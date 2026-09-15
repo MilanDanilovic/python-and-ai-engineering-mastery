@@ -37,8 +37,6 @@ jobs:
           npm run test:runner
           npm run test:contracts
           npm run test:smoke
-        env:
-          GITHUB_ACTIONS: ''
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
