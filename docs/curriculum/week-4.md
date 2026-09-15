@@ -27,7 +27,7 @@ Define an async helper and inspect the type of its call result.
 import inspect
 async def count(): return 3
 result = count()
-assert inspect.iscoroutine(result)
+print(inspect.iscoroutine(result))  # Expected: True
 result.close()  # Inspection only; release the unawaited coroutine.
 ```
 
@@ -44,8 +44,8 @@ Use inspect.iscoroutinefunction and inspect.iscoroutine to distinguish the funct
 import inspect
 async def count(): return 3
 result = count()
-assert inspect.iscoroutinefunction(count) and inspect.iscoroutine(result)
-assert not inspect.iscoroutine(count)
+print(inspect.iscoroutinefunction(count) and inspect.iscoroutine(result))  # Expected: True
+print(not inspect.iscoroutine(count))  # Expected: True
 result.close()
 ```
 
@@ -66,7 +66,7 @@ async def upload(client, records):
     return await client.send(payload)
 class FakeClient:
     async def send(self, payload): return len(payload)
-async def main(): assert await upload(FakeClient(), [1, 2]) == 2
+async def main(): print(await upload(FakeClient(), [1, 2]))  # Expected: 2
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -86,7 +86,7 @@ import asyncio
 async def count(): return 3
 async def main():
     result = await count()  # count() alone returns a coroutine, not 3.
-    assert result == 3
+    print(result)  # Expected: 3
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -125,8 +125,8 @@ async def work(trace):
     trace.append("started")
     await asyncio.sleep(0)
 async def main():
-    trace = []; pending = work(trace); assert trace == []
-    await pending; assert trace == ["started"]
+    trace = []; pending = work(trace); print(trace)  # Expected: []
+    await pending; print(trace)  # Expected: ["started"]
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -146,7 +146,7 @@ import asyncio
 async def value(n): return n
 async def main():
     a, b = value(1), value(2)
-    assert await a == 1 and await b == 2
+    print(await a, await b)  # Expected values: 1; 2
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -167,7 +167,7 @@ async def upload(record): return record["id"]
 async def main():
     # Every created coroutine has an owner that awaits it.
     results = await asyncio.gather(*(upload({"id": n}) for n in range(3)))
-    assert results == [0, 1, 2]
+    print(results)  # Expected: [0, 1, 2]
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -186,9 +186,9 @@ A coroutine is created and discarded, producing a warning. Ensure it is awaited 
 import asyncio
 async def work(): return "done"
 async def main():
-    assert await work() == "done"
+    print(await work())  # Expected: "done"
     task = asyncio.create_task(work())  # Deliberately scheduled and retained.
-    assert await task == "done"
+    print(await task)  # Expected: "done"
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -227,7 +227,7 @@ async def main():
     trace = ["before"]
     await asyncio.sleep(0)
     trace.append("after")
-    assert trace == ["before", "after"]
+    print(trace)  # Expected: ["before", "after"]
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -248,9 +248,9 @@ async def immediate(): return 1
 async def other(trace): trace.append("other")
 async def main():
     trace = []; task = asyncio.create_task(other(trace))
-    await immediate(); assert trace == []
+    await immediate(); print(trace)  # Expected: []
     await asyncio.sleep(0); await task
-    assert trace == ["other"]
+    print(trace)  # Expected: ["other"]
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -274,7 +274,7 @@ async def request(state, lock):
 async def main():
     state = {"count": 0}; lock = asyncio.Lock()
     await asyncio.gather(request(state, lock), request(state, lock))
-    assert state["count"] == 2
+    print(state['count'])  # Expected: 2
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -297,8 +297,8 @@ async def main():
     async def other(): trace.append("other")
     task = asyncio.create_task(other())
     for _ in range(10): await immediate()
-    assert trace == []  # Await did not necessarily suspend.
-    await task; assert trace == ["other"]
+    print(trace)  # Expected: []  # Await did not necessarily suspend.
+    await task; print(trace)  # Expected: ["other"]
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -338,7 +338,7 @@ async def work(name, trace):
 async def main():
     trace = []; await asyncio.gather(work("a", trace), work("b", trace))
     print(trace)
-    assert trace.index("b start") < trace.index("a end")
+    print(trace.index('b start') < trace.index('a end'))  # Expected: True
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -358,7 +358,7 @@ import asyncio
 async def loop(): return asyncio.get_running_loop()
 async def main():
     a, b = await asyncio.gather(loop(), loop())
-    assert a is b is asyncio.get_running_loop()
+    print(a is b is asyncio.get_running_loop())  # Expected: True
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -380,7 +380,7 @@ async def request():
     # IO ready -> request resumes -> response
     await asyncio.sleep(0.01)  # Fake IO readiness.
     return "response"
-async def main(): assert await request() == "response"
+async def main(): print(await request())  # Expected: "response"
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -400,7 +400,7 @@ import asyncio
 async def child(): return 1
 async def main():
     # Already inside the loop: await child(), never asyncio.run(child()).
-    assert await child() == 1
+    print(await child())  # Expected: 1
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -438,7 +438,7 @@ import asyncio
 async def value(n): return n
 async def main():
     a = asyncio.create_task(value(1)); b = asyncio.create_task(value(2))
-    assert await a == 1 and await b == 2
+    print(await a, await b)  # Expected values: 1; 2
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -457,8 +457,8 @@ Name a task, inspect its pending state, then await it and inspect its completed 
 import asyncio
 async def main():
     task = asyncio.create_task(asyncio.sleep(0.01, result=3), name="lookup")
-    assert task.get_name() == "lookup" and not task.done()
-    assert await task == 3 and task.done()
+    print(task.get_name() == 'lookup' and (not task.done()))  # Expected: True
+    print(await task == 3 and task.done())  # Expected: True
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -479,7 +479,7 @@ async def lookup(key): await asyncio.sleep(0); return key.upper()
 async def main():
     async with asyncio.TaskGroup() as group:
         tasks = {key: group.create_task(lookup(key)) for key in ("name", "region")}
-    assert {key: task.result() for key, task in tasks.items()} == {"name": "NAME", "region": "REGION"}
+    print({key: task.result() for key, task in tasks.items()})  # Expected: {"name": "NAME", "region": "REGION"}
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -500,7 +500,7 @@ async def fail(): raise ValueError("lookup failed")
 async def main():
     task = asyncio.create_task(fail())
     try: await task
-    except ValueError as error: assert str(error) == "lookup failed"
+    except ValueError as error: print(str(error))  # Expected: "lookup failed"
     # The request owns and observes completion; no orphan task.
 
 if __name__ == "__main__":
@@ -561,7 +561,7 @@ Make tasks finish in a different order from creation and inspect gather's result
 import asyncio
 async def main():
     results = await asyncio.gather(asyncio.sleep(.02, result="first"), asyncio.sleep(0, result="second"))
-    assert results == ["first", "second"]  # Input order, not completion order.
+    print(results)  # Expected: ["first", "second"]  # Input order, not completion order.
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -581,7 +581,7 @@ import asyncio
 async def summary(customer): await asyncio.sleep(0); return {"id": customer}
 async def main():
     results = await asyncio.gather(*(summary(c) for c in ("c1", "c2")))
-    assert results == [{"id": "c1"}, {"id": "c2"}]
+    print(results)  # Expected: [{"id": "c1"}, {"id": "c2"}]
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -603,7 +603,7 @@ async def main():
     sibling = asyncio.create_task(asyncio.sleep(.01, result="finished"))
     try: await asyncio.gather(fail(), sibling)
     except ValueError: pass
-    assert await sibling == "finished"
+    print(await sibling)  # Expected: "finished"
     # Choose TaskGroup instead if sibling cancellation on failure is required.
 
 if __name__ == "__main__":
@@ -647,7 +647,7 @@ async def main():
     task = asyncio.create_task(work(started, trace)); await started.wait(); task.cancel()
     try: await task
     except asyncio.CancelledError: pass
-    assert trace == ["cleanup"]
+    print(trace)  # Expected: ["cleanup"]
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -666,7 +666,7 @@ Request cancellation after a task has finished and inspect the outcome.
 import asyncio
 async def main():
     task = asyncio.create_task(asyncio.sleep(0, result=1)); await task
-    assert task.cancel() is False and task.result() == 1
+    print(task.cancel() is False and task.result() == 1)  # Expected: True
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -715,7 +715,7 @@ async def main():
     task = asyncio.create_task(work()); await asyncio.sleep(0); task.cancel()
     try: await task
     except asyncio.CancelledError: pass
-    assert task.cancelled()
+    print(task.cancelled())  # Expected: True
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -774,8 +774,8 @@ async def main():
     for delay in (0, .1):
         try:
             async with asyncio.timeout(.01): await asyncio.sleep(delay)
-        except TimeoutError: assert delay == .1
-        else: assert delay == 0
+        except TimeoutError: print(delay)  # Expected: .1
+        else: print(delay)  # Expected: 0
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -857,7 +857,7 @@ import asyncio
 async def child(): raise ValueError("child failed")
 async def main():
     try: await asyncio.create_task(child())
-    except ValueError as error: assert str(error) == "child failed"
+    except ValueError as error: print(str(error))  # Expected: "child failed"
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -880,7 +880,7 @@ async def main():
         async with asyncio.TaskGroup() as group:
             group.create_task(fail("a")); group.create_task(fail("b"))
     except* ValueError as group_error:
-        assert len(group_error.exceptions) == 2
+        print(len(group_error.exceptions))  # Expected: 2
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -902,7 +902,7 @@ async def upload(n):
     return n
 async def main():
     results = await asyncio.gather(*(upload(n) for n in (1, 2)), return_exceptions=True)
-    assert results[0] == 1 and isinstance(results[1], ValueError)
+    print(results[0] == 1 and isinstance(results[1], ValueError))  # Expected: True
     # Explicit partial-results policy; report failures alongside successes.
 
 if __name__ == "__main__":
@@ -986,9 +986,9 @@ import asyncio
 async def main():
     queue = asyncio.Queue(maxsize=1); await queue.put(1)
     pending = asyncio.create_task(queue.put(2)); await asyncio.sleep(0)
-    assert not pending.done()
-    assert await queue.get() == 1; queue.task_done()
-    await pending; assert await queue.get() == 2; queue.task_done(); await queue.join()
+    print(not pending.done())  # Expected: True
+    print(await queue.get()); queue.task_done()
+    await pending; print(await queue.get()); queue.task_done(); await queue.join()
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -1018,7 +1018,7 @@ async def main():
         group.create_task(worker(queue, results))
         for item in (1, 2, None): await queue.put(item)
         await queue.join()
-    assert results == [2, 4]
+    print(results)  # Expected: [2, 4]
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -1084,9 +1084,9 @@ async def main():
                 old = state["n"]; await asyncio.sleep(0); state["n"] = old + 1
         else:
             old = state["n"]; await asyncio.sleep(0); state["n"] = old + 1
-    await asyncio.gather(increment(False), increment(False)); assert state["n"] == 1
+    await asyncio.gather(increment(False), increment(False)); print(state['n'])  # Expected: 1
     state["n"] = 0
-    await asyncio.gather(increment(True), increment(True)); assert state["n"] == 2
+    await asyncio.gather(increment(True), increment(True)); print(state['n'])  # Expected: 2
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -1109,7 +1109,7 @@ async def main():
         async with lock: raise ValueError("fail")
     except ValueError: pass
     async with asyncio.timeout(.1):
-        async with lock: assert lock.locked()
+        async with lock: print(lock.locked())  # Expected: True
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -1133,7 +1133,7 @@ async def main():
         async with lock:
             if remaining == 0: return False
             remaining -= 1; return True
-    assert sorted(await asyncio.gather(reserve(), reserve())) == [False, True]
+    print(sorted(await asyncio.gather(reserve(), reserve())))  # Expected: [False, True]
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -1154,7 +1154,7 @@ async def main():
     lock = asyncio.Lock(); state = []
     def update_locked(): state.append(1)  # Does not reacquire the lock.
     async with lock: update_locked()
-    assert state == [1]
+    print(state)  # Expected: [1]
     # One layer owns locking. asyncio.Lock is not reentrant.
 
 if __name__ == "__main__":
@@ -1199,7 +1199,7 @@ async def main():
             try: await asyncio.sleep(.001)
             finally: active -= 1
     await asyncio.gather(*(worker() for _ in range(10)))
-    assert peak == 3 and active == 0
+    print(peak, active)  # Expected values: 3; 0
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -1245,7 +1245,7 @@ async def fetch(customer, semaphore):
             await asyncio.sleep(0); return {"id": customer}
 async def main():
     semaphore = asyncio.Semaphore(3)
-    assert len(await asyncio.gather(*(fetch(str(n), semaphore) for n in range(8)))) == 8
+    print(len(await asyncio.gather(*(fetch(str(n), semaphore) for n in range(8)))))  # Expected: 8
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -1306,8 +1306,8 @@ class Client:
     async def __aenter__(self): self.closed = False; return self
     async def __aexit__(self, *exc): await asyncio.sleep(0); self.closed = True
 async def main():
-    async with Client() as client: assert not client.closed
-    assert client.closed
+    async with Client() as client: print(not client.closed)  # Expected: True
+    print(client.closed)  # Expected: True
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -1374,7 +1374,7 @@ async def resource():
     try: yield "ready"
     finally: await asyncio.sleep(0)
 async def main():
-    async with resource() as value: assert value == "ready"
+    async with resource() as value: print(value)  # Expected: "ready"
     # 'with resource()' selects the wrong, synchronous protocol.
 
 if __name__ == "__main__":
@@ -1412,7 +1412,7 @@ Consume an async generator yielding delayed events.
 import asyncio
 async def events():
     for n in range(3): await asyncio.sleep(0); yield n
-async def main(): assert [n async for n in events()] == [0, 1, 2]
+async def main(): print([n async for n in events()])  # Expected: [0, 1, 2]
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -1431,10 +1431,10 @@ Exhaust an async iterator and verify that StopAsyncIteration ends the loop.
 import asyncio
 async def events(): yield 1
 async def main():
-    iterator = events(); assert await anext(iterator) == 1
+    iterator = events(); print(await anext(iterator))  # Expected: 1
     try: await anext(iterator)
     except StopAsyncIteration: pass
-    assert [x async for x in iterator] == []
+    print([x async for x in iterator])  # Expected: []
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -1460,7 +1460,7 @@ async def pages(fetch):
         if cursor is None: break
 async def main():
     async def fake(cursor): return {"items": [1], "next": None}
-    assert [x async for x in pages(fake)] == [1]
+    print([x async for x in pages(fake)])  # Expected: [1]
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -1483,7 +1483,7 @@ class Values:
     async def __anext__(self):
         if self.done: raise StopAsyncIteration
         self.done = True; return 1
-async def main(): assert [x async for x in Values()] == [1]
+async def main(): print([x async for x in Values()])  # Expected: [1]
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -1573,7 +1573,7 @@ async def main():
     task = asyncio.create_task(asyncio.to_thread(blocking_read))
     await asyncio.sleep(.01)
     print("loop resumed after", time.perf_counter() - start)
-    assert await task == "data"
+    print(await task)  # Expected: "data"
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -1633,7 +1633,7 @@ def read(): time.sleep(.03); return "data"
 async def main():
     task = asyncio.create_task(asyncio.to_thread(read))
     await asyncio.sleep(.001); print("heartbeat")
-    assert await task == "data"
+    print(await task)  # Expected: "data"
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -1651,7 +1651,7 @@ Pass arguments into to_thread and verify that its result returns to the awaiting
 ```python
 import asyncio
 def add(a, b, *, offset=0): return a + b + offset
-async def main(): assert await asyncio.to_thread(add, 1, 2, offset=3) == 6
+async def main(): print(await asyncio.to_thread(add, 1, 2, offset=3))  # Expected: 6
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -1673,7 +1673,7 @@ async def legacy_adapter(function, inputs, limit=3):
     async def call(value):
         async with semaphore: return await asyncio.to_thread(function, value)
     return await asyncio.gather(*(call(value) for value in inputs))
-async def main(): assert await legacy_adapter(str, [1, 2]) == ["1", "2"]
+async def main(): print(await legacy_adapter(str, [1, 2]))  # Expected: ["1", "2"]
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -1783,7 +1783,7 @@ from time import perf_counter
 def calculate(n): return sum(i*i for i in range(n))
 start = perf_counter(); expected = [calculate(100000) for _ in range(4)]
 print("serial", perf_counter() - start); start = perf_counter()
-with ThreadPoolExecutor(4) as pool: assert list(pool.map(calculate, [100000]*4)) == expected
+with ThreadPoolExecutor(4) as pool: print(list(pool.map(calculate, [100000] * 4)))  # Expected: expected
 print("threads", perf_counter() - start)
 # On a GIL-enabled build, pure Python threads add overhead without parallel bytecode execution.
 ```
@@ -1819,7 +1819,7 @@ Submit a top-level pure function to a process pool.
 from concurrent.futures import ProcessPoolExecutor
 def square(n): return n*n
 if __name__ == "__main__":
-    with ProcessPoolExecutor(2) as pool: assert list(pool.map(square, [2, 3])) == [4, 9]
+    with ProcessPoolExecutor(2) as pool: print(list(pool.map(square, [2, 3])))  # Expected: [4, 9]
 # Save as a .py file; top-level worker is importable by spawned processes.
 ```
 
@@ -1859,7 +1859,7 @@ def normalize(text): return " ".join(text.lower().split())
 if __name__ == "__main__":
     with ProcessPoolExecutor(2) as pool:
         result = list(pool.map(normalize, [" A B ", "C"], chunksize=32))
-    assert result == ["a b", "c"]
+    print(result)  # Expected: ["a b", "c"]
 # Tiny inputs are slower in a pool; measure on representative CPU-heavy batches.
 ```
 
@@ -1876,7 +1876,7 @@ A nested function or unguarded process startup fails on spawn platforms. Move th
 from concurrent.futures import ProcessPoolExecutor
 def worker(n): return n + 1  # Module-level, serializable function.
 def main():
-    with ProcessPoolExecutor(1) as pool: assert pool.submit(worker, 1).result() == 2
+    with ProcessPoolExecutor(1) as pool: print(pool.submit(worker, 1).result())  # Expected: 2
 if __name__ == "__main__": main()  # Prevent recursive startup under spawn.
 ```
 
@@ -1912,7 +1912,7 @@ from fastapi import FastAPI
 app = FastAPI()
 @app.get("/reports")
 def reports(): return []
-assert "get" in app.openapi()["paths"]["/reports"]
+print('get' in app.openapi()['paths']['/reports'])  # Expected: True
 ```
 
 </details>
@@ -1929,7 +1929,7 @@ from fastapi import FastAPI
 app = FastAPI()
 @app.get("/reports/{report_id}")
 def report(report_id: int): return {"id": report_id}
-assert app.openapi()["paths"]["/reports/{report_id}"]["get"]["parameters"][0]["in"] == "path"
+print(app.openapi()['paths']['/reports/{report_id}']['get']['parameters'][0]['in'])  # Expected: "path"
 ```
 
 </details>
@@ -1947,7 +1947,7 @@ from fastapi.testclient import TestClient
 app = FastAPI()
 @app.get("/reports/latest")
 def latest(): return {"id": "r1", "count": 12}
-assert TestClient(app).get("/reports/latest").json()["count"] == 12
+print(TestClient(app).get('/reports/latest').json()['count'])  # Expected: 12
 ```
 
 </details>
@@ -2021,7 +2021,7 @@ def config(): return {"limit": 10}
 @app.get("/")
 def read(value: dict = Depends(config)): return value
 app.dependency_overrides[config] = lambda: {"limit": 1}
-try: assert TestClient(app).get("/").json() == {"limit": 1}
+try: print(TestClient(app).get('/').json())  # Expected: {"limit": 1}
 finally: app.dependency_overrides.clear()
 ```
 
@@ -2061,7 +2061,7 @@ def repository(): return ["production"]
 @app.get("/")
 def read(repo: list = Depends(repository)): return repo
 app.dependency_overrides[repository] = lambda: ["fake"]
-try: assert TestClient(app).get("/").json() == ["fake"]
+try: print(TestClient(app).get('/').json())  # Expected: ["fake"]
 finally: app.dependency_overrides.clear()
 ```
 
@@ -2118,8 +2118,8 @@ app = FastAPI()
 def read(limit: Annotated[int, Query(gt=0)]): return limit
 client = TestClient(app)
 for path in ("/", "/?limit=bad"):
-    response = client.get(path); assert response.status_code == 422
-    assert response.json()["detail"][0]["loc"] == ["query", "limit"]
+    response = client.get(path); print(response.status_code)  # Expected: 422
+    print(response.json()['detail'][0]['loc'])  # Expected: ["query", "limit"]
 ```
 
 </details>
@@ -2157,7 +2157,7 @@ from fastapi.testclient import TestClient
 app = FastAPI()
 @app.get("/")
 def read(limit: Annotated[int, Query(gt=0)]): return {"limit": limit}
-assert TestClient(app).get("/?limit=-1").status_code == 422
+print(TestClient(app).get('/?limit=-1').status_code)  # Expected: 422
 # Use typed parameters instead of reading and trusting request.query_params manually.
 ```
 
@@ -2220,7 +2220,7 @@ async def missing(request, error): return JSONResponse(status_code=404, content=
 @app.get("/")
 def report(): raise MissingReport()
 response = TestClient(app).get("/")
-assert response.status_code == 404 and response.json() == {"error": "report_not_found"}
+print(response.status_code, response.json())  # Expected values: 404; {'error': 'report_not_found'}
 ```
 
 </details>
@@ -2320,8 +2320,8 @@ async def lifespan(app):
     try: yield
     finally: events.append("stop")
 app = FastAPI(lifespan=lifespan)
-with TestClient(app): assert events == ["start"]
-assert events == ["start", "stop"]
+with TestClient(app): print(events)  # Expected: ["start"]
+print(events)  # Expected: ["start", "stop"]
 ```
 
 </details>
@@ -2423,7 +2423,7 @@ def read(background: BackgroundTasks):
     trace.append("handler"); background.add_task(trace.append, "background")
     return {"ok": True}
 TestClient(app).get("/")  # TestClient waits for background completion.
-assert trace == ["handler", "background"]
+print(trace)  # Expected: ["handler", "background"]
 ```
 
 </details>
@@ -2464,7 +2464,7 @@ A process crashes after responding and the background task is lost. Move critica
 # 4. Make external writes idempotent and record completion.
 # FastAPI BackgroundTasks alone has no durable recovery guarantee.
 job = {"id": "request-1", "status": "pending", "attempts": 0}
-assert job["status"] == "pending"
+print(job['status'])  # Expected: "pending"
 ```
 
 </details>

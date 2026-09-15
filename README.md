@@ -91,6 +91,6 @@ Study data stays in your browser. Clearing site data removes it, and the local a
 
 ## Interactive Python workspace
 
-Open **Coding Lab** for tested exercises or **Playground** for free experimentation and ten examples. Use **Run Code**, **Run Tests**, or **Ctrl/Cmd Enter**. The editor can be resized vertically. Predictions must be submitted before code runs. Solutions require confirmation and record assistance; completion still requires passing checks.
+Open **Coding Lab** for tested exercises or **Playground** for free experimentation and ten examples. Use **Run Code**, **Run Tests**, or **Ctrl/Cmd Enter**. The editor can be resized vertically. Predictions must be submitted before code runs. Solutions open with one click and record assistance; completion still requires passing checks.
 
 See [execution architecture and limitations](docs/EXECUTION.md) for the provider interface, worker lifecycle, package loading, hidden-test behavior, and progress integration.

@@ -4,6 +4,8 @@ Use Python 3.11 or newer (3.12 is used in CI). Save a snippet as `example.py` an
 
 Each milestone has four independent references matching its original prompts. Some tasks ask for designs, shell commands, SQL, traces, or investigation procedures. Their answers are annotated reference approaches, not claims of a complete production implementation. Intentional failures are identified in comments. Process-pool examples must run from a file, not a REPL or `python -c`.
 
+Worked examples use `print(...)` and expected-value comments so you can see what the code does. Assertions remain where the lesson teaches tests or an implementation needs an invariant. Reveal Solution opens immediately in the themed editor.
+
 ## Dependencies
 
 Create a separate Python environment for exercises:

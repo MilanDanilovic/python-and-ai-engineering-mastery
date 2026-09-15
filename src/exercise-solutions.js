@@ -3,16 +3,16 @@ export const exerciseSolutions = {
 a = [[1, 2], [3, 4]]
 b = a.copy()
 b[0].append(5)
-assert a == [[1, 2, 5], [3, 4]]
-assert a is not b and a[0] is b[0]
+print(a)  # Expected: [[1, 2, 5], [3, 4]]
+print(a is not b and a[0] is b[0])  # Expected: True
 isolated = deepcopy(a)
 isolated[0].append(6)
-assert a[0] == [1, 2, 5]`,
+print(a[0])  # Expected: [1, 2, 5]`,
  'Group log events': `from collections import Counter
 def count_levels(events):
     return dict(Counter(event["severity"] for event in events))
-assert count_levels([]) == {}
-assert count_levels([{"severity": "INFO"}, {"severity": "ERROR"}, {"severity": "INFO"}]) == {"INFO": 2, "ERROR": 1}`,
+print(count_levels([]))  # Expected: {}
+print(count_levels([{'severity': 'INFO'}, {'severity': 'ERROR'}, {'severity': 'INFO'}]))  # Expected: {"INFO": 2, "ERROR": 1}`,
  'Bounded concurrent requests': `import asyncio
 async def fetch_one(url, semaphore, client):
     async with semaphore:

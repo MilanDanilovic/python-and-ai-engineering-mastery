@@ -30,9 +30,9 @@ try{
  for(const name of ['What did I expect?','Why was my assumption wrong?','What is the correct mental model?'])await page.getByLabel(name,{exact:true}).fill('My own explanation of dictionary grouping.');
  await page.getByRole('button',{name:'Save to Mistakes',exact:true}).click();expect((await state()).mistakes).toHaveLength(1);
  await page.getByRole('button',{name:'Show Hint',exact:true}).click();
- await page.getByRole('button',{name:'Reveal Solution',exact:true}).click();await expect(page.getByRole('button',{name:'Confirm Reveal Solution'})).toBeVisible();
- expect((await state()).codingExercises['group-users'].solutionRevealed).toBe(false);
- await page.getByRole('button',{name:'Confirm Reveal Solution'}).click();
+ await page.getByRole('button',{name:'Reveal Solution',exact:true}).click();
+ await expect(page.getByRole('button',{name:'Hide Solution',exact:true})).toBeVisible();
+ expect((await state()).codingExercises['group-users'].solutionRevealed).toBe(true);
  expect((await state()).codingExercises['group-users'].completed).toBe(false);
  await write(executableById['group-users'].solution);await execute('Run Tests');await expect(page.locator('.test-panel')).toContainText('Passed 5 of 5');
  await expect(page.locator('.coding-evidence')).toContainText('Completed with assistance');

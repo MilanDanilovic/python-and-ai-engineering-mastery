@@ -26,7 +26,7 @@ Parse two documents and retain their source identifiers.
 ```python
 sources = [("d1", "First policy"), ("d2", "Second policy")]
 documents = [{"source_id": key, "text": text.strip()} for key, text in sources]
-assert [d["source_id"] for d in documents] == ["d1", "d2"]
+print([d['source_id'] for d in documents])  # Expected: ["d1", "d2"]
 ```
 
 </details>
@@ -44,7 +44,7 @@ versions = {}
 def ingest(key, text):
     digest = sha256(text.encode()).hexdigest()
     changed = versions.get(key) != digest; versions[key] = digest; return changed
-assert ingest("d1", "v1") and not ingest("d1", "v1") and ingest("d1", "v2")
+print(ingest('d1', 'v1') and (not ingest('d1', 'v1')) and ingest('d1', 'v2'))  # Expected: True
 ```
 
 </details>
@@ -67,7 +67,7 @@ def ingest(source_id, text):
     record = {"source_id": source_id, "version": version, "text": text,
               "ingested_at": datetime.now(timezone.utc).isoformat()}
     documents[source_id] = record; return record
-assert ingest("d1", "policy") == ingest("d1", "policy")
+print(ingest('d1', 'policy'))  # Expected: ingest("d1", "policy")
 ```
 
 </details>
@@ -84,7 +84,7 @@ documents = {}
 def upsert(source_id, version, text):
     documents[source_id] = {"version": version, "text": text}
 upsert("d1", 1, "old"); upsert("d1", 2, "new"); upsert("d1", 2, "new")
-assert len(documents) == 1 and documents["d1"]["text"] == "new"
+print(len(documents), documents['d1']['text'])  # Expected values: 1; 'new'
 # In storage, transact the version update and obsolete-chunk replacement.
 ```
 
@@ -119,8 +119,8 @@ Split a policy into chunks with two different overlap values.
 def chunks(text, size, overlap):
     if not 0 <= overlap < size: raise ValueError("invalid overlap")
     return [text[start:start+size] for start in range(0, len(text), size-overlap)]
-assert chunks("abcdef", 3, 0) == ["abc", "def"]
-assert chunks("abcdef", 3, 1) == ["abc", "cde", "ef"]
+print(chunks('abcdef', 3, 0))  # Expected: ["abc", "def"]
+print(chunks('abcdef', 3, 1))  # Expected: ["abc", "cde", "ef"]
 ```
 
 </details>
@@ -136,7 +136,7 @@ Compare a heading-aware split with a fixed-size split on a short structured poli
 text = "# Refunds\nReceipt required.\n# Shipping\nTrack parcel."
 fixed = [text[n:n+20] for n in range(0, len(text), 20)]
 headings = ["# " + part for part in text.split("# ") if part]
-assert len(headings) == 2 and "Receipt" in headings[0]
+print(len(headings) == 2 and 'Receipt' in headings[0])  # Expected: True
 print(fixed, headings)  # Fixed slices may split a section's meaning.
 ```
 
@@ -159,7 +159,7 @@ def split_sections(text):
     return chunks
 text = "# Policy\nReceipt required.\n"
 chunk = split_sections(text)[0]
-assert text[chunk["start"]:chunk["end"]] == chunk["text"]
+print(text[chunk['start']:chunk['end']])  # Expected: chunk["text"]
 ```
 
 </details>
@@ -208,7 +208,7 @@ Attach customer and document version fields to chunks.
 
 ```python
 chunk = {"id": "d1:1:0", "text": "policy", "customer_id": "c1", "document_id": "d1", "version": 1}
-assert chunk["customer_id"] == "c1" and chunk["version"] == 1
+print(chunk['customer_id'], chunk['version'])  # Expected values: 'c1'; 1
 ```
 
 </details>
@@ -223,7 +223,7 @@ Filter two versions of one document so only the intended active version is retur
 ```python
 chunks = [{"doc": "d1", "version": 1}, {"doc": "d1", "version": 2}]
 active = {"d1": 2}
-assert [c for c in chunks if c["version"] == active[c["doc"]]] == [{"doc": "d1", "version": 2}]
+print([c for c in chunks if c['version'] == active[c['doc']]])  # Expected: [{"doc": "d1", "version": 2}]
 ```
 
 </details>
@@ -240,7 +240,7 @@ def retrieve(auth, documents):
     # Apply this predicate in the database query before ranking/top-k.
     return [d for d in documents if d["tenant_id"] == auth["tenant_id"]]
 docs = [{"tenant_id": "a", "id": "d1"}, {"tenant_id": "b", "id": "d2"}]
-assert [d["id"] for d in retrieve({"tenant_id": "a"}, docs)] == ["d1"]
+print([d['id'] for d in retrieve({'tenant_id': 'a'}, docs)])  # Expected: ["d1"]
 ```
 
 </details>
@@ -256,7 +256,7 @@ A cross-tenant document is retrieved because filtering occurs only in the UI. En
 def context(auth, candidates):
     authorized = [d for d in candidates if d["tenant"] == auth["tenant"]]
     return "\n".join(d["text"] for d in authorized)
-assert context({"tenant": "a"}, [{"tenant": "b", "text": "private"}]) == ""
+print(context({'tenant': 'a'}, [{'tenant': 'b', 'text': 'private'}]))  # Expected: ""
 # Enforce this in retrieval too; hiding results in the UI is too late.
 ```
 
@@ -296,8 +296,8 @@ def cosine(a, b):
     return sum(x*y for x, y in zip(a, b)) / norm
 # Handcrafted vectors demonstrate geometry, not a trained embedding model.
 vectors = {"refund": [1., 0.], "return money": [.9, .1], "shipping": [0., 1.]}
-assert len(vectors["refund"]) == 2
-assert cosine(vectors["refund"], vectors["return money"]) > cosine(vectors["refund"], vectors["shipping"])
+print(len(vectors['refund']))  # Expected: 2
+print(cosine(vectors['refund'], vectors['return money']) > cosine(vectors['refund'], vectors['shipping']))  # Expected: True
 ```
 
 </details>
@@ -331,7 +331,7 @@ def record(source_id, text, embed, model_version):
     vector = embed(text)
     return {"source_id": source_id, "text": text, "vector": vector, "model_version": model_version, "dimensions": len(vector)}
 sample = record("d1", "refund policy", lambda text: [1., 0.], "fixture-v1")
-assert sample["dimensions"] == 2 and sample["model_version"] == "fixture-v1"
+print(sample['dimensions'], sample['model_version'])  # Expected values: 2; 'fixture-v1'
 # Use one embedding provider/model/configuration for corpus and queries.
 ```
 
@@ -388,7 +388,7 @@ def cosine(a, b):
     norm = sqrt(sum(x*x for x in a) * sum(y*y for y in b))
     if norm == 0: raise ValueError("zero vector has undefined cosine")
     return sum(x*y for x, y in zip(a, b)) / norm
-assert abs(cosine([1, 0], [1, 1]) - 1 / sqrt(2)) < 1e-12
+print(abs(cosine([1, 0], [1, 1]) - 1 / sqrt(2)) < 1e-12)  # Expected: True
 ```
 
 </details>
@@ -407,9 +407,9 @@ def cosine(a, b):
     norm = sqrt(sum(x*x for x in a) * sum(y*y for y in b))
     if norm == 0: raise ValueError("zero vector has undefined cosine")
     return sum(x*y for x, y in zip(a, b)) / norm
-assert cosine([1, 0], [2, 0]) == 1
-assert cosine([1, 0], [0, 1]) == 0
-assert cosine([1, 0], [-1, 0]) == -1
+print(cosine([1, 0], [2, 0]))  # Expected: 1
+print(cosine([1, 0], [0, 1]))  # Expected: 0
+print(cosine([1, 0], [-1, 0]))  # Expected: -1
 ```
 
 </details>
@@ -430,7 +430,7 @@ def cosine(a, b):
     return sum(x*y for x, y in zip(a, b)) / norm
 docs = {"refund": [1, 0], "shipping": [0, 1]}
 ranked = sorted(docs, key=lambda key: cosine([1, 0], docs[key]), reverse=True)
-assert ranked == ["refund", "shipping"]
+print(ranked)  # Expected: ["refund", "shipping"]
 ```
 
 </details>
@@ -450,7 +450,7 @@ def cosine(a, b):
     if norm == 0: raise ValueError("zero vector has undefined cosine")
     return sum(x*y for x, y in zip(a, b)) / norm
 try: cosine([0, 0], [1, 0])
-except ValueError as error: assert "zero vector" in str(error)
+except ValueError as error: print('zero vector' in str(error))  # Expected: True
 # Explicit rejection keeps undefined values out of ranking.
 ```
 
@@ -490,7 +490,7 @@ def cosine(a, b):
     return sum(x*y for x, y in zip(a, b)) / norm
 docs = {"a": [1, 0], "b": [0, 1], "c": [.9, .1]}
 ranked = sorted(docs, key=lambda key: cosine([1, 0], docs[key]), reverse=True)
-assert ranked[:2] == ["a", "c"]
+print(ranked[:2])  # Expected: ["a", "c"]
 ```
 
 </details>
@@ -511,7 +511,7 @@ def cosine(a, b):
     return sum(x*y for x, y in zip(a, b)) / norm
 docs = {"a": [1, 0], "b": [0, 1], "c": [.9, .1]}
 def search(query, k): return sorted(docs, key=lambda key: cosine(query, docs[key]), reverse=True)[:k]
-assert search([1, 0], 1) == ["a"] and search([1, 0], 2) == ["a", "c"]
+print(search([1, 0], 1), search([1, 0], 2))  # Expected values: ['a']; ['a', 'c']
 ```
 
 </details>
@@ -534,7 +534,7 @@ def retrieve(query_vector, documents, tenant, k=3):
     allowed = [d for d in documents if d["tenant"] == tenant]
     return sorted(allowed, key=lambda d: cosine(query_vector, d["vector"]), reverse=True)[:k]
 docs = [{"id": "policy", "tenant": "a", "vector": [1, 0]}]
-assert retrieve([1, 0], docs, "a")[0]["id"] == "policy"
+print(retrieve([1, 0], docs, 'a')[0]['id'])  # Expected: "policy"
 # Validate embedding model identity before search.
 ```
 
@@ -549,7 +549,7 @@ A query sorts distance descending and returns the least similar documents. Verif
 
 ```python
 distances = {"near": .1, "far": .9}
-assert sorted(distances, key=distances.get)[0] == "near"
+print(sorted(distances, key=distances.get)[0])  # Expected: "near"
 # Distance: lower is better. Similarity: higher is better.
 # pgvector cosine distance example: ORDER BY embedding <=> query ASC LIMIT k.
 ```
@@ -584,7 +584,7 @@ Compare exact and indexed search on a labeled sample.
 ```python
 exact = ["a", "b", "c"]; approximate = ["a", "d", "c"]
 recall_at_3 = len(set(exact) & set(approximate)) / 3
-assert recall_at_3 == 2/3
+print(recall_at_3)  # Expected: 2/3
 # Capture actual indexed results from the same corpus/query before comparison.
 ```
 
@@ -600,7 +600,7 @@ Use exact search as a baseline and count indexed-search misses for several queri
 ```python
 cases = [(["a", "b"], ["a", "c"]), (["c", "d"], ["c", "d"])]
 misses = [len(set(exact) - set(indexed)) for exact, indexed in cases]
-assert misses == [1, 0]
+print(misses)  # Expected: [1, 0]
 ```
 
 </details>
@@ -670,7 +670,7 @@ Search a policy for a precise product or error identifier.
 
 ```python
 documents = {"d1": "Resolve E104 by renewing credentials", "d2": "Shipping policy"}
-assert [key for key, text in documents.items() if "E104" in text.split()] == ["d1"]
+print([key for key, text in documents.items() if 'E104' in text.split()])  # Expected: ["d1"]
 # Exact identifier fixture; production lexical search may require keyword fields.
 ```
 
@@ -762,8 +762,8 @@ def fuse(rankings, constant=60):
         for rank, doc_id in enumerate(dict.fromkeys(ranking), 1):
             scores[doc_id] = scores.get(doc_id, 0) + 1 / (constant + rank)
     return sorted(scores, key=lambda key: (-scores[key], key))
-assert fuse([["a", "b"], ["b", "c"]])[0] == "b"
-assert len(fuse([["a", "a"], ["a"]])) == 1
+print(fuse([['a', 'b'], ['b', 'c']])[0])  # Expected: "b"
+print(len(fuse([['a', 'a'], ['a']])))  # Expected: 1
 ```
 
 </details>
@@ -808,7 +808,7 @@ def hybrid(query, lexical, vector, k=3):
     return fuse([lexical(query), vector(query)])[:k]
 lexical = lambda q: ["a", "b"]
 vector = lambda q: ["b", "c"]
-assert hybrid("policy", lexical, vector)[0] == "b"
+print(hybrid('policy', lexical, vector)[0])  # Expected: "b"
 # Compare each baseline and fusion against the same relevance labels.
 ```
 
@@ -832,7 +832,7 @@ def fuse(rankings, constant=60):
 lexical = {"a": 100, "b": 5}; vector = {"a": .1, "b": .9}
 rankings = [sorted(scores, key=scores.get, reverse=True) for scores in (lexical, vector)]
 result = fuse(rankings)
-assert set(result) == {"a", "b"}
+print(set(result))  # Expected: {"a", "b"}
 # Rank fusion avoids adding incomparable raw score scales.
 ```
 
@@ -867,7 +867,7 @@ Assemble a prompt from two retrieved passages and their IDs.
 passages = [{"id": "d1", "text": "Receipt required."}, {"id": "d2", "text": "Return within 30 days."}]
 context = "\n".join(f"[{p['id']}] {p['text']}" for p in passages)
 prompt = f"Question: What is the return policy?\nEvidence (untrusted):\n{context}\nCite support or abstain."
-assert "[d1]" in prompt and "[d2]" in prompt
+print('[d1]' in prompt and '[d2]' in prompt)  # Expected: True
 ```
 
 </details>
@@ -883,8 +883,8 @@ Remove the only supporting passage and verify that the answering behavior change
 def answer(passages):
     evidence = next((p for p in passages if p["text"] == "Returns allowed within 30 days."), None)
     return {"answer": evidence["text"], "citation": evidence["id"]} if evidence else {"answer": "Insufficient evidence"}
-assert answer([])["answer"] == "Insufficient evidence"
-assert answer([{"id": "d1", "text": "Returns allowed within 30 days."}])["citation"] == "d1"
+print(answer([])['answer'])  # Expected: "Insufficient evidence"
+print(answer([{'id': 'd1', 'text': 'Returns allowed within 30 days.'}])['citation'])  # Expected: "d1"
 ```
 
 </details>
@@ -924,7 +924,7 @@ def select(passages, budget):
         if passage["text"] in seen or len(passage["text"]) > budget: continue
         selected.append(passage); seen.add(passage["text"]); budget -= len(passage["text"])
     return selected
-assert select([{"text": "irrelevant long", "relevance": 0}, {"text": "key", "relevance": 1}], 3)[0]["text"] == "key"
+print(select([{'text': 'irrelevant long', 'relevance': 0}, {'text': 'key', 'relevance': 1}], 3)[0]['text'])  # Expected: "key"
 # Use model token counts for production context budgeting.
 ```
 
@@ -958,7 +958,7 @@ Manually label relevance for five candidates and compare rank order.
 ```python
 candidates = ["a", "b", "c", "d", "e"]
 labels = {"a": 0, "b": 2, "c": 1, "d": 0, "e": 3}
-assert sorted(candidates, key=labels.get, reverse=True) == ["e", "b", "c", "a", "d"]
+print(sorted(candidates, key=labels.get, reverse=True))  # Expected: ["e", "b", "c", "a", "d"]
 ```
 
 </details>
@@ -973,7 +973,7 @@ Hold candidates fixed and compare the context selected before and after rerankin
 ```python
 candidates = ["a", "b", "c"]; scores = {"a": .1, "b": .9, "c": .5}
 before = candidates[:2]; after = sorted(candidates, key=scores.get, reverse=True)[:2]
-assert before == ["a", "b"] and after == ["b", "c"]
+print(before, after)  # Expected values: ['a', 'b']; ['b', 'c']
 ```
 
 </details>
@@ -990,7 +990,7 @@ def retrieve(query, retriever, rerank=None, candidate_k=20, final_k=5):
     candidates = retriever(query, candidate_k)
     if rerank is not None: candidates = sorted(candidates, key=lambda d: rerank(query, d), reverse=True)
     return candidates[:final_k]
-assert retrieve("q", lambda q, k: [1, 2], lambda q, d: d, final_k=1) == [2]
+print(retrieve('q', lambda q, k: [1, 2], lambda q, d: d, final_k=1))  # Expected: [2]
 # A real reranker scores query/document pairs; measure quality and latency.
 ```
 
@@ -1005,9 +1005,9 @@ A relevant document never enters the candidate set and reranking cannot recover 
 
 ```python
 candidates = {"a", "b"}; relevant = {"c"}
-assert not candidates & relevant
+print(not candidates & relevant)  # Expected: True
 expanded = candidates | {"c"}
-assert expanded & relevant
+print(expanded & relevant)  # Expected: True
 # Reranking only reorders candidates. Improve first-stage recall or filters
 # before tuning reranker scores when relevant documents never enter the pool.
 ```
@@ -1043,7 +1043,7 @@ Rewrite an ambiguous follow-up using explicit conversation context.
 context = {"product": "Widget", "topic": "returns"}
 original = "How long do I have?"
 rewritten = f"What is the {context['product']} {context['topic']} time limit?"
-assert rewritten == "What is the Widget returns time limit?"
+print(rewritten)  # Expected: "What is the Widget returns time limit?"
 ```
 
 </details>
@@ -1057,7 +1057,7 @@ Keep both the original and rewritten query in a trace and identify unsupported a
 
 ```python
 trace = {"original": "How long?", "rewrite": "Widget Pro return time limit", "known_products": {"Widget"}}
-assert "Pro" in trace["rewrite"]  # Unsupported qualifier: reject this rewrite.
+print('Pro' in trace['rewrite'])  # Expected: True  # Unsupported qualifier: reject this rewrite.
 trace["rewrite"] = "Widget return time limit"
 ```
 
@@ -1075,7 +1075,7 @@ def compare(original, rewritten, retrieve, relevant):
     results = {"original": retrieve(original), "rewritten": retrieve(rewritten)}
     return {kind: len(set(ids) & relevant)/len(relevant) for kind, ids in results.items()}
 scores = compare("How long?", "Widget returns", lambda q: ["d1"] if "Widget" in q else [], {"d1"})
-assert scores == {"original": 0, "rewritten": 1}
+print(scores)  # Expected: {"original": 0, "rewritten": 1}
 ```
 
 </details>
@@ -1091,7 +1091,7 @@ A rewrite adds an unsupported product name and retrieves irrelevant policies. Co
 def rewrite(original, known_product, proposed_product):
     if proposed_product != known_product: return original
     return f"{known_product}: {original}"
-assert rewrite("return deadline?", "Widget", "Other") == "return deadline?"
+print(rewrite('return deadline?', 'Widget', 'Other'))  # Expected: "return deadline?"
 # Preserve original query and provenance. Evaluate rewrites against fixed relevance judgments.
 ```
 
@@ -1126,7 +1126,7 @@ Attach each factual sentence to a supporting passage.
 claims = [{"text": "A receipt is required.", "source_id": "d1"},
           {"text": "The window is 30 days.", "source_id": "d2"}]
 support = {"d1": "Receipt required.", "d2": "Return within 30 days."}
-assert all(c["source_id"] in support for c in claims)
+print(all((c['source_id'] in support for c in claims)))  # Expected: True
 # Human check: each linked passage entails its exact claim.
 ```
 
@@ -1142,7 +1142,7 @@ Write one supported claim and one unsupported claim against the same retrieved p
 ```python
 passage = "Returns require a receipt."
 claims = {"A receipt is required.": True, "Shipping is always free.": False}
-assert claims["Shipping is always free."] is False
+print(claims['Shipping is always free.'] is False)  # Expected: True
 # Source presence does not imply support for every statement.
 ```
 
@@ -1160,8 +1160,8 @@ def answer(question, supported_claims):
     claims = supported_claims.get(question, [])
     if not claims: return {"status": "abstained", "claims": []}
     return {"status": "answered", "claims": claims}
-assert answer("unknown", {})["status"] == "abstained"
-assert answer("receipt?", {"receipt?": [{"text": "Required", "source_id": "d1"} ]})["claims"][0]["source_id"] == "d1"
+print(answer('unknown', {})['status'])  # Expected: "abstained"
+print(answer('receipt?', {'receipt?': [{'text': 'Required', 'source_id': 'd1'}]})['claims'][0]['source_id'])  # Expected: "d1"
 ```
 
 </details>
@@ -1177,7 +1177,7 @@ A citation names a retrieved document that does not support the claim. Validate 
 def validate(claims, sources, supports):
     return all(c["source_id"] in sources and supports(c["text"], sources[c["source_id"]]) for c in claims)
 # Deterministic fixture stands in for human/entailment judgments.
-assert not validate([{"text": "Free shipping", "source_id": "d1"}], {"d1": "Receipt required"}, lambda claim, source: claim in source)
+print(not validate([{'text': 'Free shipping', 'source_id': 'd1'}], {'d1': 'Receipt required'}, lambda claim, source: claim in source))  # Expected: True
 ```
 
 </details>

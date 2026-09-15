@@ -26,7 +26,7 @@ Bind two names to one list and draw the reference graph.
 ```python
 a = [1]
 b = a
-assert a is b
+print(a is b)  # Expected: True
 # a ─┐
 # b ─┴─> [1]
 ```
@@ -44,8 +44,8 @@ Rebind one alias to a new list and verify that the other alias still refers to t
 a = [1]
 b = a
 b = [2]
-assert a == [1] and b == [2]
-assert a is not b
+print(a, b)  # Expected values: [1]; [2]
+print(a is not b)  # Expected: True
 ```
 
 </details>
@@ -60,11 +60,11 @@ Trace the lifetime of a configuration object through a request handler.
 ```python
 config = {"timeout": 30}
 def handle(request, settings):
-    assert settings is config
+    # settings refers to the same configuration passed by the caller.
     local = {**settings, **request}
     return local["timeout"]
-assert handle({"timeout": 0}, config) == 0
-assert config == {"timeout": 30}
+print(handle({'timeout': 0}, config))  # Expected: 0
+print(config)  # Expected: {"timeout": 30}
 # The handler's binding ends on return; the module still owns config.
 ```
 
@@ -81,10 +81,10 @@ A developer rebinds an alias to [] and expects the original list to empty. Repro
 a = [1]
 b = a
 b = []  # Rebinds b, leaving a's object unchanged.
-assert a == [1]
+print(a)  # Expected: [1]
 b = a
 b.clear()  # Mutates the shared object instead.
-assert a == []
+print(a)  # Expected: []
 ```
 
 </details>
@@ -117,10 +117,10 @@ Compare list.append with integer addition while recording identity.
 ```python
 items = []; before = id(items)
 items.append(1)
-assert id(items) == before
+print(id(items) == before)  # True: mutation keeps the same object.
 n = 1000; old = n
 n += 1
-assert n is not old
+print(n is not old)  # Expected: True
 ```
 
 </details>
@@ -136,7 +136,7 @@ Put a list inside a tuple, mutate the list, and explain which object changed.
 outer = ([1],)
 before = id(outer)
 outer[0].append(2)
-assert outer == ([1, 2],) and id(outer) == before
+print(outer, id(outer))  # Expected values: ([1, 2],); before
 # The inner list changes; tuple references stay fixed.
 ```
 
@@ -154,8 +154,8 @@ def normalize(events):
     """Return new records; never mutate caller records."""
     return [{**e, "level": e["level"].upper()} for e in events]
 source = [{"level": "info"}]
-assert normalize(source) == [{"level": "INFO"}]
-assert source == [{"level": "info"}]
+print(normalize(source))  # Expected: [{"level": "INFO"}]
+print(source)  # Expected: [{"level": "info"}]
 ```
 
 </details>
@@ -172,11 +172,11 @@ def broken(events):
     events[0]["level"] = "INFO"
 source = [{"level": "info"}]
 broken(source)
-assert source[0]["level"] == "INFO"  # Aliased input was modified.
+print(source[0]['level'])  # Expected: "INFO"  # Aliased input was modified.
 def fixed(events):
     return [{**e, "level": e["level"].upper()} for e in events]
 source = [{"level": "info"}]; fixed(source)
-assert source[0]["level"] == "info"
+print(source[0]['level'])  # Expected: "info"
 ```
 
 </details>
@@ -208,8 +208,8 @@ Compare two equal but separately created lists with == and is.
 
 ```python
 a = [1]; b = [1]
-assert a == b
-assert a is not b
+print(a)  # Expected: b
+print(a is not b)  # Expected: True
 ```
 
 </details>
@@ -223,7 +223,7 @@ Create two distinct dictionaries with equal contents and test both identity and 
 
 ```python
 a = {"x": 1}; b = {"x": 1}
-assert a == b and a is not b
+print(a == b and a is not b)  # Expected: True
 ```
 
 </details>
@@ -238,8 +238,8 @@ Write a missing-value check that distinguishes None from a valid empty value.
 ```python
 def value_or_default(value):
     return "missing" if value is None else value
-assert value_or_default(None) == "missing"
-assert value_or_default("") == ""
+print(value_or_default(None))  # Expected: "missing"
+print(value_or_default(''))  # Expected: ""
 ```
 
 </details>
@@ -254,11 +254,11 @@ A parser uses is to compare dynamically built strings. Produce a failing case an
 ```python
 expected = "error level"
 received = " ".join(["error", "level"])
-assert received == expected
+print(received)  # Expected: expected
 print(received is expected)  # Object reuse is not a value contract.
 def is_error(text):
     return text == "error level"
-assert is_error(received)
+print(is_error(received))  # Expected: True
 ```
 
 </details>
@@ -289,7 +289,7 @@ Compare bool(None), bool(0), and bool([]).
 <summary>Reveal reference solution</summary>
 
 ```python
-assert [bool(x) for x in (None, 0, [])] == [False, False, False]
+print([bool(x) for x in (None, 0, [])])  # Expected: [False, False, False]
 ```
 
 </details>
@@ -319,7 +319,7 @@ Accept an explicit zero timeout while defaulting only a missing timeout.
 ```python
 def timeout(supplied=None):
     return 30 if supplied is None else supplied
-assert timeout(0) == 0 and timeout() == 30
+print(timeout(0), timeout())  # Expected values: 0; 30
 ```
 
 </details>
@@ -333,9 +333,9 @@ A timeout = supplied or 30 expression rejects zero. Fix it without conflating ab
 
 ```python
 supplied = 0
-assert (supplied or 30) == 30  # Bug: drops a valid zero.
+print(supplied or 30)  # Expected: 30  # Bug: drops a valid zero.
 timeout = 30 if supplied is None else supplied
-assert timeout == 0
+print(timeout)  # Expected: 0
 ```
 
 </details>
@@ -367,8 +367,8 @@ Compare 0.1 + 0.2 with 0.3 and repeat using Decimal strings.
 
 ```python
 from decimal import Decimal
-assert 0.1 + 0.2 != 0.3
-assert Decimal("0.1") + Decimal("0.2") == Decimal("0.3")
+print(0.1 + 0.2 != 0.3)  # Expected: True
+print(Decimal('0.1') + Decimal('0.2'))  # Expected: Decimal("0.3")
 ```
 
 </details>
@@ -382,8 +382,7 @@ Round two Decimal values at a half-cent boundary using an explicit rounding mode
 
 ```python
 from decimal import Decimal, ROUND_HALF_UP
-assert [Decimal(x).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-        for x in ("1.005", "2.005")] == [Decimal("1.01"), Decimal("2.01")]
+print([Decimal(x).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP) for x in ('1.005', '2.005')])  # Expected: [Decimal("1.01"), Decimal("2.01")]
 ```
 
 </details>
@@ -401,7 +400,7 @@ def invoice(lines):
     # Policy: round the invoice total once, half up, to cents.
     total = sum((Decimal(price) * quantity for price, quantity in lines), Decimal(0))
     return total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-assert invoice([("1.005", 2)]) == Decimal("2.01")
+print(invoice([('1.005', 2)]))  # Expected: Decimal("2.01")
 ```
 
 </details>
@@ -415,10 +414,10 @@ Decimal(0.1) preserves a binary approximation. Explain and fix the constructor i
 
 ```python
 from decimal import Decimal
-assert Decimal(0.1) != Decimal("0.1")
+print(Decimal(0.1) != Decimal('0.1'))  # Expected: True
 # The float already lost the exact decimal representation.
 amount = Decimal("0.1")
-assert amount * 3 == Decimal("0.3")
+print(amount * 3)  # Expected: Decimal("0.3")
 ```
 
 </details>
@@ -450,8 +449,8 @@ Slice and encode a string containing a non-ASCII character.
 
 ```python
 text = "café"
-assert text[-1:] == "é"
-assert len(text) == 4 and len(text.encode("utf-8")) == 5
+print(text[-1:])  # Expected: "é"
+print(len(text), len(text.encode('utf-8')))  # Expected values: 4; 5
 ```
 
 </details>
@@ -465,8 +464,8 @@ Reverse a string with slicing and compare a full slice with an out-of-range slic
 
 ```python
 text = "Python"
-assert text[::-1] == "nohtyP"
-assert text[:] == text and text[99:] == ""
+print(text[::-1])  # Expected: "nohtyP"
+print(text[:], text[99:])  # Expected values: text; ''
 ```
 
 </details>
@@ -483,7 +482,7 @@ def parse(raw):
     original = raw.decode("utf-8")
     level, message = original.rstrip("\n").split(" ", 1)
     return {"level": level, "message": message, "original": original}
-assert parse("INFO café".encode())["message"] == "café"
+print(parse('INFO café'.encode())['message'])  # Expected: "café"
 ```
 
 </details>
@@ -501,7 +500,7 @@ try:
     raw[:1].decode("utf-8")
 except UnicodeDecodeError:
     pass
-assert raw.decode("utf-8")[:1] == "é"  # Decode before slicing characters.
+print(raw.decode('utf-8')[:1])  # Expected: "é"  # Decode before slicing characters.
 ```
 
 </details>
@@ -534,7 +533,7 @@ Contrast append([2, 3]) with extend([2, 3]).
 ```python
 a = [1]; b = [1]
 a.append([2, 3]); b.extend([2, 3])
-assert a == [1, [2, 3]] and b == [1, 2, 3]
+print(a, b)  # Expected values: [1, [2, 3]]; [1, 2, 3]
 ```
 
 </details>
@@ -548,7 +547,7 @@ Compare a negative index with its positive equivalent and demonstrate an invalid
 
 ```python
 xs = [10, 20, 30]
-assert xs[-1] == xs[2]
+print(xs[-1])  # Expected: xs[2]
 try:
     xs[3]
 except IndexError:
@@ -567,9 +566,7 @@ Maintain an ordered list of normalized log events.
 ```python
 def normalize(events):
     return [{**e, "level": e["level"].upper()} for e in events]
-assert [e["id"] for e in normalize([
-    {"id": 2, "level": "info"}, {"id": 1, "level": "error"}
-])] == [2, 1]
+print([e['id'] for e in normalize([{'id': 2, 'level': 'info'}, {'id': 1, 'level': 'error'}])])  # Expected: [2, 1]
 ```
 
 </details>
@@ -585,9 +582,9 @@ Removing matching items while iterating skips adjacent entries. Reproduce and re
 xs = [0, 0, 1]
 for x in xs:
     if x == 0: xs.remove(x)
-assert xs == [0, 1]  # Index shifts skip the second zero.
+print(xs)  # Expected: [0, 1]  # Index shifts skip the second zero.
 xs = [x for x in [0, 0, 1] if x != 0]
-assert xs == [1]
+print(xs)  # Expected: [1]
 ```
 
 </details>
@@ -621,7 +618,7 @@ Count three repeated event levels with a dictionary.
 counts = {}
 for level in ["INFO", "ERROR", "INFO"]:
     counts[level] = counts.get(level, 0) + 1
-assert counts == {"INFO": 2, "ERROR": 1}
+print(counts)  # Expected: {"INFO": 2, "ERROR": 1}
 ```
 
 </details>
@@ -635,8 +632,8 @@ Compare direct lookup, get, and membership for a missing key and a key mapped to
 
 ```python
 d = {"present": None}
-assert d["present"] is None and d.get("missing") is None
-assert "present" in d and "missing" not in d
+print(d['present'] is None and d.get('missing') is None)  # Expected: True
+print('present' in d and 'missing' not in d)  # Expected: True
 try: d["missing"]
 except KeyError: print("Direct lookup distinguishes missing keys")
 ```
@@ -657,7 +654,7 @@ def totals(events):
         key = event["customer_id"]
         result[key] = result.get(key, 0) + event["amount"]
     return result
-assert totals([{"customer_id": "c1", "amount": 2}, {"customer_id": "c1", "amount": 3}]) == {"c1": 5}
+print(totals([{'customer_id': 'c1', 'amount': 2}, {'customer_id': 'c1', 'amount': 3}]))  # Expected: {"c1": 5}
 ```
 
 </details>
@@ -672,10 +669,10 @@ A shared list passed as a default groups unrelated keys together. Locate the ali
 ```python
 shared = []; bad = {}
 for key in ("a", "b"): bad.setdefault(key, shared).append(key)
-assert bad["a"] is bad["b"]
+print(bad['a'] is bad['b'])  # Expected: True
 good = {}
 for key in ("a", "b"): good.setdefault(key, []).append(key)
-assert good == {"a": ["a"], "b": ["b"]}
+print(good)  # Expected: {"a": ["a"], "b": ["b"]}
 ```
 
 </details>
@@ -706,7 +703,7 @@ Compute the intersection of two customer-ID sets.
 <summary>Reveal reference solution</summary>
 
 ```python
-assert {"c1", "c2"} & {"c2", "c3"} == {"c2"}
+print({'c1', 'c2'} & {'c2', 'c3'})  # Expected: {"c2"}
 ```
 
 </details>
@@ -737,7 +734,7 @@ Deduplicate repeated event identifiers before aggregation.
 events = [{"id": "e1", "amount": 3}, {"id": "e1", "amount": 3}]
 unique = {}
 for event in events: unique.setdefault(event["id"], event)
-assert sum(e["amount"] for e in unique.values()) == 3
+print(sum((e['amount'] for e in unique.values())))  # Expected: 3
 # Policy: first occurrence wins; reject conflicts if payloads can differ.
 ```
 
@@ -753,7 +750,7 @@ Putting a list into a set raises TypeError. Choose a stable representation and e
 ```python
 try: set([[1, 2]])
 except TypeError: pass
-assert set([tuple([1, 2]), tuple([1, 2])]) == {(1, 2)}
+print(set([tuple([1, 2]), tuple([1, 2])]))  # Expected: {(1, 2)}
 # Tuple preserves order; frozenset would discard order and duplicates.
 ```
 
@@ -786,7 +783,7 @@ Unpack a status code, message, and remaining fields.
 
 ```python
 status, message, *rest = [200, "OK", "trace-1", 42]
-assert (status, message, rest) == (200, "OK", ["trace-1", 42])
+print((status, message, rest))  # Expected: (200, "OK", ["trace-1", 42])
 ```
 
 </details>
@@ -801,7 +798,7 @@ Capture the first and last items with a starred middle, including a two-item inp
 ```python
 for row in ([1, 2], [1, 2, 3, 4]):
     first, *middle, last = row
-    assert first == 1
+    print(first)  # Expected: 1
     print(first, middle, last)
 ```
 
@@ -819,7 +816,7 @@ def normalize(row):
     if len(row) < 2: raise ValueError("ID and name required")
     customer_id, name, *tags = row
     return {"customer_id": customer_id, "name": name, "tags": tags}
-assert normalize(["c1", "Ada"])["tags"] == []
+print(normalize(['c1', 'Ada'])['tags'])  # Expected: []
 ```
 
 </details>
@@ -836,7 +833,7 @@ row = (200, "OK", "trace-1")
 try: status, message = row
 except ValueError: pass
 status, message, *metadata = row
-assert metadata == ["trace-1"]
+print(metadata)  # Expected: ["trace-1"]
 ```
 
 </details>
@@ -868,7 +865,7 @@ Generate indexes for five records and verify the final index.
 
 ```python
 indexes = list(range(5))
-assert indexes == [0, 1, 2, 3, 4]
+print(indexes)  # Expected: [0, 1, 2, 3, 4]
 ```
 
 </details>
@@ -886,7 +883,7 @@ def contains_zero(xs):
         if x == 0: break
     else: return False
     return True
-assert contains_zero([1, 0]) and not contains_zero([1, 2])
+print(contains_zero([1, 0]) and (not contains_zero([1, 2])))  # Expected: True
 ```
 
 </details>
@@ -906,7 +903,7 @@ def records(lines):
         if not line.strip(): continue
         result.append(line)
     return result
-assert records(["", "INFO ok", "END", "ignored"]) == ["INFO ok"]
+print(records(['', 'INFO ok', 'END', 'ignored']))  # Expected: ["INFO ok"]
 ```
 
 </details>
@@ -920,9 +917,9 @@ range(1, count) omits the last numbered record. Specify the intended interval an
 
 ```python
 count = 3
-assert list(range(1, count)) == [1, 2]
-assert list(range(1, count + 1)) == [1, 2, 3]  # Inclusive numbering.
-assert list(range(count)) == [0, 1, 2]  # Zero-based indexes.
+print(list(range(1, count)))  # Expected: [1, 2]
+print(list(range(1, count + 1)))  # Expected: [1, 2, 3]  # Inclusive numbering.
+print(list(range(count)))  # Expected: [0, 1, 2]  # Zero-based indexes.
 ```
 
 </details>
@@ -953,7 +950,7 @@ Filter positive numbers and square the survivors.
 <summary>Reveal reference solution</summary>
 
 ```python
-assert [x*x for x in [-2, 0, 3] if x > 0] == [9]
+print([x * x for x in [-2, 0, 3] if x > 0])  # Expected: [9]
 ```
 
 </details>
@@ -966,7 +963,7 @@ Create a dictionary comprehension that maps each nonempty word to its length.
 <summary>Reveal reference solution</summary>
 
 ```python
-assert {w: len(w) for w in ["", "cat", "hello"] if w} == {"cat": 3, "hello": 5}
+print({w: len(w) for w in ['', 'cat', 'hello'] if w})  # Expected: {"cat": 3, "hello": 5}
 ```
 
 </details>
@@ -982,7 +979,7 @@ Build a dictionary of error counts from parsed records.
 from collections import Counter
 records = [{"level": "ERROR", "code": "E1"}, {"level": "INFO", "code": "I1"}]
 counts = dict(Counter(r["code"] for r in records if r["level"] == "ERROR"))
-assert counts == {"E1": 1}
+print(counts)  # Expected: {"E1": 1}
 ```
 
 </details>
@@ -1001,7 +998,7 @@ def parse(text):
     return int(text)
 parsed = (parse(x) for x in ["0", "2"])
 result = [x for x in parsed if x > 0]
-assert result == [2] and calls == ["0", "2"]
+print(result, calls)  # Expected values: [2]; ['0', '2']
 ```
 
 </details>
@@ -1073,7 +1070,7 @@ def parse(lines):
         except ValueError as error: errors.append((number, line, str(error)))
     return records, errors
 records, errors = parse(["1", "bad"])
-assert records == [1] and errors[0][0] == 2
+print(records, errors[0][0])  # Expected values: [1]; 2
 ```
 
 </details>
@@ -1089,7 +1086,7 @@ A broad except hides a programming error as an empty result. Narrow the boundary
 def parse(text):
     try: return int(text)
     except ValueError: return None
-assert parse("bad") is None
+print(parse('bad') is None)  # Expected: True
 try: parse(None)
 except TypeError: print("Programming contract errors remain visible")
 ```
@@ -1127,7 +1124,7 @@ from tempfile import TemporaryDirectory
 with TemporaryDirectory() as directory:
     path = Path(directory) / "fixture.txt"
     path.write_text("café", encoding="utf-8")
-    assert path.read_text(encoding="utf-8") == "café"
+    print(path.read_text(encoding='utf-8'))  # Expected: "café"
 ```
 
 </details>
@@ -1142,8 +1139,8 @@ Join paths with pathlib and compare relative and resolved absolute paths.
 ```python
 from pathlib import Path
 relative = Path("fixtures") / "events.log"
-assert not relative.is_absolute()
-assert relative.resolve().is_absolute()
+print(not relative.is_absolute())  # Expected: True
+print(relative.resolve().is_absolute())  # Expected: True
 ```
 
 </details>
@@ -1215,7 +1212,7 @@ Round-trip a nested event and inspect its decoded types.
 import json
 value = {"event": {"ids": [1, 2], "active": True}}
 decoded = json.loads(json.dumps(value))
-assert decoded == value and isinstance(decoded["event"]["ids"], list)
+print(decoded == value and isinstance(decoded['event']['ids'], list))  # Expected: True
 ```
 
 </details>
@@ -1229,7 +1226,7 @@ Decode a JSON null, boolean, number, and array and identify each Python type.
 
 ```python
 import json
-assert [type(json.loads(x)).__name__ for x in ["null", "true", "3", "[]"]] == ["NoneType", "bool", "int", "list"]
+print([type(json.loads(x)).__name__ for x in ['null', 'true', '3', '[]']])  # Expected: ["NoneType", "bool", "int", "list"]
 ```
 
 </details>
@@ -1248,7 +1245,7 @@ def parse(text):
     if not isinstance(record, dict) or "severity" not in record:
         raise ValueError("object with severity required")
     return record
-assert parse('{"severity":"INFO"}')["severity"] == "INFO"
+print(parse('{"severity":"INFO"}')['severity'])  # Expected: "INFO"
 ```
 
 </details>
@@ -1300,7 +1297,7 @@ Define a function that converts a log level to uppercase.
 ```python
 def normalize_level(level):
     return level.upper()
-assert normalize_level("info") == "INFO"
+print(normalize_level('info'))  # Expected: "INFO"
 ```
 
 </details>
@@ -1316,7 +1313,7 @@ Add a docstring to a helper and inspect it without calling the helper.
 def helper():
     """Normalize one record."""
     raise RuntimeError("not called during inspection")
-assert helper.__doc__ == "Normalize one record."
+print(helper.__doc__)  # Expected: "Normalize one record."
 ```
 
 </details>
@@ -1334,7 +1331,7 @@ def normalize(line):
     return {"level": level.upper(), "message": message}
 def read_records(handle):
     return [normalize(line) for line in handle if line.strip()]
-assert read_records(["info hello"])[0]["level"] == "INFO"
+print(read_records(['info hello'])[0]['level'])  # Expected: "INFO"
 ```
 
 </details>
@@ -1349,9 +1346,9 @@ A helper is referenced without parentheses and its result is treated as text. Tr
 ```python
 def helper(): return "ready"
 wrong = helper
-assert callable(wrong)
+print(callable(wrong))  # Expected: True
 correct = helper()
-assert correct.upper() == "READY"
+print(correct.upper())  # Expected: "READY"
 ```
 
 </details>
@@ -1383,7 +1380,7 @@ Return both a count and a total from a helper.
 
 ```python
 def summarize(xs): return len(xs), sum(xs)
-assert summarize([2, 3]) == (2, 5)
+print(summarize([2, 3]))  # Expected: (2, 5)
 ```
 
 </details>
@@ -1399,7 +1396,7 @@ Compare explicit return None, bare return, and falling off the end of a function
 def explicit(): return None
 def bare(): return
 def falling(): pass
-assert explicit() is bare() is falling() is None
+print(explicit() is bare() is falling() is None)  # Expected: True
 ```
 
 </details>
@@ -1417,7 +1414,7 @@ def parse(line):
     level, message = line.split(" ", 1)
     if level not in {"INFO", "ERROR"}: raise ValueError("unsupported level")
     return {"level": level, "message": message}
-assert parse("INFO ready")["message"] == "ready"
+print(parse('INFO ready')['message'])  # Expected: "ready"
 ```
 
 </details>
@@ -1433,9 +1430,9 @@ A branch prints a value instead of returning it. Write a reproducer for the unex
 def broken(x):
     if x > 0: print(x)
     else: return 0
-assert broken(1) is None
+print(broken(1) is None)  # Expected: True
 def fixed(x): return x if x > 0 else 0
-assert fixed(1) == 1
+print(fixed(1))  # Expected: 1
 ```
 
 </details>
@@ -1467,7 +1464,7 @@ Call a two-parameter function in both orders and compare results.
 
 ```python
 def divide(a, b): return a / b
-assert divide(6, 2) == 3 and divide(2, 6) == 1/3
+print(divide(6, 2), divide(2, 6))  # Expected values: 3; 1 / 3
 ```
 
 </details>
@@ -1481,7 +1478,7 @@ Define a positional-only parameter and demonstrate the failure of a keyword call
 
 ```python
 def identity(value, /): return value
-assert identity(1) == 1
+print(identity(1))  # Expected: 1
 try: identity(value=1)
 except TypeError: print("value is positional-only")
 ```
@@ -1499,7 +1496,7 @@ Define a ratio helper whose numerator and denominator are unambiguous.
 def ratio(numerator, denominator):
     if denominator == 0: raise ValueError("denominator must be nonzero")
     return numerator / denominator
-assert ratio(numerator=6, denominator=2) == 3
+print(ratio(numerator=6, denominator=2))  # Expected: 3
 ```
 
 </details>
@@ -1514,7 +1511,7 @@ A caller reverses source and destination parameters. Improve naming and call-sit
 ```python
 def transfer(*, source, destination): return (source, destination)
 # Keyword-only names make the direction reviewable at each call site.
-assert transfer(source="inbox", destination="archive") == ("inbox", "archive")
+print(transfer(source='inbox', destination='archive'))  # Expected: ("inbox", "archive")
 ```
 
 </details>
@@ -1546,7 +1543,7 @@ Define a keyword-only strict option and call it correctly.
 
 ```python
 def parse(text, *, strict): return int(text) if strict else text
-assert parse("2", strict=True) == 2
+print(parse('2', strict=True))  # Expected: 2
 ```
 
 </details>
@@ -1576,7 +1573,7 @@ Add explicit encoding and strict options to a log parser.
 ```python
 def parse(raw, *, encoding="utf-8", strict=True):
     return raw.decode(encoding, errors="strict" if strict else "replace")
-assert parse(b"hello", encoding="utf-8", strict=True) == "hello"
+print(parse(b'hello', encoding='utf-8', strict=True))  # Expected: "hello"
 ```
 
 </details>
@@ -1593,7 +1590,7 @@ def inner(value): return value
 try: inner(1, value=2)
 except TypeError: pass
 def wrapper(value): return inner(value=value)
-assert wrapper(2) == 2
+print(wrapper(2))  # Expected: 2
 ```
 
 </details>
@@ -1628,7 +1625,7 @@ def make_default():
     print("created at definition")
     return 3
 def run(attempts=make_default()): return attempts
-assert run() == run() == 3
+print(run() == run() == 3)  # Expected: True
 ```
 
 </details>
@@ -1642,7 +1639,7 @@ Override a default explicitly and compare the result with a call that omits it.
 
 ```python
 def run(attempts=3): return attempts
-assert run() == 3 and run(1) == 1
+print(run(), run(1))  # Expected values: 3; 1
 ```
 
 </details>
@@ -1659,7 +1656,7 @@ def retry_count(attempts=3):
     """Total attempts, including the first; callers may override."""
     if attempts < 1: raise ValueError("at least one attempt")
     return attempts
-assert retry_count() == 3 and retry_count(attempts=1) == 1
+print(retry_count(), retry_count(attempts=1))  # Expected values: 3; 1
 ```
 
 </details>
@@ -1676,7 +1673,7 @@ from datetime import datetime, timezone
 def stamp(timestamp=None):
     return datetime.now(timezone.utc) if timestamp is None else timestamp
 fixed = datetime(2025, 1, 1, tzinfo=timezone.utc)
-assert stamp(fixed) is fixed
+print(stamp(fixed) is fixed)  # Expected: True
 # Calling now inside the body acquires time per invocation.
 ```
 
@@ -1710,9 +1707,9 @@ Call an accumulator twice and inspect its default list.
 ```python
 def collect(x, items=[]):
     items.append(x); return items
-assert collect(1) == [1]
-assert collect(2) == [1, 2]
-assert collect.__defaults__[0] == [1, 2]
+print(collect(1))  # Expected: [1]
+print(collect(2))  # Expected: [1, 2]
+print(collect.__defaults__[0])  # Expected: [1, 2]
 ```
 
 </details>
@@ -1728,8 +1725,8 @@ Test a None-sentinel implementation with two omitted arguments and an explicitly
 def collect(x, items=None):
     if items is None: items = []
     items.append(x); return items
-assert collect(1) == [1] and collect(2) == [2]
-given = []; assert collect(3, given) is given
+print(collect(1), collect(2))  # Expected values: [1]; [2]
+given = []; print(collect(3, given) is given)  # Expected: True
 ```
 
 </details>
@@ -1748,7 +1745,7 @@ def collect(record, buffer=None):
     buffer.append(record)
     return buffer
 a, b = collect("a"), collect("b")
-assert a == ["a"] and b == ["b"] and a is not b
+print(a == ['a'] and b == ['b'] and (a is not b))  # Expected: True
 ```
 
 </details>
@@ -1765,7 +1762,7 @@ def record(x, items=None):
     if items is None: items = []
     items.append(x)
     return items
-assert record(1) == [1] and record(2) == [2]
+print(record(1), record(2))  # Expected values: [1]; [2]
 # A definition-time list was shared. The sentinel allocates per call.
 ```
 
@@ -1798,7 +1795,7 @@ Write a helper that totals an arbitrary number of values.
 
 ```python
 def total(*values): return sum(values)
-assert total(1, 2, 3) == 6 and total() == 0
+print(total(1, 2, 3), total())  # Expected values: 6; 0
 ```
 
 </details>
@@ -1812,7 +1809,7 @@ Call the same variadic helper with zero, one, and three arguments and inspect th
 
 ```python
 def inspect(*args): return args
-assert inspect() == () and inspect(1) == (1,) and inspect(1, 2, 3) == (1, 2, 3)
+print(inspect(), inspect(1), inspect(1, 2, 3))  # Expected values: (); (1,); (1, 2, 3)
 ```
 
 </details>
@@ -1828,7 +1825,7 @@ Create a metric aggregator accepting several sample values.
 def aggregate(*samples):
     return {"count": len(samples), "total": sum(samples),
             "mean": sum(samples)/len(samples) if samples else None}
-assert aggregate(2, 4)["mean"] == 3 and aggregate()["mean"] is None
+print(aggregate(2, 4)['mean'] == 3 and aggregate()['mean'] is None)  # Expected: True
 ```
 
 </details>
@@ -1844,7 +1841,7 @@ A function loops over args[0] assuming it is the tuple of all arguments. Correct
 def total(*args):
     # args is already the tuple; args[0] is the first scalar.
     return sum(value for value in args)
-assert total(1, 2) == 3 and total() == 0
+print(total(1, 2), total())  # Expected values: 3; 0
 ```
 
 </details>
@@ -1876,7 +1873,7 @@ Collect named metric labels and inspect the resulting dictionary.
 
 ```python
 def labels(**kwargs): return kwargs
-assert labels(region="eu", service="api") == {"region": "eu", "service": "api"}
+print(labels(region='eu', service='api'))  # Expected: {"region": "eu", "service": "api"}
 ```
 
 </details>
@@ -1890,7 +1887,7 @@ Separate one named parameter from two extra keyword options and inspect the coll
 
 ```python
 def metric(name, **options): return name, options
-assert metric("latency", unit="ms", region="eu") == ("latency", {"unit": "ms", "region": "eu"})
+print(metric('latency', unit='ms', region='eu'))  # Expected: ("latency", {"unit": "ms", "region": "eu"})
 ```
 
 </details>
@@ -1907,7 +1904,7 @@ def log(message, **fields):
     allowed = {"customer_id", "trace_id"}
     if fields.keys() - allowed: raise ValueError("unsupported/reserved field")
     return {"message": message, **fields}
-assert log("ready", trace_id="t1")["trace_id"] == "t1"
+print(log('ready', trace_id='t1')['trace_id'])  # Expected: "t1"
 ```
 
 </details>
@@ -1957,7 +1954,7 @@ Invoke one function from a tuple and a dictionary.
 
 ```python
 def add(a, b): return a + b
-assert add(*(1, 2)) == add(**{"a": 1, "b": 2}) == 3
+print(add(*(1, 2)) == add(**{'a': 1, 'b': 2}) == 3)  # Expected: True
 ```
 
 </details>
@@ -1971,7 +1968,7 @@ Expand an empty tuple and a nonempty option dictionary into one function call.
 
 ```python
 def values(*, strict): return strict
-assert values(*(), **{"strict": True}) is True
+print(values(*(), **{'strict': True}) is True)  # Expected: True
 ```
 
 </details>
@@ -1988,7 +1985,7 @@ def parse(text, *, strict): return int(text) if strict else text
 config = {"strict": True}
 if set(config) != {"strict"} or not isinstance(config["strict"], bool):
     raise ValueError("invalid config")
-assert parse("4", **config) == 4
+print(parse('4', **config))  # Expected: 4
 ```
 
 </details>
@@ -2006,7 +2003,7 @@ base = {"timeout": 30}; override = {"timeout": 0}
 try: run(**base, **override)
 except TypeError: pass
 merged = {**base, **override}  # Explicit last-write-wins policy.
-assert run(**merged) == 0
+print(run(**merged))  # Expected: 0
 ```
 
 </details>
@@ -2038,8 +2035,8 @@ Annotate a parser returning an integer and call it with a wrong type.
 
 ```python
 def parse(text: str) -> int: return int(text)
-assert parse("2") == 2
-assert parse(2) == 2  # A static checker flags this call, Python does not.
+print(parse('2'))  # Expected: 2
+print(parse(2))  # Expected: 2  # A static checker flags this call, Python does not.
 ```
 
 </details>
@@ -2054,7 +2051,7 @@ Inspect a function's annotations and compare them with what a static checker rep
 ```python
 from typing import get_type_hints
 def length(text: str) -> int: return len(text)
-assert get_type_hints(length) == {"text": str, "return": int}
+print(get_type_hints(length))  # Expected: {"text": str, "return": int}
 ```
 
 </details>
@@ -2070,7 +2067,7 @@ Document the types of each log-normalization helper.
 def normalize_level(level: str) -> str: return level.strip().upper()
 def normalize_record(record: dict[str, str]) -> dict[str, str]:
     return {**record, "level": normalize_level(record["level"])}
-assert normalize_record({"level": " info "}) == {"level": "INFO"}
+print(normalize_record({'level': ' info '}))  # Expected: {"level": "INFO"}
 ```
 
 </details>
@@ -2084,11 +2081,11 @@ An annotated function accepts a string at runtime. Add a static check and identi
 
 ```python
 def double(x: int) -> int: return x * 2
-assert double("2") == "22"  # Run a type checker to flag this misuse.
+print(double('2'))  # Expected: "22"  # Run a type checker to flag this misuse.
 def validated_double(x: object) -> int:
     if type(x) is not int: raise TypeError("integer required")
     return double(x)
-assert validated_double(2) == 4
+print(validated_double(2))  # Expected: 4
 ```
 
 </details>
@@ -2120,7 +2117,7 @@ Store two functions in a dictionary and invoke one by key.
 
 ```python
 formatters = {"upper": str.upper, "lower": str.lower}
-assert formatters["upper"]("Info") == "INFO"
+print(formatters['upper']('Info'))  # Expected: "INFO"
 ```
 
 </details>
@@ -2135,8 +2132,8 @@ Compare callable() for a function, its returned value, and an ordinary integer.
 ```python
 def greet(): return "hello"
 alias = greet
-assert alias is greet and alias() == "hello"
-assert callable(greet) and not callable(greet()) and not callable(3)
+print(alias is greet and alias() == 'hello')  # Expected: True
+print(callable(greet) and (not callable(greet())) and (not callable(3)))  # Expected: True
 ```
 
 </details>
@@ -2152,7 +2149,7 @@ Build a severity-based formatter dispatch table.
 formatters = {"ERROR": lambda text: f"ALERT: {text}", "INFO": str}
 def format_record(record):
     return formatters[record["level"]](record["message"])
-assert format_record({"level": "ERROR", "message": "disk"}) == "ALERT: disk"
+print(format_record({'level': 'ERROR', 'message': 'disk'}))  # Expected: "ALERT: disk"
 ```
 
 </details>
@@ -2168,8 +2165,8 @@ A registry stores formatter() instead of formatter. Explain why work runs during
 calls = []
 def formatter(): calls.append(1); return "ready"
 registry = {"format": formatter}  # Store callable, not formatter().
-assert calls == []
-assert registry["format"]() == "ready" and calls == [1]
+print(calls)  # Expected: []
+print(registry['format'](), calls)  # Expected values: 'ready'; [1]
 ```
 
 </details>
@@ -2201,7 +2198,7 @@ Sort records using an injected key function.
 
 ```python
 records = [{"age": 3}, {"age": 1}]
-assert sorted(records, key=lambda r: r["age"])[0]["age"] == 1
+print(sorted(records, key=lambda r: r['age'])[0]['age'])  # Expected: 1
 ```
 
 </details>
@@ -2215,7 +2212,7 @@ Write a factory that returns either an uppercase or lowercase formatter.
 
 ```python
 def formatter(uppercase): return str.upper if uppercase else str.lower
-assert formatter(True)("Info") == "INFO" and formatter(False)("Info") == "info"
+print(formatter(True)('Info'), formatter(False)('Info'))  # Expected values: 'INFO'; 'info'
 ```
 
 </details>
@@ -2229,7 +2226,7 @@ Write a pipeline stage accepting a normalization callback.
 
 ```python
 def stage(records, normalize): return [normalize(record) for record in records]
-assert stage([" info ", "error"], lambda x: x.strip().upper()) == ["INFO", "ERROR"]
+print(stage([' info ', 'error'], lambda x: x.strip().upper()))  # Expected: ["INFO", "ERROR"]
 ```
 
 </details>
@@ -2245,7 +2242,7 @@ A callback receives the whole list instead of one record. Align the callback con
 def apply(records, callback):
     return [callback(record) for record in records]
 # callback consumes one record, not the whole list.
-assert apply([{"n": 1}, {"n": 2}], lambda r: r["n"] * 2) == [2, 4]
+print(apply([{'n': 1}, {'n': 2}], lambda r: r['n'] * 2))  # Expected: [2, 4]
 ```
 
 </details>
@@ -2281,7 +2278,7 @@ def read(): return value
 def local():
     value = 9
     return value
-assert read() == 5 and local() == 9 and value == 5
+print(read(), local(), value)  # Expected values: 5; 9; 5
 ```
 
 </details>
@@ -2299,8 +2296,8 @@ def mutate(): items.append(1)
 def rebind_locally():
     items = [2]
     return items
-mutate(); assert items == [1] and rebind_locally() == [2]
-assert items == [1]
+mutate(); print(items == [1] and rebind_locally() == [2])  # Expected: True
+print(items)  # Expected: [1]
 ```
 
 </details>
@@ -2316,7 +2313,7 @@ Remove an implicit global counter from a processing helper.
 def next_count(current): return current + 1
 count = 0
 count = next_count(count)
-assert count == 1
+print(count)  # Expected: 1
 # Explicit input/output removes hidden global coupling.
 ```
 
@@ -2336,7 +2333,7 @@ def broken():
 try: broken()
 except UnboundLocalError: pass
 def fixed(count): return count + 1
-assert fixed(count) == 1
+print(fixed(count))  # Expected: 1
 ```
 
 </details>
@@ -2372,7 +2369,7 @@ def outer():
     name = "enclosing"
     def inner(): return name
     return inner()
-assert outer() == "enclosing"
+print(outer())  # Expected: "enclosing"
 ```
 
 </details>
@@ -2390,7 +2387,7 @@ def outer():
     name = "enclosing"
     def inner(): return name
     return inner()
-assert outer() == "enclosing" and name == "global"
+print(outer(), name)  # Expected values: 'enclosing'; 'global'
 ```
 
 </details>
@@ -2406,7 +2403,7 @@ Audit a module for names that shadow useful built-ins.
 import builtins
 namespace = {"list": [], "len": 3, "event_count": 4}
 shadowed = sorted(name for name in namespace if name in vars(builtins))
-assert shadowed == ["len", "list"]
+print(shadowed)  # Expected: ["len", "list"]
 # Rename these to events and length; audit function locals and parameters too.
 ```
 
@@ -2428,7 +2425,7 @@ except TypeError: pass
 def fixed():
     items = []
     return list((1, 2))
-assert fixed() == [1, 2]
+print(fixed())  # Expected: [1, 2]
 ```
 
 </details>
@@ -2463,7 +2460,7 @@ def multiplier(factor):
     def multiply(value): return factor * value
     return multiply
 twice, triple = multiplier(2), multiplier(3)
-assert twice(4) == 8 and triple(4) == 12
+print(twice(4), triple(4))  # Expected values: 8; 12
 ```
 
 </details>
@@ -2484,7 +2481,7 @@ def counter():
         return count
     return increment
 a, b = counter(), counter()
-assert (a(), a(), b()) == (1, 2, 1)
+print((a(), a(), b()))  # Expected: (1, 2, 1)
 ```
 
 </details>
@@ -2500,7 +2497,7 @@ Build a threshold predicate factory for log filtering.
 def threshold_filter(minimum):
     return lambda record: record["severity"] >= minimum
 warning = threshold_filter(30)
-assert warning({"severity": 40}) and not warning({"severity": 10})
+print(warning({'severity': 40}) and (not warning({'severity': 10})))  # Expected: True
 ```
 
 </details>
@@ -2514,9 +2511,9 @@ Functions created in a loop all use the final loop value. Reproduce late binding
 
 ```python
 wrong = [lambda: i for i in range(3)]
-assert [f() for f in wrong] == [2, 2, 2]
+print([f() for f in wrong])  # Expected: [2, 2, 2]
 fixed = [lambda i=i: i for i in range(3)]
-assert [f() for f in fixed] == [0, 1, 2]
+print([f() for f in fixed])  # Expected: [0, 1, 2]
 # Defaults bind each iteration's value instead of sharing the loop cell.
 ```
 

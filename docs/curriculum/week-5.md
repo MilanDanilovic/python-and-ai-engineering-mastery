@@ -28,9 +28,9 @@ from pydantic import BaseModel, Field, ValidationError
 class Note(BaseModel):
     customer_id: int = Field(gt=0)
     note: str = Field(min_length=1)
-assert Note.model_validate({"customer_id": 1, "note": "hello"}).customer_id == 1
+print(Note.model_validate({'customer_id': 1, 'note': 'hello'}).customer_id)  # Expected: 1
 try: Note(customer_id=0, note="")
-except ValidationError as error: assert len(error.errors()) == 2
+except ValidationError as error: print(len(error.errors()))  # Expected: 2
 ```
 
 </details>
@@ -49,7 +49,7 @@ class Note(BaseModel):
     note: str = Field(min_length=1)
 try: Note(customer_id=-1, note="")
 except ValidationError as error:
-    assert {tuple(e["loc"]) for e in error.errors()} == {("customer_id",), ("note",)}
+    print({tuple(e['loc']) for e in error.errors()})  # Expected: {("customer_id",), ("note",)}
 ```
 
 </details>
@@ -67,7 +67,7 @@ class AnalyzeRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     source: str = Field(min_length=1)
     limit: int = Field(default=100, gt=0, le=10000)
-assert AnalyzeRequest(source="events.log").limit == 100
+print(AnalyzeRequest(source='events.log').limit)  # Expected: 100
 ```
 
 </details>
@@ -82,7 +82,7 @@ model_construct bypasses validation on untrusted input. Replace it at the bounda
 ```python
 from pydantic import BaseModel, Field, ValidationError
 class Request(BaseModel): count: int = Field(gt=0)
-assert Request.model_construct(count=-1).count == -1  # Bypasses validation.
+print(Request.model_construct(count=-1).count)  # Expected: -1  # Bypasses validation.
 try: Request.model_validate({"count": -1})
 except ValidationError: print("untrusted input rejected")
 ```
@@ -119,7 +119,7 @@ from pydantic import BaseModel, Field
 class Note(BaseModel):
     customer_id: int = Field(gt=0)
     note: str = Field(min_length=1, max_length=500)
-assert Note(customer_id=1, note="hello").note == "hello"
+print(Note(customer_id=1, note='hello').note)  # Expected: "hello"
 ```
 
 </details>
@@ -135,7 +135,7 @@ Use default_factory for a list and prove that two model instances do not share i
 from pydantic import BaseModel, Field
 class Record(BaseModel): tags: list[str] = Field(default_factory=list)
 a, b = Record(), Record(); a.tags.append("a")
-assert b.tags == [] and a.tags is not b.tags
+print(b.tags == [] and a.tags is not b.tags)  # Expected: True
 ```
 
 </details>
@@ -172,7 +172,7 @@ for invalid in (0, -1):
     try: Customer(id=invalid)
     except ValidationError: pass
     else: raise AssertionError("positive constraint missing")
-assert Customer(id=1).id == 1
+print(Customer(id=1).id)  # Expected: 1
 ```
 
 </details>
@@ -212,7 +212,7 @@ class Event(BaseModel):
         value = value.strip().upper()
         if value not in {"INFO", "ERROR"}: raise ValueError("unsupported severity")
         return value
-assert Event(severity=" info ").severity == "INFO"
+print(Event(severity=' info ').severity)  # Expected: "INFO"
 ```
 
 </details>
@@ -235,7 +235,7 @@ class Count(BaseModel):
     @field_validator("value")
     @classmethod
     def after(cls, value): seen.append(type(value)); return value
-Count(value="2"); assert seen == [str, int]
+Count(value="2"); print(seen)  # Expected: [str, int]
 ```
 
 </details>
@@ -258,7 +258,7 @@ class CustomerRef(BaseModel):
         value = value.strip().lower()
         if not re.fullmatch(r"c[1-9][0-9]*", value): raise ValueError("expected c followed by positive digits")
         return value
-assert CustomerRef(id=" C12 ").id == "c12"
+print(CustomerRef(id=' C12 ').id)  # Expected: "c12"
 ```
 
 </details>
@@ -279,7 +279,7 @@ class Count(BaseModel):
     def positive(cls, value):
         if value <= 0: raise ValueError("positive count required")
         return value
-assert Count(value="2").value == 2
+print(Count(value='2').value)  # Expected: 2
 # Before validators receive raw text; arithmetic belongs after integer parsing.
 ```
 
@@ -320,7 +320,7 @@ class Window(BaseModel):
     def ordered(self):
         if self.end <= self.start: raise ValueError("end must follow start")
         return self
-assert Window(start="2025-01-01", end="2025-01-02").end > Window(start="2025-01-01", end="2025-01-02").start
+print(Window(start='2025-01-01', end='2025-01-02').end > Window(start='2025-01-01', end='2025-01-02').start)  # Expected: True
 ```
 
 </details>
@@ -343,8 +343,8 @@ class Window(BaseModel):
         return self
 for start, end in ((1, 1), (1, 2), (2, 1)):
     try: Window(start=start, end=end)
-    except ValidationError: assert end <= start
-    else: assert end > start
+    except ValidationError: print(end <= start)  # Expected: True
+    else: print(end > start)  # Expected: True
 ```
 
 </details>
@@ -424,7 +424,7 @@ Validate a customer with a list of orders.
 from pydantic import BaseModel, Field
 class Order(BaseModel): id: int = Field(gt=0)
 class Customer(BaseModel): orders: list[Order]
-assert Customer(orders=[{"id": 1}]).orders[0].id == 1
+print(Customer(orders=[{'id': 1}]).orders[0].id)  # Expected: 1
 ```
 
 </details>
@@ -441,7 +441,7 @@ from pydantic import BaseModel, Field, ValidationError
 class Order(BaseModel): id: int = Field(gt=0)
 class Customer(BaseModel): orders: list[Order]
 try: Customer(orders=[{"id": 1}, {"id": 0}])
-except ValidationError as error: assert error.errors()[0]["loc"] == ("orders", 1, "id")
+except ValidationError as error: print(error.errors()[0]['loc'])  # Expected: ("orders", 1, "id")
 ```
 
 </details>
@@ -462,7 +462,7 @@ class Source(BaseModel):
 class Ticket(BaseModel):
     requester: Requester
     sources: list[Source]
-assert Ticket(requester={"customer_id": "c1"}, sources=[{"document_id": "d1", "version": 1}]).sources[0].version == 1
+print(Ticket(requester={'customer_id': 'c1'}, sources=[{'document_id': 'd1', 'version': 1}]).sources[0].version)  # Expected: 1
 ```
 
 </details>
@@ -479,7 +479,7 @@ from pydantic import BaseModel, Field, ValidationError
 class Order(BaseModel): amount: int = Field(ge=0)
 class Payload(BaseModel): order: Order  # Not an unconstrained dict.
 try: Payload(order={"amount": -1})
-except ValidationError as error: assert error.errors()[0]["loc"] == ("order", "amount")
+except ValidationError as error: print(error.errors()[0]['loc'])  # Expected: ("order", "amount")
 ```
 
 </details>
@@ -519,7 +519,7 @@ class Error(BaseModel):
     kind: Literal["error"]
     code: str
 result = TypeAdapter(Annotated[Success | Error, Field(discriminator="kind")])
-assert isinstance(result.validate_python({"kind": "success", "value": "ok"}), Success)
+print(isinstance(result.validate_python({'kind': 'success', 'value': 'ok'}), Success))  # Expected: True
 ```
 
 </details>
@@ -537,7 +537,7 @@ from pydantic import BaseModel, Field, TypeAdapter, ValidationError
 class Read(BaseModel): kind: Literal["read"]
 class Write(BaseModel): kind: Literal["write"]
 adapter = TypeAdapter(Annotated[Read | Write, Field(discriminator="kind")])
-for kind in ("read", "write"): assert adapter.validate_python({"kind": kind}).kind == kind
+for kind in ("read", "write"): print(adapter.validate_python({'kind': kind}).kind)  # Expected: kind
 try: adapter.validate_python({"kind": "unknown"})
 except ValidationError: print("unknown tag rejected")
 ```
@@ -562,7 +562,7 @@ class CreateNote(BaseModel):
     customer_id: str
     note: str = Field(min_length=1)
 request = TypeAdapter(Annotated[Lookup | CreateNote, Field(discriminator="kind")])
-assert request.validate_python({"kind": "lookup", "customer_id": "c1"}).kind == "lookup"
+print(request.validate_python({'kind': 'lookup', 'customer_id': 'c1'}).kind)  # Expected: "lookup"
 ```
 
 </details>
@@ -581,7 +581,7 @@ class Ok(BaseModel): kind: Literal["ok"]
 class Error(BaseModel): kind: Literal["error"]
 adapter = TypeAdapter(Annotated[Ok | Error, Field(discriminator="kind")])
 payload = {"kind": "ok"}  # Producer and consumer share exact tag spelling.
-assert adapter.validate_python(payload).kind == "ok"
+print(adapter.validate_python(payload).kind)  # Expected: "ok"
 # Add a producer/consumer contract test; do not guess missing variant tags.
 ```
 
@@ -615,7 +615,7 @@ Serialize a model with an external field alias.
 ```python
 from pydantic import BaseModel, Field
 class Customer(BaseModel): customer_id: str = Field(alias="customerId")
-assert Customer(customerId="c1").model_dump(by_alias=True) == {"customerId": "c1"}
+print(Customer(customerId='c1').model_dump(by_alias=True))  # Expected: {"customerId": "c1"}
 ```
 
 </details>
@@ -632,8 +632,8 @@ from datetime import datetime, timezone
 from pydantic import BaseModel
 class Event(BaseModel): at: datetime
 event = Event(at=datetime(2025, 1, 1, tzinfo=timezone.utc))
-assert isinstance(event.model_dump()["at"], datetime)
-assert isinstance(event.model_dump(mode="json")["at"], str)
+print(isinstance(event.model_dump()['at'], datetime))  # Expected: True
+print(isinstance(event.model_dump(mode='json')['at'], str))  # Expected: True
 ```
 
 </details>
@@ -650,7 +650,7 @@ from pydantic import BaseModel, Field
 class Result(BaseModel):
     report_id: str
     internal_token: str = Field(exclude=True)
-assert Result(report_id="r1", internal_token="example-only").model_dump() == {"report_id": "r1"}
+print(Result(report_id='r1', internal_token='example-only').model_dump())  # Expected: {"report_id": "r1"}
 ```
 
 </details>
@@ -666,8 +666,8 @@ An internal field name leaks because by_alias was not selected. Assert the exter
 from pydantic import BaseModel, Field
 class Result(BaseModel): report_id: str = Field(alias="reportId")
 result = Result(reportId="r1")
-assert result.model_dump(by_alias=True) == {"reportId": "r1"}
-assert "report_id" not in result.model_dump(by_alias=True)
+print(result.model_dump(by_alias=True))  # Expected: {"reportId": "r1"}
+print('report_id' not in result.model_dump(by_alias=True))  # Expected: True
 ```
 
 </details>
@@ -703,7 +703,7 @@ class Input(BaseModel):
     query: str
     limit: int = 10
 schema = Input.model_json_schema()
-assert schema["required"] == ["query"] and schema["properties"]["limit"]["default"] == 10
+print(schema['required'], schema['properties']['limit']['default'])  # Expected values: ['query']; 10
 ```
 
 </details>
@@ -720,7 +720,7 @@ from pydantic import BaseModel
 class Input(BaseModel):
     required_nullable: str | None
     optional_with_default: str | None = None
-assert Input.model_json_schema()["required"] == ["required_nullable"]
+print(Input.model_json_schema()['required'])  # Expected: ["required_nullable"]
 ```
 
 </details>
@@ -736,7 +736,7 @@ Generate a tool input contract from a validated model.
 from pydantic import BaseModel, Field
 class SearchCustomer(BaseModel): query: str = Field(min_length=1, description="Customer name or stable ID")
 tool = {"name": "search_customer", "description": "Read-only customer lookup", "inputSchema": SearchCustomer.model_json_schema()}
-assert tool["inputSchema"]["required"] == ["query"]
+print(tool['inputSchema']['required'])  # Expected: ["query"]
 ```
 
 </details>
@@ -793,7 +793,7 @@ for _ in range(3):
     response = next(responses); history.append(response)
     if "answer" in response: break
     history.append({"tool_result": {"name": "Ada"}})
-assert history[-1] == {"answer": "Ada"} and "tool_result" in history[1]
+print(history[-1] == {'answer': 'Ada'} and 'tool_result' in history[1])  # Expected: True
 ```
 
 </details>
@@ -810,7 +810,7 @@ def run(model):
     response = model([])
     if "answer" in response: return response["answer"]
     raise ValueError("unexpected tool request")
-assert run(lambda history: {"answer": "hello"}) == "hello"
+print(run(lambda history: {'answer': 'hello'}))  # Expected: "hello"
 ```
 
 </details>
@@ -831,7 +831,7 @@ def assistant(model, repository, history, max_steps=3):
         history.append({"tool_result": repository.get(response["id"])})
     raise RuntimeError("step budget exhausted")
 responses = iter([{"tool": "lookup", "id": "c1"}, {"answer": "Ada"}])
-assert assistant(lambda h: next(responses), {"c1": {"name": "Ada"}}, []) == "Ada"
+print(assistant(lambda h: next(responses), {'c1': {'name': 'Ada'}}, []))  # Expected: "Ada"
 ```
 
 </details>
@@ -848,7 +848,7 @@ history = [{"role": "user", "content": "Find c1"}]
 call = {"role": "assistant", "tool_call_id": "call-1", "name": "lookup", "arguments": {"id": "c1"}}
 history.append(call)
 history.append({"role": "tool", "tool_call_id": "call-1", "content": {"name": "Ada"}})
-assert history[-1]["tool_call_id"] == call["tool_call_id"]
+print(history[-1]['tool_call_id'])  # Expected: call["tool_call_id"]
 # Pass this updated history into the next model request; adapt to provider message types.
 ```
 
@@ -883,7 +883,7 @@ Run a minimal agent against a test model.
 from pydantic_ai import Agent
 from pydantic_ai.models.test import TestModel
 agent = Agent(TestModel(custom_output_text="hello"))
-assert agent.run_sync("Say hello").output == "hello"
+print(agent.run_sync('Say hello').output)  # Expected: "hello"
 ```
 
 </details>
@@ -899,9 +899,9 @@ Replace the test model without changing the assistant's dependency or output con
 from pydantic_ai import Agent
 from pydantic_ai.models.test import TestModel
 agent = Agent(TestModel(custom_output_text="first"), deps_type=dict, output_type=str)
-assert agent.run_sync("hello", deps={}).output == "first"
+print(agent.run_sync('hello', deps={}).output)  # Expected: "first"
 with agent.override(model=TestModel(custom_output_text="second")):
-    assert agent.run_sync("hello", deps={}).output == "second"
+    print(agent.run_sync('hello', deps={}).output)  # Expected: "second"
 ```
 
 </details>
@@ -921,7 +921,7 @@ agent = Agent(TestModel(), deps_type=dict)
 def lookup(ctx: RunContext[dict], customer_id: str) -> dict:
     return ctx.deps.get(customer_id, {"error": "not_found"})
 result = agent.run_sync("Look up a customer", deps={"c1": {"name": "Ada"}})
-assert result.output is not None
+print(result.output is not None)  # Expected: True
 # TestModel exercises tooling; it does not assess real model reasoning.
 ```
 
@@ -941,7 +941,7 @@ from pydantic_ai.models.test import TestModel
 class Answer(BaseModel): customer_id: str
 agent = Agent(TestModel(custom_output_args={"customer_id": "c1"}), output_type=Answer)
 answer = agent.run_sync("Find the customer").output
-assert answer.customer_id == "c1"
+print(answer.customer_id)  # Expected: "c1"
 # Domain code consumes Answer, not provider-specific response JSON.
 ```
 
@@ -979,7 +979,7 @@ agent = Agent(TestModel(), deps_type=dict)
 @agent.tool
 def count_customers(ctx: RunContext[dict]) -> int: return len(ctx.deps)
 result = agent.run_sync("Count customers", deps={"c1": "Ada"})
-assert result.output is not None
+print(result.output is not None)  # Expected: True
 ```
 
 </details>
@@ -997,7 +997,7 @@ from dataclasses import dataclass
 class Dependencies: customers: dict
 def lookup(deps, customer_id): return deps.customers.get(customer_id)
 a, b = Dependencies({"c1": "Ada"}), Dependencies({"c1": "Grace"})
-assert lookup(a, "c1") == "Ada" and lookup(b, "c1") == "Grace"
+print(lookup(a, 'c1'), lookup(b, 'c1'))  # Expected values: 'Ada'; 'Grace'
 # Pass each Dependencies instance as deps= for its corresponding agent run.
 ```
 
@@ -1039,7 +1039,7 @@ async def handle(deps): return deps.customer_id
 # No mutable global current_customer. Each concurrent run receives its own deps.
 import asyncio
 async def main():
-    assert await asyncio.gather(handle(RunDependencies("a")), handle(RunDependencies("b"))) == ["a", "b"]
+    print(await asyncio.gather(handle(RunDependencies('a')), handle(RunDependencies('b'))))  # Expected: ["a", "b"]
 if __name__ == "__main__": asyncio.run(main())
 ```
 
@@ -1095,7 +1095,7 @@ def lookup(customer_id, repository):
         return {"ok": False, "code": "invalid_id"}
     value = repository.get(customer_id)
     return {"ok": True, "customer": value} if value else {"ok": False, "code": "not_found"}
-assert lookup("", {}) == {"ok": False, "code": "invalid_id"}
+print(lookup('', {}))  # Expected: {"ok": False, "code": "invalid_id"}
 ```
 
 </details>
@@ -1134,7 +1134,7 @@ def lookup(authenticated_context, customer_id, repository):
     customer = repository.get(customer_id)
     if customer is None or customer["tenant"] != tenant: raise PermissionError("denied")
     return customer
-assert lookup({"tenant": "a"}, "c1", {"c1": {"tenant": "a"}})["tenant"] == "a"
+print(lookup({'tenant': 'a'}, 'c1', {'c1': {'tenant': 'a'}})['tenant'])  # Expected: "a"
 ```
 
 </details>
@@ -1171,7 +1171,7 @@ from pydantic_ai import Agent
 from pydantic_ai.models.test import TestModel
 class Triage(BaseModel): category: Literal["billing", "technical"]
 agent = Agent(TestModel(custom_output_args={"category": "billing"}), output_type=Triage)
-assert agent.run_sync("Classify").output.category == "billing"
+print(agent.run_sync('Classify').output.category)  # Expected: "billing"
 ```
 
 </details>
@@ -1192,7 +1192,7 @@ for attempt in range(2):
     try: result = Triage.model_validate(next(responses)); break
     except ValidationError:
         if attempt == 1: raise
-assert result.category == "billing"
+print(result.category)  # Expected: "billing"
 ```
 
 </details>
@@ -1213,7 +1213,7 @@ class Triage(BaseModel):
     category: Literal["billing", "technical"]
     evidence_ids: list[str] = Field(min_length=1)
 agent = Agent(TestModel(custom_output_args={"category": "billing", "evidence_ids": ["d1"]}), output_type=Triage)
-assert agent.run_sync("Classify with evidence").output.evidence_ids == ["d1"]
+print(agent.run_sync('Classify with evidence').output.evidence_ids)  # Expected: ["d1"]
 # Also verify each evidence ID exists and supports the classification.
 ```
 
@@ -1232,7 +1232,7 @@ from pydantic_ai.models.test import TestModel
 from pydantic_ai.usage import UsageLimits
 agent = Agent(TestModel(), retries=1)
 result = agent.run_sync("Answer", usage_limits=UsageLimits(request_limit=3))
-assert result.output is not None
+print(result.output is not None)  # Expected: True
 # retries bounds validation correction; request_limit bounds total model requests.
 # Surface UnexpectedModelBehavior/UsageLimitExceeded to the caller as failure.
 ```
@@ -1271,7 +1271,7 @@ for event in events:
     if event["kind"] == "delta": text += event["text"]
     else: complete = True
     print(text, "complete" if complete else "partial")
-assert text == "Hello" and complete
+print(text == 'Hello' and complete)  # Expected: True
 ```
 
 </details>
@@ -1289,8 +1289,8 @@ from pydantic_ai.models.test import TestModel
 agent = Agent(TestModel(custom_output_text="ok"))
 first = agent.run_sync("hello"); history = first.all_messages()
 second = agent.run_sync("follow up", message_history=history)
-assert len(second.all_messages()) > len(history)
-assert len(second.new_messages()) < len(second.all_messages())
+print(len(second.all_messages()) > len(history))  # Expected: True
+print(len(second.new_messages()) < len(second.all_messages()))  # Expected: True
 ```
 
 </details>
@@ -1311,7 +1311,7 @@ def bounded_history(exchanges, max_chars=2000):
         if used + size > max_chars: break
         kept.insert(0, exchange); used += size
     return [message for exchange in kept for message in exchange]
-assert bounded_history([[{"role": "user", "text": "hello"}]], 100) != []
+print(bounded_history([[{'role': 'user', 'text': 'hello'}]], 100) != [])  # Expected: True
 # Load/store per authenticated conversation and adapt to Pydantic AI message types.
 ```
 
@@ -1330,10 +1330,10 @@ class Action(BaseModel):
     customer_id: str
     note: str
 partial = {"customer_id": "c1"}
-assert "note" not in partial  # Display only; never execute.
+print('note' not in partial)  # Expected: True  # Display only; never execute.
 final = Action.model_validate({**partial, "note": "reviewed"})
 # After final validation, authorize and obtain exact-payload approval separately.
-assert final.note == "reviewed"
+print(final.note)  # Expected: "reviewed"
 ```
 
 </details>
@@ -1389,7 +1389,7 @@ def request():
     budget["remaining"] -= 1
 request()
 try: request()
-except RuntimeError: assert budget["remaining"] == 0
+except RuntimeError: print(budget['remaining'])  # Expected: 0
 ```
 
 </details>
@@ -1428,7 +1428,7 @@ class Budget:
 def helper(budget): budget.consume()
 budget = Budget(2); helper(budget); helper(budget)
 try: helper(budget)
-except RuntimeError: assert budget.remaining == 0
+except RuntimeError: print(budget.remaining)  # Expected: 0
 # Pass the same budget to nested helpers; do not create a new one.
 ```
 

@@ -208,7 +208,7 @@ def load_timeout():
     value = int(os.getenv("TIMEOUT", "30"))
     if value < 0: raise ValueError("TIMEOUT must be nonnegative")
     return value
-assert load_timeout() >= 0
+print(load_timeout() >= 0)  # Expected: True
 ```
 
 </details>
@@ -294,7 +294,7 @@ Annotate a status that may be absent and narrow it before use.
 def normalize(status: str | None) -> str:
     if status is None: return "unknown"
     return status.upper()
-assert normalize(None) == "unknown"
+print(normalize(None))  # Expected: "unknown"
 ```
 
 </details>
@@ -332,7 +332,7 @@ from typing import Literal
 class ParseResult:
     mode: Literal["strict", "lenient"]
     count: int
-assert ParseResult("strict", 2).mode == "strict"
+print(ParseResult('strict', 2).mode)  # Expected: "strict"
 ```
 
 </details>
@@ -348,7 +348,7 @@ A value typed as possibly None is dereferenced without a check. Add explicit nar
 def length(value: str | None) -> int:
     if value is None: return 0
     return len(value)
-assert length(None) == 0 and length("abc") == 3
+print(length(None), length('abc'))  # Expected values: 0; 3
 ```
 
 </details>
@@ -382,7 +382,7 @@ Annotate a transformation accepting and returning a string.
 from collections.abc import Callable
 def apply(text: str, transform: Callable[[str], str]) -> str:
     return transform(text)
-assert apply("info", str.upper) == "INFO"
+print(apply('info', str.upper))  # Expected: "INFO"
 ```
 
 </details>
@@ -416,7 +416,7 @@ from collections.abc import Callable
 registry: dict[str, Callable[[str], str]] = {"upper": str.upper}
 def wrong(text: str) -> int: return len(text)
 # Static error: registry["length"] = wrong
-assert registry["upper"]("ok") == "OK"
+print(registry['upper']('ok'))  # Expected: "OK"
 ```
 
 </details>
@@ -434,7 +434,7 @@ def consume(callback: Callable[[str], str]) -> str: return callback("x")
 def wrong(text: str) -> None: print(text)
 # Run mypy/pyright on consume(wrong): incompatible return type.
 def fixed(text: str) -> str: return text
-assert consume(fixed) == "x"
+print(consume(fixed))  # Expected: "x"
 ```
 
 </details>
@@ -469,7 +469,7 @@ from typing import TypeVar
 from collections.abc import Sequence
 T = TypeVar("T")
 def first(values: Sequence[T]) -> T: return values[0]
-assert first([1, 2]) == 1
+print(first([1, 2]))  # Expected: 1
 ```
 
 </details>
@@ -523,7 +523,7 @@ T = TypeVar("T")
 def first(values: Sequence[T]) -> T: return values[0]
 value = first([1])
 # A checker rejects value.upper(); an Any result would conceal the bug.
-assert value + 1 == 2
+print(value + 1)  # Expected: 2
 ```
 
 </details>
@@ -655,7 +655,7 @@ class Event(TypedDict):
     id: str
     label: NotRequired[str]
 event: Event = {"id": "e1"}
-assert "label" not in event
+print('label' not in event)  # Expected: True
 ```
 
 </details>
@@ -672,7 +672,7 @@ from typing import TypedDict, NotRequired
 class Event(TypedDict):
     label: NotRequired[str | None]
 missing: Event = {}; present: Event = {"label": None}
-assert "label" not in missing and "label" in present
+print('label' not in missing and 'label' in present)  # Expected: True
 ```
 
 </details>
@@ -709,7 +709,7 @@ A TypedDict instance accepts invalid runtime data. Identify where actual validat
 from typing import TypedDict
 class Event(TypedDict): id: str
 bad = Event(id=123)  # Static error, but ordinary dict at runtime.
-assert isinstance(bad, dict)
+print(isinstance(bad, dict))  # Expected: True
 def validate(value):
     if not isinstance(value, dict) or not isinstance(value.get("id"), str):
         raise ValueError("string id required")
@@ -747,7 +747,7 @@ Narrow a string-or-integer value before normalization.
 def normalize(value: str | int) -> str:
     if isinstance(value, str): return value.strip()
     return str(value)
-assert normalize(" x ") == "x" and normalize(3) == "3"
+print(normalize(' x '), normalize(3))  # Expected values: 'x'; '3'
 ```
 
 </details>
@@ -783,7 +783,7 @@ def parse(text: str) -> int:
     if not isinstance(data, dict) or type(data.get("count")) is not int:
         raise ValueError("integer count required")
     return double(data["count"])
-assert parse('{"count":2}') == 4
+print(parse('{"count":2}'))  # Expected: 4
 ```
 
 </details>
@@ -801,7 +801,7 @@ def validate(count):
         raise ValueError("nonnegative integer required")
     return count
 # Explicit checks remain active under python -O; assert statements do not.
-assert validate(0) == 0
+print(validate(0))  # Expected: 0
 ```
 
 </details>
@@ -1498,7 +1498,7 @@ def parse(text):
     return int(text)
 # Reproduce with parse(None); inspect the traceback and int documentation.
 # Repair the caller to pass text, rather than swallowing TypeError.
-assert parse("12") == 12
+print(parse('12'))  # Expected: 12
 ```
 
 </details>
@@ -1515,7 +1515,7 @@ import json
 payload = {"count": 2}
 # json.loads(payload) fails in the library because loads expects serialized data.
 encoded = json.dumps(payload)
-assert json.loads(encoded) == payload
+print(json.loads(encoded))  # Expected: payload
 # Trace payload back to its producer; avoid decoding an already-decoded object.
 ```
 
