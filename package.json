@@ -1,0 +1,45 @@
+{
+  "name": "python-ai-mastery",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 5188 --strictPort",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "test:smoke": "node smoke.mjs",
+    "test": "node --test tests/curriculum.test.mjs tests/learning-engine.test.mjs tests/solutions.test.mjs tests/execution.test.mjs",
+    "test:curriculum": "node tests/curriculum-browser.mjs",
+    "test:daily": "node tests/daily-browser.mjs",
+    "test:examples": "node scripts/check-examples.mjs",
+    "test:solutions": "node tests/solutions-browser.mjs",
+    "docs:curriculum": "node scripts/generate-tutorial.mjs",
+    "test:runner": "node tests/runner-browser.mjs",
+    "test:contracts": "node tests/executable-contracts-browser.mjs"
+  },
+  "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
+    "lucide-react": "^0.468.0",
+    "monaco-editor": "^0.56.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.51.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^6.1.0"
+  },
+  "description": "A local-first Python and AI engineering learning dashboard with 152 milestones, 608 worked exercises, daily practice, and independence tracking.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MilanDanilovic/python-and-ai-engineering-mastery.git"
+  },
+  "homepage": "https://MilanDanilovic.github.io/python-and-ai-engineering-mastery/",
+  "engines": {
+    "node": ">=22"
+  },
+  "overrides": {
+    "dompurify": "^3.4.15"
+  }
+}

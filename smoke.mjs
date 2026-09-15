@@ -1,0 +1,50 @@
+import { chromium } from '@playwright/test';
+const browser = await chromium.launch();
+const page = await browser.newPage({viewport:{width:1440,height:1100}});
+const errors=[];page.on('pageerror',e=>errors.push(e.message));
+await page.goto('http://127.0.0.1:5188');
+await page.screenshot({path:'dashboard-desktop.png',fullPage:true});
+await page.getByRole('button',{name:'Roadmap',exact:true}).click();
+await page.getByRole('button',{name:'Mutability',exact:true}).click();
+await page.getByLabel('I read the concept',{exact:true}).check();
+await page.getByRole('button',{name:'Complete lesson',exact:true}).click();
+await page.reload();
+await page.getByRole('button',{name:'Roadmap',exact:true}).click();
+await page.getByRole('button',{name:'Mutability',exact:true}).click();
+if(!await page.getByLabel('I read the concept',{exact:true}).isChecked())throw Error('Persistence failed');
+await page.getByRole('button',{name:'AI Engineering',exact:true}).click();
+await page.getByRole('heading',{name:'Pydantic and Pydantic AI',exact:true}).waitFor();
+await page.getByRole('button',{name:'Knowledge Base',exact:true}).click();
+await page.getByRole('button',{name:'Add note',exact:true}).click();
+await page.getByLabel('Title',{exact:true}).fill('Reference mental model');
+await page.getByLabel('Your notes',{exact:true}).fill('Assignment binds a name to an object.');
+await page.getByRole('button',{name:'Save note',exact:true}).click();
+await page.getByRole('heading',{name:'Reference mental model'}).waitFor();
+await page.getByRole('button',{name:'Exercises',exact:true}).click();
+await page.getByLabel('Difficulty',{exact:true}).selectOption('Hard');
+await page.getByRole('heading',{name:'Bounded concurrent requests'}).waitFor();
+await page.getByRole('button',{name:'Progress',exact:true}).click();
+await page.getByLabel('Mutability mastery',{exact:true}).selectOption('5');
+await page.getByRole('button',{name:'Dashboard',exact:true}).click();
+await page.getByRole('button',{name:'Mutability',exact:true}).last().waitFor();
+await page.keyboard.press('Control+k');
+await page.getByPlaceholder('Search concepts and pages...').fill('Generators');
+await page.keyboard.press('Escape');
+for(const [width,height] of [[375,812],[812,375]]){
+ await page.setViewportSize({width,height});
+ if(await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth))throw Error(`Overflow at ${width}`);
+ if(await page.getByRole('button',{name:'Toggle navigation'}).isVisible())await page.getByRole('button',{name:'Toggle navigation'}).click();
+ await page.getByRole('button',{name:'Resources',exact:true}).click();
+ await page.getByRole('heading',{name:'Resources',exact:true}).waitFor();
+ if(await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth))throw Error(`Resources overflow at ${width}`);
+}
+await page.setViewportSize({width:375,height:812});
+if(await page.getByRole('button',{name:'Toggle navigation'}).isVisible())await page.getByRole('button',{name:'Toggle navigation'}).click();await page.getByRole('button',{name:'Dashboard',exact:true}).click();
+await page.emulateMedia({reducedMotion:'reduce'});
+await page.waitForTimeout(300);
+await page.screenshot({path:'dashboard-mobile.png',fullPage:true});
+if(errors.length)throw Error(errors.join('\n'));
+console.log(JSON.stringify({errors,status:'Persistence, navigation, notes, filters, mastery, search and responsive checks passed'}));
+await browser.close();
+
+

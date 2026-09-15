@@ -1,0 +1,53 @@
+import {chromium,expect} from '@playwright/test';
+import {executableById} from '../src/execution/exercises.js';
+import {mkdir} from 'node:fs/promises';
+await mkdir('test-results',{recursive:true});
+const browser=await chromium.launch();const page=await browser.newPage({viewport:{width:1440,height:1100}});
+const errors=[];page.on('pageerror',e=>errors.push(e.message));
+const nav=async name=>{if(await page.getByRole('button',{name:'Toggle navigation'}).isVisible()&&!await page.locator('.sidebar').evaluate(e=>e.classList.contains('open')))await page.getByRole('button',{name:'Toggle navigation'}).click();await page.locator('nav').getByRole('button',{name,exact:true}).click();};
+const code=()=>page.locator('.python-runner').getByRole('textbox').filter({visible:true}).first();
+async function write(text){await page.context().grantPermissions(['clipboard-read','clipboard-write']);await page.evaluate(value=>navigator.clipboard.writeText(value),text);const editor=page.locator('.python-runner .monaco-editor').first();await editor.click();await page.keyboard.press('ControlOrMeta+a');await page.keyboard.press('ControlOrMeta+v');}
+async function execute(name='Run Code'){await page.getByRole('button',{name,exact:true}).click();await expect(page.locator('.runtime-status')).toHaveText(/^(Ready|Timed Out|Execution Failed)$/,{timeout:90000});}
+const state=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('mastery-v1')));
+try{
+ await page.goto('http://127.0.0.1:5188');await nav('Playground');
+ await expect(page.locator('.monaco-editor')).toHaveCount(1);await execute();
+ await expect(page.getByLabel('Python stdout')).toContainText('Hello, Python');
+ await write('print(2 + 3)');await page.keyboard.press('ControlOrMeta+Enter');
+ await expect(page.getByLabel('Python stdout')).toHaveText('5\n',{timeout:90000});
+ await write('raise TypeError("intentional lesson bug")');await execute();
+ await expect(page.getByLabel('Python error')).toContainText('TypeError: intentional lesson bug');
+ await write('while True:\n    pass');await page.getByRole('button',{name:'Run Code',exact:true}).click();
+ await expect(page.locator('.runtime-status')).toHaveText('Running',{timeout:90000});
+ await page.getByRole('button',{name:'Clear Console',exact:true}).click();
+ await expect(page.locator('.runtime-status')).toHaveText('Timed Out',{timeout:10000});
+ await expect(page.getByLabel('Python error')).toContainText('exceeded the time limit');
+ await write('print("recovered")');await execute();await expect(page.getByLabel('Python stdout')).toContainText('recovered');
+ await page.reload();await nav('Playground');expect((await state()).codingExercises.playground.code).toBe('print("recovered")');
+ await nav('Coding Lab');await expect(page.getByRole('heading',{name:'Group Users by Country',exact:true})).toBeVisible();
+ await execute('Run Tests');await expect(page.locator('.test-panel')).toContainText('Passed 0 of 5');
+ await execute('Run Tests');await page.getByRole('button',{name:'Add failed attempt to Mistakes'}).click();
+ for(const name of ['What did I expect?','Why was my assumption wrong?','What is the correct mental model?'])await page.getByLabel(name,{exact:true}).fill('My own explanation of dictionary grouping.');
+ await page.getByRole('button',{name:'Save to Mistakes',exact:true}).click();expect((await state()).mistakes).toHaveLength(1);
+ await page.getByRole('button',{name:'Show Hint',exact:true}).click();
+ await page.getByRole('button',{name:'Reveal Solution',exact:true}).click();await expect(page.getByRole('button',{name:'Confirm Reveal Solution'})).toBeVisible();
+ expect((await state()).codingExercises['group-users'].solutionRevealed).toBe(false);
+ await page.getByRole('button',{name:'Confirm Reveal Solution'}).click();
+ expect((await state()).codingExercises['group-users'].completed).toBe(false);
+ await write(executableById['group-users'].solution);await execute('Run Tests');await expect(page.locator('.test-panel')).toContainText('Passed 5 of 5');
+ await expect(page.locator('.coding-evidence')).toContainText('Completed with assistance');
+ await expect(page.locator('.test-panel')).not.toContainText('before=deepcopy');
+ await page.getByLabel('Coding confidence').selectOption('5');await page.getByLabel('Repeat independently').selectOption('Yes');
+ expect((await state()).mastery['Dictionary lookup and aggregation']).toBe(2);
+ await page.getByRole('button',{name:'Reset Code',exact:true}).click();await page.getByRole('button',{name:'Keep My Code'}).click();
+ await page.screenshot({path:'test-results/coding-lab-desktop.png',fullPage:true});
+ await page.getByRole('button',{name:'Predict References',exact:false}).click();
+ await expect(page.getByRole('button',{name:'Run Code',exact:true})).toBeDisabled();
+ await page.getByLabel('Predicted output').fill('[1, 2, 3]');await page.getByRole('button',{name:'Submit Prediction'}).click();await execute();
+ await expect(page.getByText('Your prediction matches the output.')).toBeVisible();
+ await page.setViewportSize({width:375,height:812});await page.screenshot({path:'test-results/coding-lab-mobile.png',fullPage:true});
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await nav('Progress');await expect(page.getByRole('heading',{name:'Browser coding evidence'})).toBeVisible();
+ expect(errors).toEqual([]);
+ console.log('Runner UI passed: real Python output/errors, timeout/recovery, tests, hidden feedback, predictions, assistance, confidence, mistakes, persistence, mobile.');
+}finally{await browser.close();}

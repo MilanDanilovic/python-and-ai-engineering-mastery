@@ -1,0 +1,91 @@
+import {chromium,expect} from '@playwright/test';
+import {mkdir} from 'node:fs/promises';
+await mkdir('test-results',{recursive:true});
+const browser=await chromium.launch();
+const page=await browser.newPage({viewport:{width:1440,height:1000},reducedMotion:'reduce',timezoneId:'Europe/Belgrade'});
+await page.addInitScript(()=>{const RealDate=Date;window.__studyNow=RealDate.parse('2026-09-01T12:00:00+02:00');window.Date=class extends RealDate{constructor(...args){super(...(args.length?args:[window.__studyNow]));}static now(){return window.__studyNow;}};});
+page.on('dialog',dialog=>dialog.accept());
+const errors=[];page.on('pageerror',e=>errors.push(e.message));
+const nav=async name=>{if(await page.getByRole('button',{name:'Toggle navigation'}).isVisible()&&!await page.locator('.sidebar').evaluate(e=>e.classList.contains('open')))await page.getByRole('button',{name:'Toggle navigation'}).click();await page.locator('nav').getByRole('button',{name,exact:true}).click()};
+const stage=async name=>page.locator('.daily-outline').getByRole('button',{name:new RegExp(name)}).click();
+async function fillTasks(outcome='passed'){
+ for(const task of await page.locator('.daily-task').all()){
+  await task.getByRole('textbox',{name:/Python code:/}).focus();await page.keyboard.press('ControlOrMeta+a');await page.keyboard.insertText('My independently written implementation.');
+  await task.getByRole('combobox',{name:/Result:/}).selectOption(outcome);
+  await task.getByRole('textbox',{name:/Verification evidence:/}).fill(outcome==='passed'?'I ran the stated checks successfully.':'I could not satisfy the stated checks.');
+ }
+}
+const storage=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('mastery-v1')));
+try{
+ await page.goto('http://127.0.0.1:5188');
+ await page.screenshot({path:'test-results/daily-dashboard.png'});
+ await page.getByRole('button',{name:'Start Today’s Session',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Concept Review',exact:true})).toBeVisible();
+ await expect(page.locator('.reference-solution')).toHaveCount(0);
+ await page.getByRole('textbox',{name:/Explain from memory:/}).fill('Names refer to objects; rebinding changes one reference without mutating another object.');
+ await page.getByLabel('I verified my explanation against the documentation and can give a correct example.').check();
+ await stage('Coding From Memory');await fillTasks('failed');
+ await stage('Exercises');
+ const first=page.locator('.daily-task').first();
+ await expect(first.getByRole('button',{name:'Show Another Hint',exact:true})).toBeDisabled();
+ await first.getByRole('button',{name:'Show Hint',exact:true}).click();
+ await first.getByRole('button',{name:'Show Another Hint',exact:true}).click();
+ await first.getByRole('button',{name:'Reveal Solution',exact:true}).click();
+ await expect(first.locator('.reference-solution')).toBeVisible();
+ await first.getByLabel('I used an AI agent for this attempt').check();
+ await fillTasks('failed');
+ await page.locator('.before-ai summary').click();
+ await page.getByLabel('Have I read the error?',{exact:true}).check();
+ await page.getByLabel('Have I reproduced the issue?',{exact:true}).check();
+ await page.reload();await nav('Today');
+ await expect(page.getByRole('heading',{name:'Exercises',exact:true})).toBeVisible();
+ await expect(page.locator('.daily-task').first().locator('.reference-solution')).toBeVisible();
+ let data=await storage();expect(data.sessions).toHaveLength(1);expect(data.sessions[0].tasks.find(t=>t.id==='exercise-0').hintsShown).toBe(2);expect(data.sessions[0].beforeAI['Have I read the error?']).toBe(true);
+ await page.screenshot({path:'test-results/daily-exercises.png'});
+ await stage('Debugging');await expect(page.locator('.daily-task .themed-editor').first()).toContainText('events=[]');await fillTasks();
+ await stage('Documentation Practice');
+ await page.getByLabel('Documentation-based answer',{exact:true}).fill('A shallow copy shares references to nested values.');
+ await page.getByLabel('Official page and section used',{exact:true}).fill('https://docs.python.org/3/library/copy.html#copy.copy');
+ await page.getByLabel('I read the official documentation to solve this problem.').check();
+ await stage('Practical Engineering Challenge');
+ await expect(page.locator('.daily-task').getByRole('button',{name:'Run Code',exact:true})).toBeDisabled();
+ await page.getByRole('button',{name:'Save design before coding',exact:true}).click();
+ await expect(page.locator('.daily-status')).toContainText('Complete the seven design fields');
+ for(const label of ['Problem','My proposed architecture','Data flow','Important abstractions','Potential failure modes','Alternatives considered','Why I selected this solution'])await page.getByLabel(label,{exact:true}).fill(`Concrete design decision: ${label}`);
+ await page.getByLabel('I made these architecture decisions before consulting AI.').check();
+ await page.getByRole('button',{name:'Save design before coding',exact:true}).click();
+ await expect(page.getByLabel('My proposed architecture',{exact:true})).toBeDisabled();
+ await page.getByRole('button',{name:'Begin implementation',exact:true}).click();
+ await fillTasks();
+ await stage('Reflection');
+ await page.getByRole('combobox',{name:/Confidence:/}).selectOption('5');
+ await expect(page.locator('.confidence-topics')).toContainText('False Confidence');
+ await page.getByLabel('I completed this roadmap milestone. Mastery stays separate.').check();
+ const answers={'What did you learn today?':'I must choose ownership explicitly.','What surprised you?':'None','What did you forget?':'None','What mistake did you make?':'I expected a shallow copy to isolate nested values.','What would you have asked an AI agent previously?':'Why did my base configuration change?','Could you now solve it yourself?':'I still need practice with nested copies.'};
+ for(const [label,value] of Object.entries(answers))await page.getByLabel(label,{exact:true}).fill(value);
+ await page.getByRole('button',{name:'Review suggestion',exact:true}).click();
+ await page.getByLabel('Why my assumption was wrong',{exact:true}).fill('I copied only the outer container.');
+ await page.getByRole('button',{name:'Save to Mistakes',exact:true}).click();
+ await expect(page.getByRole('button',{name:'Review suggestion',exact:true})).toHaveCount(0);
+ await page.getByRole('button',{name:'Finish session and schedule revision',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Turn today’s practice into tomorrow’s confidence.',exact:true})).toBeVisible();
+ data=await storage();expect(data.sessions[0].status).toBe('completed');expect(data.revisions.bindings.dueDate).toBe('2026-09-02');expect(data.revisions.bindings.flag).toBe('False Confidence');expect(data.mastery).toEqual({});expect(data.done).toContain('Names, bindings, and references');expect(data.mistakes).toHaveLength(1);
+ await nav('Independence Score');await expect(page.getByRole('heading',{name:'Confidence and evidence',exact:true})).toBeVisible();await expect(page.locator('.confidence-row')).toContainText('False Confidence');
+ await nav('Architecture Journal');await expect(page.getByLabel('My proposed architecture',{exact:true})).toHaveValue('Concrete design decision: My proposed architecture');await page.getByLabel('What AI suggested afterward',{exact:true}).fill('Use a documented ownership contract.');
+ await page.evaluate(()=>{window.__studyNow=Date.parse('2026-09-08T12:00:00+02:00');});
+ await nav('Dashboard');await page.getByRole('button',{name:'Weekly review ready',exact:true}).click();
+ await expect(page.locator('.weekly-stats')).toContainText('Topics completed');
+ await page.getByRole('button',{name:'Record weekly review',exact:true}).click();data=await storage();expect(data.weeklyReviews['2026-09-01'].summary.sessions).toHaveLength(1);expect(data.weeklyReviews['2026-09-01'].summary.completed).toContain('bindings');
+ await nav('Today');await page.getByRole('button',{name:'Start Today’s Session',exact:true}).click();data=await storage();expect(data.sessions).toHaveLength(2);expect(data.sessions[1].topics.map(t=>t.id)).toEqual(['bindings','mutability']);
+ for(const width of [375,812]){
+  await page.setViewportSize({width,height:width===375?812:375});
+  await nav('Today');
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await stage('Debugging');expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  if(width===375)await page.screenshot({path:'test-results/daily-mobile.png'});
+  await nav('Architecture Journal');expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await nav('Weekly Review');expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ }
+ expect(errors).toEqual([]);
+ console.log('Daily browser checks passed: resumable sessions, hidden help, assistance tracking, design-before-code, calibration, mistakes, spaced revision, weekly review, and mobile layouts.');
+}catch(error){await page.screenshot({path:'test-results/daily-failure.png'});throw error}finally{await browser.close()}
