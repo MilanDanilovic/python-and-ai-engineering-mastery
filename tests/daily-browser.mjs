@@ -10,7 +10,11 @@ const nav=async name=>{if(await page.getByRole('button',{name:'Toggle navigation
 const stage=async name=>page.locator('.daily-outline').getByRole('button',{name:new RegExp(name)}).click();
 async function fillTasks(outcome='passed'){
  for(const task of await page.locator('.daily-task').all()){
-  await task.getByRole('textbox',{name:/Python code:/}).focus();await page.keyboard.press('ControlOrMeta+a');await page.keyboard.insertText('My independently written implementation.');
+  await page.context().grantPermissions(['clipboard-read','clipboard-write']);
+  await page.evaluate(()=>navigator.clipboard.writeText('My independently written implementation.'));
+  await task.locator('.python-runner .view-lines').click({position:{x:40,y:10}});
+  await page.keyboard.press('ControlOrMeta+a');await page.keyboard.press('ControlOrMeta+v');
+  await expect(task.locator('.python-runner .view-lines')).toContainText('My independently written implementation.');
   await task.getByRole('combobox',{name:/Result:/}).selectOption(outcome);
   await task.getByRole('textbox',{name:/Verification evidence:/}).fill(outcome==='passed'?'I ran the stated checks successfully.':'I could not satisfy the stated checks.');
  }
