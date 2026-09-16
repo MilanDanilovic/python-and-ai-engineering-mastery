@@ -8,14 +8,17 @@
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
     "test:smoke": "node smoke.mjs",
-    "test": "node --test tests/curriculum.test.mjs tests/learning-engine.test.mjs tests/solutions.test.mjs tests/execution.test.mjs",
+    "test": "node --test tests/curriculum.test.mjs tests/learning-engine.test.mjs tests/solutions.test.mjs tests/execution.test.mjs tests/learning-guides.test.mjs",
     "test:curriculum": "node tests/curriculum-browser.mjs",
     "test:daily": "node tests/daily-browser.mjs",
     "test:examples": "node scripts/check-examples.mjs",
     "test:solutions": "node tests/solutions-browser.mjs",
     "docs:curriculum": "node scripts/generate-tutorial.mjs",
     "test:runner": "node tests/runner-browser.mjs",
-    "test:contracts": "node tests/executable-contracts-browser.mjs"
+    "test:contracts": "node tests/executable-contracts-browser.mjs",
+    "test:guides": "node scripts/check-learning-guides.mjs",
+    "check:docs": "node scripts/check-documentation.mjs",
+    "test:guides:browser": "node tests/learning-guides-browser.mjs"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",

@@ -14,7 +14,33 @@ Ingestion extracts usable content while preserving source identity and version i
 
 **Difficulty:** Advanced · **Code concepts:** parser, source ID, content hash
 
-[Official documentation](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-solution-design-and-evaluation-guide) · [Additional reading](https://www.postgresql.org/docs/current/textsearch-intro.html)
+[RAG data pipeline](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-solution-design-and-evaluation-guide#rag-data-pipeline-flow) · [Additional reading](https://docs.python.org/3/library/pathlib.html#pathlib.Path.open)
+
+**Read for:** Separate loading, transformation, indexing and refresh; preserve source identity through every stage.
+
+### Learn with an example
+
+Loading a document is followed by normalization, provenance recording and indexing. Keeping source identity and revision enables replacement or deletion of stale chunks later. This example models that boundary without calling an index.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+source = {"id": "doc-7", "revision": 2, "text": "  Returns accepted.  "}
+record = {"source_id": source["id"], "revision": source["revision"], "text": source["text"].strip()}
+print(record)
+```
+
+**Expected output**
+
+```text
+{'source_id': 'doc-7', 'revision': 2, 'text': 'Returns accepted.'}
+```
+
+**Watch out for:** Appending a new revision without removing stale chunks can produce conflicting answers.
+
+**Change one thing:** Design the keys needed to replace all chunks from revision 1 atomically.
 
 ### Simple exercise 1
 
@@ -106,7 +132,34 @@ Chunking partitions content for retrieval; overlap trades duplication for bounda
 
 **Difficulty:** Advanced · **Code concepts:** chunk size, overlap, token budget
 
-[Official documentation](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-chunking-phase) · [Additional reading](https://www.postgresql.org/docs/current/textsearch-intro.html)
+[Fixed-size parsing with overlap](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-chunking-phase#fixed-size-parsing-with-overlap) · [Additional reading](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-solution-design-and-evaluation-guide#rag-data-pipeline-flow)
+
+**Read for:** Read why overlap preserves boundaries but increases duplication and cost.
+
+### Learn with an example
+
+The stride is size minus overlap. Repeating a boundary word retains context but consumes storage and prompt space more than once. Production token-based or semantic chunking must respect actual document structure.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+words = "one two three four five six".split()
+size, overlap = 3, 1
+chunks = [" ".join(words[start:start + size]) for start in range(0, len(words), size - overlap)]
+print(chunks)
+```
+
+**Expected output**
+
+```text
+['one two three', 'three four five', 'five six']
+```
+
+**Watch out for:** Overlap equal to or larger than size makes this stride invalid.
+
+**Change one thing:** Try overlap 0 and compare the boundary context, then validate the configuration.
 
 ### Simple exercise 1
 
@@ -197,7 +250,34 @@ Metadata carries source, version, and access context alongside content.
 
 **Difficulty:** Advanced · **Code concepts:** tenant filter, source version, metadata
 
-[Official documentation](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-enrichment-phase) · [Additional reading](https://www.postgresql.org/docs/current/textsearch-intro.html)
+[Filter queries](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-information-retrieval#filter-queries) · [Additional reading](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-solution-design-and-evaluation-guide#rag-data-pipeline-flow)
+
+**Read for:** Apply tenant and access constraints before selecting context; metadata alone is not enforcement.
+
+### Learn with an example
+
+The trusted caller identity constrains which documents may become context. This in-memory filter illustrates the policy; a production index query should enforce equivalent access constraints before returning candidates.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+chunks = [{"tenant": "a", "text": "allowed"}, {"tenant": "b", "text": "private"}]
+caller_tenant = "a"
+visible = [chunk["text"] for chunk in chunks if chunk["tenant"] == caller_tenant]
+print(visible)
+```
+
+**Expected output**
+
+```text
+['allowed']
+```
+
+**Watch out for:** Filtering only the final displayed answer is too late if private text already entered the model context.
+
+**Change one thing:** Add document-level permissions in addition to tenant matching.
 
 ### Simple exercise 1
 
@@ -278,7 +358,36 @@ An embedding maps content to a numeric representation whose geometry supports si
 
 **Difficulty:** Advanced · **Code concepts:** embedding vector, dimensions, model version
 
-[Official documentation](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-enrichment-phase) · [Additional reading](https://www.postgresql.org/docs/current/textsearch-intro.html)
+[Semantic search embeddings](https://www.sbert.net/examples/sentence_transformer/applications/semantic-search/README.html#semantic-search) · [Additional reading](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-chunking-phase#fixed-size-parsing-with-overlap)
+
+**Read for:** Read query/document encoding and similarity; keep model version and dimensions compatible.
+
+### Learn with an example
+
+These hand-authored vectors illustrate the idea of a representation space; they are not learned embeddings and the dot products are not calibrated probabilities. A real encoder maps compatible queries and documents into the same versioned space.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+vectors = {"cat": [1.0, 0.0], "kitten": [0.9, 0.1], "invoice": [0.0, 1.0]}
+query = vectors["cat"]
+for name in ["kitten", "invoice"]:
+    score = sum(a * b for a, b in zip(query, vectors[name]))
+    print(name, round(score, 2))
+```
+
+**Expected output**
+
+```text
+kitten 0.9
+invoice 0.0
+```
+
+**Watch out for:** Equal dimensions do not make vectors from different models meaningfully comparable.
+
+**Change one thing:** Replace the toy vectors with one model's query and document encodings and compare rankings.
 
 ### Simple exercise 1
 
@@ -372,7 +481,35 @@ Cosine compares direction rather than raw magnitude and requires nonzero norms.
 
 **Difficulty:** Advanced · **Code concepts:** dot product, norm, cosine distance
 
-[Official documentation](https://github.com/pgvector/pgvector) · [Additional reading](https://www.postgresql.org/docs/current/textsearch-intro.html)
+[Distances](https://github.com/pgvector/pgvector#distances) · [Additional reading](https://www.sbert.net/examples/sentence_transformer/applications/semantic-search/README.html#semantic-search)
+
+**Read for:** Find cosine distance and its conversion to similarity; compare direction with magnitude.
+
+### Learn with an example
+
+Dividing by the two magnitudes removes length from the comparison. Parallel nonzero vectors have similarity 1; perpendicular ones have 0. pgvector's cosine operator returns distance, so lower is better there.
+
+**Worked example** - Browser-compatible Python
+
+```python
+from math import sqrt
+def cosine(a, b):
+    dot = sum(x * y for x, y in zip(a, b))
+    return dot / (sqrt(sum(x*x for x in a)) * sqrt(sum(y*y for y in b)))
+print(round(cosine([1, 0], [4, 0]), 2))
+print(round(cosine([1, 0], [0, 3]), 2))
+```
+
+**Expected output**
+
+```text
+1.0
+0.0
+```
+
+**Watch out for:** The formula is undefined for a zero vector; production code must also check dimensions.
+
+**Change one thing:** Add zero-vector and dimension checks before computing the score.
 
 ### Simple exercise 1
 
@@ -472,7 +609,36 @@ Vector search ranks stored embeddings by a chosen distance; exact and approximat
 
 **Difficulty:** Advanced · **Code concepts:** pgvector, distance operator, ORDER BY, LIMIT
 
-[Official documentation](https://github.com/pgvector/pgvector) · [Additional reading](https://www.postgresql.org/docs/current/textsearch-intro.html)
+[Querying vectors](https://github.com/pgvector/pgvector#querying) · [Additional reading](https://www.sbert.net/examples/sentence_transformer/applications/semantic-search/README.html#semantic-search)
+
+**Read for:** Read the distance operator, ascending ordering and LIMIT together.
+
+### Learn with an example
+
+This exact search uses squared Euclidean distance, so the closest row sorts first. pgvector performs the analogous ordering in SQL with a chosen distance operator and LIMIT. Always match the operator to your embedding/index design.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+query = [1, 0]
+rows = {"a": [0, 1], "b": [1, 0], "c": [2, 0]}
+def squared_distance(vector):
+    return sum((a-b)**2 for a, b in zip(query, vector))
+ranked = sorted(rows, key=lambda key: squared_distance(rows[key]))
+print(ranked[:2])
+```
+
+**Expected output**
+
+```text
+['b', 'c']
+```
+
+**Watch out for:** Sorting a distance descending returns the least similar results.
+
+**Change one thing:** Write the equivalent pgvector query, then compare its result with this exact baseline.
 
 ### Simple exercise 1
 
@@ -572,7 +738,34 @@ Approximate indexes reduce search work at the possible cost of missed neighbors.
 
 **Difficulty:** Advanced · **Code concepts:** HNSW, IVFFlat, recall, query plan
 
-[Official documentation](https://github.com/pgvector/pgvector) · [Additional reading](https://www.postgresql.org/docs/current/textsearch-intro.html)
+[Approximate indexing](https://github.com/pgvector/pgvector#indexing) · [Additional reading](https://github.com/pgvector/pgvector#querying)
+
+**Read for:** Compare exact search with HNSW and IVFFlat; measure recall before choosing speed settings.
+
+### Learn with an example
+
+Only two of the four exact neighbors survive this approximate result. An approximate index trades search work for potentially missed neighbors. Benchmark latency together with recall on representative data and filters.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+exact_top = {"a", "b", "c", "d"}
+approximate_top = {"a", "b", "x", "y"}
+recall = len(exact_top & approximate_top) / len(exact_top)
+print(recall)
+```
+
+**Expected output**
+
+```text
+0.5
+```
+
+**Watch out for:** Faster retrieval can still make the downstream answer worse if important evidence disappears.
+
+**Change one thing:** Compare two index configurations using the same queries and exact baseline.
 
 ### Simple exercise 1
 
@@ -659,7 +852,34 @@ Full-text search matches normalized lexical terms using a configured text-search
 
 **Difficulty:** Advanced · **Code concepts:** tsvector, tsquery, text configuration, rank
 
-[Official documentation](https://www.postgresql.org/docs/current/textsearch-intro.html) · [Additional reading](https://www.postgresql.org/docs/current/textsearch-intro.html)
+[Parsing documents](https://www.postgresql.org/docs/current/textsearch-controls.html#TEXTSEARCH-PARSING-DOCUMENTS) · [Additional reading](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-solution-design-and-evaluation-guide#rag-data-pipeline-flow)
+
+**Read for:** Follow to_tsvector, language configuration and query matching; lexical search is not substring search.
+
+### Learn with an example
+
+This toy term matcher illustrates lexical retrieval. PostgreSQL adds language-aware parsing, lexemes, query operators and ranking through tsvector and tsquery. Exact identifiers often benefit from lexical search even when semantic similarity is available.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+documents = {"a": "payment refund policy", "b": "shipping times"}
+query_terms = {"refund"}
+matches = [key for key, text in documents.items() if query_terms <= set(text.split())]
+print(matches)
+```
+
+**Expected output**
+
+```text
+['a']
+```
+
+**Watch out for:** Whitespace token matching is not a replacement for PostgreSQL full-text semantics.
+
+**Change one thing:** Compare refund and refunds using an English to_tsvector configuration.
 
 ### Simple exercise 1
 
@@ -745,7 +965,35 @@ Hybrid retrieval combines lexical and vector candidates, often using ranks rathe
 
 **Difficulty:** Advanced · **Code concepts:** candidate union, reciprocal rank fusion, deduplication
 
-[Official documentation](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/reciprocal-rank-fusion) · [Additional reading](https://www.postgresql.org/docs/current/textsearch-intro.html)
+[Reciprocal rank fusion](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/reciprocal-rank-fusion#rrf-api) · [Additional reading](https://github.com/pgvector/pgvector#querying)
+
+**Read for:** Combine ranks rather than adding incomparable vector and lexical scores.
+
+### Learn with an example
+
+Reciprocal rank fusion adds contributions based on positions rather than raw similarity scales. Document b benefits from appearing in both lists. The rank constant controls how sharply top positions are favored.
+
+**Worked example** - Browser-compatible Python
+
+```python
+lexical = ["a", "b"]
+semantic = ["b", "c"]
+scores = {}
+for ranking in [lexical, semantic]:
+    for rank, key in enumerate(ranking, start=1):
+        scores[key] = scores.get(key, 0) + 1 / (60 + rank)
+print(sorted(scores, key=scores.get, reverse=True))
+```
+
+**Expected output**
+
+```text
+['b', 'a', 'c']
+```
+
+**Watch out for:** Adding raw lexical and vector scores can mix incomparable scales.
+
+**Change one thing:** Remove b from one ranking and predict how its combined position changes.
 
 ### Simple exercise 1
 
@@ -854,7 +1102,37 @@ A basic RAG system retrieves evidence, assembles bounded context, and requests a
 
 **Difficulty:** Advanced · **Code concepts:** retrieval, context budget, source attribution
 
-[Official documentation](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-solution-design-and-evaluation-guide) · [Additional reading](https://www.postgresql.org/docs/current/textsearch-intro.html)
+[RAG application flow](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-solution-design-and-evaluation-guide#rag-application-flow) · [Additional reading](https://github.com/pgvector/pgvector#querying)
+
+**Read for:** Follow retrieval, context assembly and generation as separate steps with separate failure modes.
+
+### Learn with an example
+
+A retrieval stage selects evidence before a generator receives the question and context. This example models context assembly only; it makes no model call. Keeping source IDs alongside text enables later citation checks.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+documents = {"returns": "Returns are accepted within 14 days."}
+query = "When can I return an item?"
+selected = ["returns"]
+context = [documents[key] for key in selected]
+print(context[0])
+print("sources:", selected)
+```
+
+**Expected output**
+
+```text
+Returns are accepted within 14 days.
+sources: ['returns']
+```
+
+**Watch out for:** A correct-looking answer does not prove the retriever found the right evidence.
+
+**Change one thing:** Use an empty selection and define an explicit insufficient-evidence response.
 
 ### Simple exercise 1
 
@@ -946,7 +1224,34 @@ A reranker reorders an existing candidate set using a more focused relevance sig
 
 **Difficulty:** Advanced · **Code concepts:** candidate set, reranker, top K
 
-[Official documentation](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-information-retrieval) · [Additional reading](https://www.postgresql.org/docs/current/textsearch-intro.html)
+[Cross-encoder reranking](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-information-retrieval#cross-encoder-reranking) · [Additional reading](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-solution-design-and-evaluation-guide#rag-application-flow)
+
+**Read for:** Read why a reranker examines query-document pairs after initial candidate retrieval.
+
+### Learn with an example
+
+These supplied scores model a second-stage reranker. A real cross-encoder scores each query-document pair jointly, then changes the candidate order. It cannot recover a document that the first-stage retriever omitted.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+candidates = ["a", "b", "c"]
+query_document_scores = {"a": 0.2, "b": 0.9, "c": 0.5}
+reranked = sorted(candidates, key=query_document_scores.get, reverse=True)
+print(reranked)
+```
+
+**Expected output**
+
+```text
+['b', 'c', 'a']
+```
+
+**Watch out for:** Reranking a poor candidate pool cannot create missing evidence.
+
+**Change one thing:** Remove b before reranking and explain which retrieval stage must be improved.
 
 ### Simple exercise 1
 
@@ -1030,7 +1335,36 @@ A rewritten query can resolve context or add useful terms, but must preserve the
 
 **Difficulty:** Advanced · **Code concepts:** query rewrite, original query, retrieval comparison
 
-[Official documentation](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-information-retrieval) · [Additional reading](https://www.postgresql.org/docs/current/textsearch-intro.html)
+[Query rewriting](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-information-retrieval#rewriting) · [Additional reading](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-solution-design-and-evaluation-guide#rag-application-flow)
+
+**Read for:** Preserve intent while improving retrieval wording; measure changes against the original query.
+
+### Learn with an example
+
+The rewrite makes likely retrieval terms explicit while retaining the original request for comparison. A real rewriter can drift from intent, so evaluate its retrieved evidence against a labeled question set.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+original = "How long do I have to send it back?"
+rewritten = "product return time limit"
+queries = [original, rewritten]
+print(len(queries))
+print(queries[1])
+```
+
+**Expected output**
+
+```text
+2
+product return time limit
+```
+
+**Watch out for:** A fluent rewrite can add assumptions the user never made.
+
+**Change one thing:** Rewrite a query containing an exact product code without losing that code.
 
 ### Simple exercise 1
 
@@ -1113,7 +1447,33 @@ Claims should map to retrieved evidence; absence of support should allow an expl
 
 **Difficulty:** Advanced · **Code concepts:** source ID, evidence span, abstention
 
-[Official documentation](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-prompt-engineering) · [Additional reading](https://www.postgresql.org/docs/current/textsearch-intro.html)
+[Grounding instructions](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-prompt-engineering#design-grounding-instructions) · [Additional reading](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-solution-design-and-evaluation-guide#rag-application-flow)
+
+**Read for:** Connect claims to evidence and define behavior for missing or conflicting context.
+
+### Learn with an example
+
+The membership check proves only that cited IDs exist in supplied evidence. A separate support check must determine whether each claim is actually justified by the cited text. Grounding is more than attaching a source-shaped label.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+sources = {"d1": "Returns are allowed for 14 days."}
+answer = {"claim": "The return window is 14 days.", "citations": ["d1"]}
+print(all(key in sources for key in answer["citations"]))
+```
+
+**Expected output**
+
+```text
+True
+```
+
+**Watch out for:** An existing citation can still fail to support its associated claim.
+
+**Change one thing:** Change the claim to 90 days and explain why this structural check still passes.
 
 ### Simple exercise 1
 
@@ -1198,7 +1558,34 @@ A labeled query set measures whether retrieval returns relevant evidence at a ch
 
 **Difficulty:** Advanced · **Code concepts:** precision@K, recall@K, relevance labels
 
-[Official documentation](https://ai.pydantic.dev/evals/) · [Additional reading](https://www.postgresql.org/docs/current/textsearch-intro.html)
+[Evaluate search results](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-information-retrieval#evaluate-your-search-results) · [Additional reading](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-information-retrieval#cross-encoder-reranking)
+
+**Read for:** Use labeled relevant documents to measure retrieval independently of generated answer quality.
+
+### Learn with an example
+
+Precision measures how much retrieved material is relevant; recall measures how much relevant material was found. The denominators answer different questions. Use query-level labels and define empty-set behavior before aggregating.
+
+**Worked example** - Browser-compatible Python
+
+```python
+relevant = {"a", "b", "c"}
+retrieved = ["a", "x"]
+hits = len(relevant.intersection(retrieved))
+print(round(hits / len(retrieved), 2))
+print(round(hits / len(relevant), 2))
+```
+
+**Expected output**
+
+```text
+0.5
+0.33
+```
+
+**Watch out for:** A single aggregate score can hide failure on important query categories.
+
+**Change one thing:** Compute both metrics after retrieving a, b, c and seven irrelevant documents.
 
 ### Simple exercise 1
 

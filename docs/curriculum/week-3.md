@@ -14,7 +14,35 @@ Imports load modules and bind names; package structure establishes import paths.
 
 **Difficulty:** Intermediate · **Code concepts:** module, package, __init__.py, absolute import
 
-[Official documentation](https://docs.python.org/3/tutorial/modules.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Packages](https://docs.python.org/3/tutorial/modules.html#packages) · [Additional reading](https://docs.python.org/3/tutorial/controlflow.html#defining-functions)
+
+**Read for:** Read package-qualified imports and distinguish importing a module from running it as a script.
+
+### Learn with an example
+
+Both imports expose the same function here, but they bind different names in the importing module. Later patching must target the name your code actually looks up.
+
+**Worked example** - Browser-compatible Python
+
+```python
+import json
+from json import loads
+print(json.loads("42"))
+print(loads("42"))
+print(loads is json.loads)
+```
+
+**Expected output**
+
+```text
+42
+42
+True
+```
+
+**Watch out for:** Importing a function does not create a live alias that tracks later reassignment in its source module.
+
+**Change one thing:** Reassign json.loads to a small replacement and compare calling loads with json.loads.
 
 ### Simple exercise 1
 
@@ -107,7 +135,35 @@ An isolated environment separates dependencies; pyproject.toml records project a
 
 **Difficulty:** Intermediate · **Code concepts:** venv, pip, pyproject.toml
 
-[Official documentation](https://packaging.python.org/en/latest/tutorials/packaging-projects/) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Configuring project metadata](https://packaging.python.org/en/latest/tutorials/packaging-projects/#configuring-metadata) · [Additional reading](https://docs.python.org/3/tutorial/modules.html#packages)
+
+**Read for:** Find requires-python and dependencies; distinguish project metadata from the active interpreter.
+
+### Learn with an example
+
+sys.executable identifies the interpreter running this code. A pyproject file describes the project but does not switch that interpreter. Install dependencies through the interpreter you intend to use.
+
+**Worked example** - Browser-compatible Python
+
+```python
+import sys
+from pathlib import Path
+print(bool(sys.executable))
+print(Path("pyproject.toml").suffix)
+print(sys.version_info >= (3, 11))
+```
+
+**Expected output**
+
+```text
+True
+.toml
+True
+```
+
+**Watch out for:** Having a virtual-environment folder does not prove your command uses it.
+
+**Change one thing:** Print sys.executable in your terminal and editor, then compare their paths.
 
 ### Simple exercise 1
 
@@ -193,7 +249,33 @@ Configuration should enter at a boundary; logs should include fields that suppor
 
 **Difficulty:** Intermediate · **Code concepts:** os.environ, logging, logger, extra
 
-[Official documentation](https://docs.python.org/3/library/logging.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[LoggerAdapter](https://docs.python.org/3/library/logging.html#logging.LoggerAdapter) · [Additional reading](https://packaging.python.org/en/latest/tutorials/packaging-projects/#configuring-metadata)
+
+**Read for:** Follow adding request context through extra instead of concatenating ad hoc log messages.
+
+### Learn with an example
+
+The adapter supplies request context while the formatter controls output. Application code emits a semantic event rather than constructing a custom prefix each time. In production, a JSON formatter can retain fields as structured data.
+
+**Worked example** - Browser-compatible Python
+
+```python
+import logging
+import sys
+logging.basicConfig(stream=sys.stdout, level=logging.INFO, format="%(levelname)s %(request_id)s %(message)s", force=True)
+log = logging.LoggerAdapter(logging.getLogger("service"), {"request_id": "r7"})
+log.info("started")
+```
+
+**Expected output**
+
+```text
+INFO r7 started
+```
+
+**Watch out for:** Credentials and full payloads should not be copied into routine log context.
+
+**Change one thing:** Create a second adapter with a different request ID and compare its output.
 
 ### Simple exercise 1
 
@@ -281,7 +363,34 @@ Union types model alternatives; Optional includes None, while Literal restricts 
 
 **Difficulty:** Intermediate · **Code concepts:** Optional, Union, Literal, narrowing
 
-[Official documentation](https://docs.python.org/3/library/typing.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Optional](https://docs.python.org/3/library/typing.html#typing.Optional) · [Additional reading](https://docs.python.org/3/tutorial/controlflow.html#function-annotations)
+
+**Read for:** Read why Optional[T] means T or None, not that an argument can be omitted.
+
+### Learn with an example
+
+Optional[int] permits an integer or None. The default = None separately allows omitting the argument. Testing for None preserves a valid integer zero.
+
+**Worked example** - Browser-compatible Python
+
+```python
+from typing import Optional
+def display(value: Optional[int] = None):
+    return "missing" if value is None else str(value)
+print(display())
+print(display(0))
+```
+
+**Expected output**
+
+```text
+missing
+0
+```
+
+**Watch out for:** Optional type and optional argument are separate ideas.
+
+**Change one thing:** Remove the default but keep the annotation and call display with no arguments.
 
 ### Simple exercise 1
 
@@ -369,7 +478,32 @@ Callable contracts describe argument and return types of injected behavior.
 
 **Difficulty:** Intermediate · **Code concepts:** Callable, ParamSpec, return type
 
-[Official documentation](https://docs.python.org/3/library/typing.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Annotating callable objects](https://docs.python.org/3/library/typing.html#annotating-callable-objects) · [Additional reading](https://docs.python.org/3/tutorial/controlflow.html#function-annotations)
+
+**Read for:** Match argument types and return type; distinguish the callable itself from its result.
+
+### Learn with an example
+
+The annotation describes a callable accepting an integer and returning text. transform passes the value to that behavior without knowing how the result is produced.
+
+**Worked example** - Browser-compatible Python
+
+```python
+from typing import Callable
+def transform(value: int, operation: Callable[[int], str]) -> str:
+    return operation(value)
+print(transform(7, lambda n: f"item-{n}"))
+```
+
+**Expected output**
+
+```text
+item-7
+```
+
+**Watch out for:** Callable describes the function's call contract, not the type of a previously computed value.
+
+**Change one thing:** Pass str as the operation, then try passing str(7) and explain the difference.
 
 ### Simple exercise 1
 
@@ -455,7 +589,35 @@ Generics express relationships between types rather than replacing them with Any
 
 **Difficulty:** Intermediate · **Code concepts:** TypeVar, Generic, list[T]
 
-[Official documentation](https://docs.python.org/3/library/typing.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Generics](https://docs.python.org/3/library/typing.html#generics) · [Additional reading](https://docs.python.org/3/library/typing.html#typing.Optional)
+
+**Read for:** Trace the same type variable from an input container to the returned element.
+
+### Learn with an example
+
+The same type variable connects input element type to output type. A checker can infer int for the first call and str for the second. That relationship is lost with an unrestricted Any return.
+
+**Worked example** - Browser-compatible Python
+
+```python
+from typing import TypeVar
+T = TypeVar("T")
+def first(values: list[T]) -> T:
+    return values[0]
+print(first([5, 6]))
+print(first(["a", "b"]))
+```
+
+**Expected output**
+
+```text
+5
+a
+```
+
+**Watch out for:** A type relationship does not guarantee that the input list is nonempty.
+
+**Change one thing:** Call first on an empty list and decide how the API should express that case.
 
 ### Simple exercise 1
 
@@ -544,7 +706,37 @@ A Protocol describes supported operations without requiring explicit inheritance
 
 **Difficulty:** Intermediate · **Code concepts:** Protocol, structural typing
 
-[Official documentation](https://docs.python.org/3/library/typing.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Protocol](https://docs.python.org/3/library/typing.html#typing.Protocol) · [Additional reading](https://docs.python.org/3/tutorial/controlflow.html#function-annotations)
+
+**Read for:** Read structural subtyping: satisfying the required interface does not require inheritance.
+
+### Learn with an example
+
+Console satisfies the required send interface without inheriting Sender. The annotation expresses what announce needs, while a static checker verifies compatibility. Runtime execution is ordinary method dispatch.
+
+**Worked example** - Browser-compatible Python
+
+```python
+from typing import Protocol
+class Sender(Protocol):
+    def send(self, text: str) -> None: ...
+class Console:
+    def send(self, text: str) -> None:
+        print(text)
+def announce(sender: Sender):
+    sender.send("ready")
+announce(Console())
+```
+
+**Expected output**
+
+```text
+ready
+```
+
+**Watch out for:** Protocol annotations do not automatically perform runtime interface checks.
+
+**Change one thing:** Change Console.send to require another argument and inspect the static error.
 
 ### Simple exercise 1
 
@@ -640,7 +832,36 @@ TypedDict gives static field information for dictionaries while retaining ordina
 
 **Difficulty:** Intermediate · **Code concepts:** TypedDict, NotRequired, Required
 
-[Official documentation](https://docs.python.org/3/library/typing.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[TypedDict](https://docs.python.org/3/library/typing.html#typing.TypedDict) · [Additional reading](https://docs.python.org/3/tutorial/controlflow.html#function-annotations)
+
+**Read for:** Check required and optional keys and the fact that values remain ordinary dictionaries at runtime.
+
+### Learn with an example
+
+TypedDict gives a checker information about named keys, but the runtime object is still a dictionary. External payloads need runtime validation before you trust this shape.
+
+**Worked example** - Browser-compatible Python
+
+```python
+from typing import TypedDict
+class Event(TypedDict):
+    name: str
+    count: int
+event: Event = {"name": "login", "count": 2}
+print(type(event).__name__)
+print(event["count"] + 1)
+```
+
+**Expected output**
+
+```text
+dict
+3
+```
+
+**Watch out for:** Annotating an untrusted dictionary does not validate its contents.
+
+**Change one thing:** Change count to text and compare checker feedback with the runtime addition error.
 
 ### Simple exercise 1
 
@@ -734,7 +955,35 @@ Control-flow checks refine the possible types of a value for subsequent operatio
 
 **Difficulty:** Intermediate · **Code concepts:** isinstance, assert, TypeGuard
 
-[Official documentation](https://docs.python.org/3/library/typing.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[TypeGuard](https://docs.python.org/3/library/typing.html#typing.TypeGuard) · [Additional reading](https://docs.python.org/3/library/typing.html#typing.Optional)
+
+**Read for:** Read how a predicate changes a checker's knowledge; verify the predicate actually checks the claim.
+
+### Learn with an example
+
+The isinstance branch proves a runtime fact and narrows the static type within that branch. len is appropriate there; the fallback handles other objects without pretending they are strings.
+
+**Worked example** - Browser-compatible Python
+
+```python
+def length(value: object) -> int:
+    if isinstance(value, str):
+        return len(value)
+    return 0
+print(length("hello"))
+print(length(42))
+```
+
+**Expected output**
+
+```text
+5
+0
+```
+
+**Watch out for:** A cast changes checker assumptions but performs no runtime validation.
+
+**Change one thing:** Extend the function to support lists with a second checked branch.
 
 ### Simple exercise 1
 
@@ -822,7 +1071,34 @@ pytest discovers test functions and reports failed behavioral assertions.
 
 **Difficulty:** Intermediate · **Code concepts:** test_ prefix, assert, pytest
 
-[Official documentation](https://docs.pytest.org/en/stable/how-to/assert.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Assertions in tests](https://docs.pytest.org/en/stable/how-to/assert.html#asserting-with-the-assert-statement) · [Additional reading](https://docs.python.org/3/tutorial/controlflow.html#defining-functions)
+
+**Read for:** Read failure introspection; assertions belong here because the topic is testing behavior.
+
+### Learn with an example
+
+This is intentionally a test: an assertion checks an observable contract. The direct call makes the tiny example runnable; pytest would discover the test_ function when saved in a test_ file.
+
+**Worked example** - Browser-compatible Python
+
+```python
+def normalize(text):
+    return text.strip().upper()
+def test_normalize():
+    assert normalize(" ok ") == "OK"
+test_normalize()
+print("example test passed")
+```
+
+**Expected output**
+
+```text
+example test passed
+```
+
+**Watch out for:** Testing only an implementation detail can miss incorrect externally visible behavior.
+
+**Change one thing:** Change upper to lower and inspect the failing assertion with pytest.
 
 ### Simple exercise 1
 
@@ -905,7 +1181,36 @@ Fixtures supply dependencies and manage setup and teardown with explicit scopes.
 
 **Difficulty:** Intermediate · **Code concepts:** pytest.fixture, yield, scope
 
-[Official documentation](https://docs.pytest.org/en/stable/how-to/fixtures.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Fixture scopes](https://docs.pytest.org/en/stable/how-to/fixtures.html#fixture-scopes) · [Additional reading](https://docs.pytest.org/en/stable/how-to/assert.html#asserting-with-the-assert-statement)
+
+**Read for:** Compare per-test and shared fixture lifetimes, especially when values are mutable.
+
+### Learn with an example
+
+This plain-Python model shows why fixture lifetime matters. A fresh allocation per case isolates mutation; a shared allocation couples cases. In pytest, a fixture's scope controls when its setup result is reused.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+def new_buffer():
+    return []
+first_case = new_buffer()
+second_case = new_buffer()
+first_case.append("event")
+print(first_case, second_case)
+```
+
+**Expected output**
+
+```text
+['event'] []
+```
+
+**Watch out for:** A session-scoped mutable fixture can leak state between tests.
+
+**Change one thing:** Return one module-level list from new_buffer and observe the leak; then map that to fixture scope.
 
 ### Simple exercise 1
 
@@ -997,7 +1302,36 @@ Parametrization runs one behavior against multiple explicit input-output cases.
 
 **Difficulty:** Intermediate · **Code concepts:** pytest.mark.parametrize, test IDs
 
-[Official documentation](https://docs.pytest.org/en/stable/how-to/parametrize.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Parametrizing test functions](https://docs.pytest.org/en/stable/how-to/parametrize.html#pytest-mark-parametrize-parametrizing-test-functions) · [Additional reading](https://docs.pytest.org/en/stable/how-to/assert.html#asserting-with-the-assert-statement)
+
+**Read for:** Follow how each input/expected pair becomes an independently reported case.
+
+### Learn with an example
+
+Each row expresses one input/output example, including a boundary and a negative value. pytest.mark.parametrize turns this table idea into separately named test cases with independent failure reports.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+def square(number):
+    return number * number
+for value, expected in [(0, 0), (-3, 9), (4, 16)]:
+    print(value, square(value) == expected)
+```
+
+**Expected output**
+
+```text
+0 True
+-3 True
+4 True
+```
+
+**Watch out for:** A large table without meaningful edge cases can still miss the important behavior.
+
+**Change one thing:** Add a float case and decide whether the function promises to accept it.
 
 ### Simple exercise 1
 
@@ -1083,7 +1417,36 @@ Exception tests assert the type and useful details of a failure.
 
 **Difficulty:** Intermediate · **Code concepts:** pytest.raises, match
 
-[Official documentation](https://docs.pytest.org/en/stable/how-to/assert.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Expected exceptions](https://docs.pytest.org/en/stable/how-to/assert.html#assertions-about-expected-exceptions) · [Additional reading](https://docs.pytest.org/en/stable/how-to/assert.html#asserting-with-the-assert-statement)
+
+**Read for:** Read pytest.raises and matching messages; place only the failing operation inside the block.
+
+### Learn with an example
+
+The failure type and message are observable parts of this small contract. A pytest version places positive(0) inside pytest.raises(ValueError, match=...). It must also fail if no exception is raised.
+
+**Worked example** - Browser-compatible Python
+
+```python
+def positive(value):
+    if value <= 0:
+        raise ValueError("must be positive")
+    return value
+try:
+    positive(0)
+except ValueError as error:
+    print(type(error).__name__, str(error))
+```
+
+**Expected output**
+
+```text
+ValueError must be positive
+```
+
+**Watch out for:** Catching an exception without checking the no-exception path is an incomplete test.
+
+**Change one thing:** Write the pytest.raises version and deliberately remove the raise to see the test fail.
 
 ### Simple exercise 1
 
@@ -1174,7 +1537,33 @@ A patch must replace the reference used by the code under test, which may differ
 
 **Difficulty:** Intermediate · **Code concepts:** unittest.mock.patch, mock, return_value
 
-[Official documentation](https://docs.python.org/3/library/unittest.mock.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Where to patch](https://docs.python.org/3/library/unittest.mock.html#where-to-patch) · [Additional reading](https://docs.pytest.org/en/stable/how-to/assert.html#asserting-with-the-assert-statement)
+
+**Read for:** Patch the name looked up by the system under test, not automatically its defining module.
+
+### Learn with an example
+
+The mock supplies a controlled result and records the call. When substituting it into a real module, patch the binding used by that module. The mock itself does not prove that a real remote API behaves this way.
+
+**Worked example** - Browser-compatible Python
+
+```python
+from unittest.mock import Mock
+lookup = Mock(return_value={"name": "Ada"})
+print(lookup("u1")["name"])
+print(lookup.call_args.args)
+```
+
+**Expected output**
+
+```text
+Ada
+('u1',)
+```
+
+**Watch out for:** A passing mocked test is not an integration test of the real service.
+
+**Change one thing:** Configure side_effect=TimeoutError and inspect how your calling code responds.
 
 ### Simple exercise 1
 
@@ -1265,7 +1654,36 @@ monkeypatch temporarily alters attributes, environment variables, and paths, the
 
 **Difficulty:** Intermediate · **Code concepts:** monkeypatch.setenv, setattr, delenv
 
-[Official documentation](https://docs.pytest.org/en/stable/how-to/monkeypatch.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Environment variables](https://docs.pytest.org/en/stable/how-to/monkeypatch.html#monkeypatching-environment-variables) · [Additional reading](https://docs.pytest.org/en/stable/how-to/fixtures.html#fixture-scopes)
+
+**Read for:** Trace setenv and automatic restoration after the test.
+
+### Learn with an example
+
+This standard-library demonstration temporarily changes an environment mapping and restores it on exit. pytest's monkeypatch.setenv gives the same scoped intent with automatic restoration at fixture teardown.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+import os
+from unittest.mock import patch
+with patch.dict(os.environ, {"DEMO_REGION": "test"}):
+    print(os.environ["DEMO_REGION"])
+print("context restored")
+```
+
+**Expected output**
+
+```text
+test
+context restored
+```
+
+**Watch out for:** Changing os.environ without restoring it makes tests depend on execution order.
+
+**Change one thing:** Use monkeypatch.setenv in a pytest test and verify that a later test sees its original environment.
 
 ### Simple exercise 1
 
@@ -1356,7 +1774,38 @@ A fake implements a dependency contract with simplified deterministic behavior.
 
 **Difficulty:** Intermediate · **Code concepts:** Protocol, constructor injection, in-memory fake
 
-[Official documentation](https://docs.python.org/3/library/unittest.mock.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Mock side_effect](https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock.side_effect) · [Additional reading](https://docs.python.org/3/library/typing.html#typing.Protocol)
+
+**Read for:** Compare configured mock outcomes with a small stateful fake implementing a real interface.
+
+### Learn with an example
+
+A fake implements a small working behavior instead of returning one canned response. It is useful for testing flows across multiple operations. A contract test should verify that the real adapter obeys the same promises.
+
+**Worked example** - Browser-compatible Python
+
+```python
+class MemoryStore:
+    def __init__(self):
+        self.data = {}
+    def save(self, key, value):
+        self.data[key] = value
+    def load(self, key):
+        return self.data[key]
+store = MemoryStore()
+store.save("a", "draft")
+print(store.load("a"))
+```
+
+**Expected output**
+
+```text
+draft
+```
+
+**Watch out for:** An in-memory fake does not reproduce database transactions, concurrency or persistence after a crash.
+
+**Change one thing:** Define the missing-key behavior and test both the fake and real store against it.
 
 ### Simple exercise 1
 
@@ -1449,7 +1898,37 @@ A traceback describes the call path and failure location, not automatically the 
 
 **Difficulty:** Intermediate · **Code concepts:** traceback, breakpoint, pdb
 
-[Official documentation](https://docs.python.org/3/library/pdb.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Debugger commands](https://docs.python.org/3/library/pdb.html#debugger-commands) · [Additional reading](https://docs.python.org/3/tutorial/errors.html#handling-exceptions)
+
+**Read for:** Find where, p and next; inspect a failing value before changing the implementation.
+
+### Learn with an example
+
+The failure comes from a string at the boundary, not from arithmetic itself. Inspecting the value and its type gives a hypothesis you can reproduce. Conversion repairs this valid numeric input but still needs an invalid-input policy.
+
+**Worked example** - Browser-compatible Python
+
+```python
+record = {"count": "3"}
+print(type(record["count"]).__name__)
+try:
+    result = record["count"] + 1
+except TypeError:
+    print("inspect the input type before adding")
+print(int(record["count"]) + 1)
+```
+
+**Expected output**
+
+```text
+str
+inspect the input type before adding
+4
+```
+
+**Watch out for:** Changing operators without inspecting inputs can hide the actual contract mismatch.
+
+**Change one thing:** Replace 3 with many and decide where conversion errors should be handled.
 
 ### Simple exercise 1
 
@@ -1537,7 +2016,33 @@ Different test layers verify local logic, real integrations, and shared interfac
 
 **Difficulty:** Intermediate · **Code concepts:** unit test, integration fixture, contract
 
-[Official documentation](https://docs.pytest.org/en/stable/how-to/assert.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Safe fixture structure](https://docs.pytest.org/en/stable/how-to/fixtures.html#safe-fixture-structure) · [Additional reading](https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock.side_effect)
+
+**Read for:** Trace setup and teardown boundaries; decide which external dependency each test actually exercises.
+
+### Learn with an example
+
+Injecting price_lookup isolates the multiplication in a unit test. A separate adapter test must check real lookup behavior, and an integration test checks the wiring between them. One test cannot establish all three guarantees cheaply.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+def total_price(quantity, price_lookup):
+    return quantity * price_lookup("item")
+print(total_price(3, lambda key: 4))
+```
+
+**Expected output**
+
+```text
+12
+```
+
+**Watch out for:** Replacing every dependency with a stub leaves real integration untested.
+
+**Change one thing:** List one unit failure, one adapter failure and one end-to-end failure for this tiny function.
 
 ### Simple exercise 1
 

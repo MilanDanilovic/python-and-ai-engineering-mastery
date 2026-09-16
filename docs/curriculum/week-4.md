@@ -14,7 +14,34 @@ An async def function defines a coroutine function whose execution can suspend a
 
 **Difficulty:** Intermediate · **Code concepts:** async def, coroutine
 
-[Official documentation](https://docs.python.org/3/library/asyncio-task.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Coroutines](https://docs.python.org/3/library/asyncio-task.html#coroutines) · [Additional reading](https://docs.python.org/3/tutorial/controlflow.html#defining-functions)
+
+**Read for:** Separate a coroutine function, the object it creates and the execution driven by awaiting it.
+
+### Learn with an example
+
+async def creates a coroutine function. Calling it produces a coroutine object; awaiting that object drives its body and receives its result. This example uses top-level await in the browser runner.
+
+**Worked example** - Browser-compatible Python
+
+```python
+async def answer():
+    return 42
+operation = answer()
+print(type(operation).__name__)
+print(await operation)
+```
+
+**Expected output**
+
+```text
+coroutine
+42
+```
+
+**Watch out for:** A coroutine object is not its final value.
+
+**Change one thing:** Add a print inside answer and predict whether it appears before or after the first outer print.
 
 ### Simple exercise 1
 
@@ -110,7 +137,36 @@ Calling async def creates a coroutine object; normal execution of its body begin
 
 **Difficulty:** Intermediate · **Code concepts:** coroutine object, await, asyncio.run
 
-[Official documentation](https://docs.python.org/3/library/asyncio-task.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Awaitables](https://docs.python.org/3/library/asyncio-task.html#awaitables) · [Additional reading](https://docs.python.org/3/library/asyncio-task.html#coroutines)
+
+**Read for:** Read why calling an async function creates an object without automatically scheduling work.
+
+### Learn with an example
+
+The empty first list proves that a plain coroutine call did not execute the body. Awaiting the object performs the append. Merely creating objects without awaiting or scheduling them loses work.
+
+**Worked example** - Browser-compatible Python
+
+```python
+events = []
+async def work():
+    events.append("ran")
+operation = work()
+print(events)
+await operation
+print(events)
+```
+
+**Expected output**
+
+```text
+[]
+['ran']
+```
+
+**Watch out for:** Do not confuse creating a coroutine with creating a scheduled task.
+
+**Change one thing:** Create two coroutine objects and await only one; then clean up the other by awaiting it too.
 
 ### Simple exercise 1
 
@@ -212,7 +268,36 @@ Await drives an awaitable and can suspend the current coroutine while it waits; 
 
 **Difficulty:** Intermediate · **Code concepts:** awaitable, await, suspension
 
-[Official documentation](https://docs.python.org/3/library/asyncio-task.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Await expression](https://docs.python.org/3/reference/expressions.html#await-expression) · [Additional reading](https://docs.python.org/3/library/asyncio-task.html#awaitables)
+
+**Read for:** Trace result propagation and remember that an already-ready operation need not suspend.
+
+### Learn with an example
+
+The surrounding coroutine cannot pass the await until ready supplies a result. Because ready completes immediately, this await need not hand control to another task. Waiting and suspension are related but not identical.
+
+**Worked example** - Browser-compatible Python
+
+```python
+async def ready():
+    return "value"
+print("before")
+result = await ready()
+print(result)
+print("after")
+```
+
+**Expected output**
+
+```text
+before
+value
+after
+```
+
+**Watch out for:** Counting await keywords does not prove that code yields fairly.
+
+**Change one thing:** Add await asyncio.sleep(0) inside ready and observe it alongside another task.
 
 ### Simple exercise 1
 
@@ -322,7 +407,37 @@ The loop coordinates ready callbacks, I/O, and task resumption on its thread.
 
 **Difficulty:** Intermediate · **Code concepts:** asyncio.run, running loop, cooperative scheduling
 
-[Official documentation](https://docs.python.org/3/library/asyncio-eventloop.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Running and stopping the loop](https://docs.python.org/3/library/asyncio-eventloop.html#running-and-stopping-the-loop) · [Additional reading](https://docs.python.org/3/reference/expressions.html#await-expression)
+
+**Read for:** Understand the loop lifecycle before using lower-level APIs; prefer asyncio.run in ordinary scripts.
+
+### Learn with an example
+
+Under the default scheduler, each worker reaches a suspension point before resuming. The event loop coordinates these resumptions on one thread; sleep does not create a worker thread. Exact ordering can change with different scheduling configuration.
+
+**Worked example** - Browser-compatible Python
+
+```python
+import asyncio
+async def worker(name):
+    print(name, "start")
+    await asyncio.sleep(0)
+    print(name, "end")
+await asyncio.gather(worker("a"), worker("b"))
+```
+
+**Expected output**
+
+```text
+a start
+b start
+a end
+b end
+```
+
+**Watch out for:** Cooperative concurrency is not simultaneous CPU execution.
+
+**Change one thing:** Replace the awaited sleep with synchronous work and explain why the other task cannot progress during it.
 
 ### Simple exercise 1
 
@@ -424,7 +539,35 @@ A task schedules a coroutine for execution under the event loop and represents i
 
 **Difficulty:** Intermediate · **Code concepts:** asyncio.create_task, Task
 
-[Official documentation](https://docs.python.org/3/library/asyncio-task.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Creating tasks](https://docs.python.org/3/library/asyncio-task.html#creating-tasks) · [Additional reading](https://docs.python.org/3/library/asyncio-task.html#coroutines)
+
+**Read for:** Read task ownership, references and scheduling; inspect eager-start behavior in newer Python versions.
+
+### Learn with an example
+
+create_task gives the coroutine to the loop and returns a handle. Keeping both handles gives the caller ownership of their results and failures. Awaiting the first handle does not undo the second task's scheduling.
+
+**Worked example** - Browser-compatible Python
+
+```python
+import asyncio
+async def square(number):
+    await asyncio.sleep(0)
+    return number * number
+first = asyncio.create_task(square(3))
+second = asyncio.create_task(square(4))
+print(await first, await second)
+```
+
+**Expected output**
+
+```text
+9 16
+```
+
+**Watch out for:** Unreferenced background tasks are not a reliable job system.
+
+**Change one thing:** Make one task raise and ensure the owner still observes or cancels the other.
 
 ### Simple exercise 1
 
@@ -525,7 +668,34 @@ gather collects ordered results; structured task groups coordinate lifetimes and
 
 **Difficulty:** Intermediate · **Code concepts:** asyncio.gather, TaskGroup
 
-[Official documentation](https://docs.python.org/3/library/asyncio-task.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[asyncio.gather](https://docs.python.org/3/library/asyncio-task.html#asyncio.gather) · [Additional reading](https://docs.python.org/3/library/asyncio-task.html#creating-tasks)
+
+**Read for:** Check result ordering and sibling behavior when a child raises; compare TaskGroup.
+
+### Learn with an example
+
+Both operations can wait concurrently. gather returns results in input order, so completion order does not rearrange this list. Its ordinary first-error behavior differs from TaskGroup's structured sibling cancellation.
+
+**Worked example** - Browser-compatible Python
+
+```python
+import asyncio
+async def value(label, delay):
+    await asyncio.sleep(delay)
+    return label
+results = await asyncio.gather(value("slow", 0.01), value("fast", 0))
+print(results)
+```
+
+**Expected output**
+
+```text
+['slow', 'fast']
+```
+
+**Watch out for:** Concurrency does not imply completion-order results.
+
+**Change one thing:** Reverse the input order and predict the returned list.
 
 ### Simple exercise 1
 
@@ -628,7 +798,42 @@ Cancellation requests inject cancellation at a suspension point and should norma
 
 **Difficulty:** Intermediate · **Code concepts:** Task.cancel, CancelledError, finally
 
-[Official documentation](https://docs.python.org/3/library/asyncio-task.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Task cancellation](https://docs.python.org/3/library/asyncio-task.html#task-cancellation) · [Additional reading](https://docs.python.org/3/library/asyncio-task.html#creating-tasks)
+
+**Read for:** Read cleanup with try/finally and why CancelledError normally needs to propagate.
+
+### Learn with an example
+
+The initial sleep lets the worker enter its try block. Cancellation interrupts its awaited sleep, runs finally and propagates to the caller awaiting the task. Cleanup and cancellation observation are separate responsibilities.
+
+**Worked example** - Browser-compatible Python
+
+```python
+import asyncio
+async def worker():
+    try:
+        await asyncio.sleep(10)
+    finally:
+        print("cleanup")
+task = asyncio.create_task(worker())
+await asyncio.sleep(0)
+task.cancel()
+try:
+    await task
+except asyncio.CancelledError:
+    print("cancelled")
+```
+
+**Expected output**
+
+```text
+cleanup
+cancelled
+```
+
+**Watch out for:** Suppressing CancelledError can break timeouts and shutdown.
+
+**Change one thing:** Cancel before the worker starts and explain why entry-dependent cleanup may differ.
 
 ### Simple exercise 1
 
@@ -739,7 +944,34 @@ A timeout bounds waiting and commonly interacts with cancellation; a deadline re
 
 **Difficulty:** Intermediate · **Code concepts:** asyncio.timeout, wait_for, TimeoutError
 
-[Official documentation](https://docs.python.org/3/library/asyncio-task.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Timeouts](https://docs.python.org/3/library/asyncio-task.html#timeouts) · [Additional reading](https://docs.python.org/3/library/asyncio-task.html#task-cancellation)
+
+**Read for:** Compare timeout, timeout_at and wait_for; identify where TimeoutError is caught.
+
+### Learn with an example
+
+The timeout context bounds the awaited operation and translates its timeout-triggered cancellation into TimeoutError outside the context. The handler belongs outside that boundary.
+
+**Worked example** - Browser-compatible Python
+
+```python
+import asyncio
+try:
+    async with asyncio.timeout(0.01):
+        await asyncio.sleep(1)
+except TimeoutError:
+    print("deadline reached")
+```
+
+**Expected output**
+
+```text
+deadline reached
+```
+
+**Watch out for:** Giving each retry a fresh timeout can exceed the request's total budget.
+
+**Change one thing:** Use timeout_at with one shared deadline around two sequential operations.
 
 ### Simple exercise 1
 
@@ -843,7 +1075,36 @@ Exceptions become observable when results are awaited or managed by a task owner
 
 **Difficulty:** Intermediate · **Code concepts:** task.result, exception, ExceptionGroup
 
-[Official documentation](https://docs.python.org/3/library/asyncio-task.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Task groups](https://docs.python.org/3/library/asyncio-task.html#task-groups) · [Additional reading](https://docs.python.org/3/library/asyncio-task.html#asyncio.gather)
+
+**Read for:** Trace child failure, sibling cancellation and the resulting exception group.
+
+### Learn with an example
+
+The task group owns the child lifetime and reports its failure when leaving the group. except* handles matching members of an exception group. Real groups can contain failures from more than one child.
+
+**Worked example** - Browser-compatible Python
+
+```python
+import asyncio
+async def fail():
+    raise ValueError("invalid record")
+try:
+    async with asyncio.TaskGroup() as group:
+        group.create_task(fail())
+except* ValueError:
+    print("child failure observed")
+```
+
+**Expected output**
+
+```text
+child failure observed
+```
+
+**Watch out for:** Reading only one task result can leave sibling failures unobserved.
+
+**Change one thing:** Add a second failing task and inspect the exception group's contents.
 
 ### Simple exercise 1
 
@@ -948,7 +1209,39 @@ An async queue coordinates producers and consumers; a size bound limits queued w
 
 **Difficulty:** Intermediate · **Code concepts:** asyncio.Queue, put, get, task_done, join
 
-[Official documentation](https://docs.python.org/3/library/asyncio-queue.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[asyncio.Queue](https://docs.python.org/3/library/asyncio-queue.html#asyncio.Queue) · [Additional reading](https://docs.python.org/3/library/asyncio-task.html#creating-tasks)
+
+**Read for:** Read maxsize, task_done and join together; queue removal is not task completion.
+
+### Learn with an example
+
+get removes an item but does not mark its work complete. task_done updates the unfinished-work count; join waits for that accounting to reach zero. A bound on queued items applies backpressure to producers.
+
+**Worked example** - Browser-compatible Python
+
+```python
+import asyncio
+queue = asyncio.Queue(maxsize=1)
+await queue.put("job")
+item = await queue.get()
+try:
+    print(item)
+finally:
+    queue.task_done()
+await queue.join()
+print("drained")
+```
+
+**Expected output**
+
+```text
+job
+drained
+```
+
+**Watch out for:** Missing task_done on an error path can make join wait forever.
+
+**Change one thing:** Use a consumer that raises and keep task_done in finally.
 
 ### Simple exercise 1
 
@@ -1065,7 +1358,38 @@ An asyncio lock protects shared state across coroutine suspension points within 
 
 **Difficulty:** Intermediate · **Code concepts:** asyncio.Lock, async with
 
-[Official documentation](https://docs.python.org/3/library/asyncio-sync.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[asyncio.Lock](https://docs.python.org/3/library/asyncio-sync.html#asyncio.Lock) · [Additional reading](https://docs.python.org/3/reference/expressions.html#await-expression)
+
+**Read for:** Find async with and the lock acquisition semantics for cooperating tasks.
+
+### Learn with an example
+
+Both tasks use the same lock around the complete read-modify-write sequence. The await would permit interleaving, but the lock keeps the second task out of this critical section until release.
+
+**Worked example** - Browser-compatible Python
+
+```python
+import asyncio
+lock = asyncio.Lock()
+state = {"count": 0}
+async def increment():
+    async with lock:
+        before = state["count"]
+        await asyncio.sleep(0)
+        state["count"] = before + 1
+await asyncio.gather(increment(), increment())
+print(state["count"])
+```
+
+**Expected output**
+
+```text
+2
+```
+
+**Watch out for:** A separate lock created inside each call protects nothing shared.
+
+**Change one thing:** Remove the lock and explain why both tasks can write 1.
 
 ### Simple exercise 1
 
@@ -1179,7 +1503,35 @@ A semaphore limits how many tasks may enter a region simultaneously.
 
 **Difficulty:** Intermediate · **Code concepts:** asyncio.Semaphore, async with
 
-[Official documentation](https://docs.python.org/3/library/asyncio-sync.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[asyncio.Semaphore](https://docs.python.org/3/library/asyncio-sync.html#asyncio.Semaphore) · [Additional reading](https://docs.python.org/3/library/asyncio-task.html#creating-tasks)
+
+**Read for:** Trace the shared counter and distinguish concurrent occupancy from requests per second.
+
+### Learn with an example
+
+The shared semaphore admits at most two workers into the guarded region. Other workers wait for a release. It limits occupancy, not how many requests may occur over a minute.
+
+**Worked example** - Browser-compatible Python
+
+```python
+import asyncio
+limit = asyncio.Semaphore(2)
+async def work(number):
+    async with limit:
+        await asyncio.sleep(0)
+        return number
+print(await asyncio.gather(*(work(n) for n in range(4))))
+```
+
+**Expected output**
+
+```text
+[0, 1, 2, 3]
+```
+
+**Watch out for:** Creating the semaphore inside work gives each task its own unrelated limit.
+
+**Change one thing:** Count active workers inside the region and record the maximum.
 
 ### Simple exercise 1
 
@@ -1291,7 +1643,42 @@ Async context managers allow acquisition and cleanup themselves to await.
 
 **Difficulty:** Intermediate · **Code concepts:** __aenter__, __aexit__, async with
 
-[Official documentation](https://docs.python.org/3/reference/datamodel.html#asynchronous-context-managers) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Asynchronous context managers](https://docs.python.org/3/reference/datamodel.html#asynchronous-context-managers) · [Additional reading](https://docs.python.org/3/reference/compound_stmts.html#the-with-statement)
+
+**Read for:** Follow awaited __aenter__ and __aexit__ around an async with block.
+
+### Learn with an example
+
+An asynchronous context manager permits acquisition or cleanup to await. The resource's owner surrounds the whole usage block, including exceptional exits. The yielded value is what the caller receives.
+
+**Worked example** - Browser-compatible Python
+
+```python
+from contextlib import asynccontextmanager
+import asyncio
+@asynccontextmanager
+async def connection():
+    print("open")
+    try:
+        yield "client"
+    finally:
+        await asyncio.sleep(0)
+        print("closed")
+async with connection() as client:
+    print(client)
+```
+
+**Expected output**
+
+```text
+open
+client
+closed
+```
+
+**Watch out for:** Using with instead of async with selects the wrong protocol.
+
+**Change one thing:** Raise inside the body and verify that asynchronous cleanup still completes.
 
 ### Simple exercise 1
 
@@ -1399,7 +1786,36 @@ Async iteration awaits successive values from an asynchronous iterator.
 
 **Difficulty:** Intermediate · **Code concepts:** __aiter__, __anext__, StopAsyncIteration, async for
 
-[Official documentation](https://docs.python.org/3/reference/datamodel.html#asynchronous-iterators) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Asynchronous iterators](https://docs.python.org/3/reference/datamodel.html#asynchronous-iterators) · [Additional reading](https://docs.python.org/3/library/stdtypes.html#iterator.__next__)
+
+**Read for:** Read __aiter__, __anext__ and StopAsyncIteration as separate protocol responsibilities.
+
+### Learn with an example
+
+The async generator can wait before providing each item. async for requests the next item through the asynchronous iteration protocol and awaits it. It ends on StopAsyncIteration.
+
+**Worked example** - Browser-compatible Python
+
+```python
+import asyncio
+async def rows():
+    for number in range(2):
+        await asyncio.sleep(0)
+        yield number
+async for row in rows():
+    print(row)
+```
+
+**Expected output**
+
+```text
+0
+1
+```
+
+**Watch out for:** An async iterator is not consumed by an ordinary for loop.
+
+**Change one thing:** Try list(rows()) and explain why an async comprehension is needed instead.
 
 ### Simple exercise 1
 
@@ -1507,7 +1923,36 @@ Synchronous blocking work still blocks the loop when executed inside async def.
 
 **Difficulty:** Intermediate · **Code concepts:** time.sleep, blocking I/O, event-loop latency
 
-[Official documentation](https://docs.python.org/3/library/asyncio-task.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Running blocking code](https://docs.python.org/3/library/asyncio-dev.html#running-blocking-code) · [Additional reading](https://docs.python.org/3/library/asyncio-eventloop.html#running-and-stopping-the-loop)
+
+**Read for:** Find why synchronous CPU work delays all tasks on the event-loop thread.
+
+### Learn with an example
+
+The synchronous sum contains no suspension point, so other tasks cannot run on this loop thread while it executes. async def changes the calling protocol; it does not make every operation nonblocking.
+
+**Worked example** - Browser-compatible Python
+
+```python
+import asyncio
+events = []
+async def compute():
+    events.append("start")
+    sum(range(10000))
+    events.append("end")
+await compute()
+print(events)
+```
+
+**Expected output**
+
+```text
+['start', 'end']
+```
+
+**Watch out for:** Putting a blocking library call inside async def does not make that call asynchronous.
+
+**Change one thing:** Replace the calculation with a real blocking I/O call in a local experiment and compare using to_thread.
 
 ### Simple exercise 1
 
@@ -1617,7 +2062,33 @@ Thread offloading can keep blocking I/O away from the loop, with explicit thread
 
 **Difficulty:** Intermediate · **Code concepts:** asyncio.to_thread, executor, thread safety
 
-[Official documentation](https://docs.python.org/3/library/asyncio-task.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[asyncio.to_thread](https://docs.python.org/3/library/asyncio-task.html#asyncio.to_thread) · [Additional reading](https://docs.python.org/3/library/asyncio-dev.html#running-blocking-code)
+
+**Read for:** Read its I/O use case and cancellation limitations; a cancelled await does not forcibly stop a thread.
+
+### Learn with an example
+
+to_thread runs the synchronous function in a thread while the coroutine awaits its result. This is useful for blocking I/O in local Python. Browser Python does not provide an ordinary native thread pool.
+
+**Worked example** - Run in local Python
+
+```python
+import asyncio
+def blocking_read():
+    return "file contents"
+result = await asyncio.to_thread(blocking_read)
+print(result)
+```
+
+**Expected output**
+
+```text
+file contents
+```
+
+**Watch out for:** Cancelling the await does not forcibly terminate arbitrary synchronous work already running in the thread.
+
+**Change one thing:** Make the function raise and observe the exception at the awaiting call.
 
 ### Simple exercise 1
 
@@ -1718,7 +2189,32 @@ CPU-heavy work needs a separate parallelism decision; behavior depends on interp
 
 **Difficulty:** Intermediate · **Code concepts:** CPU bound, GIL, profiling
 
-[Official documentation](https://docs.python.org/3/library/threading.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[GIL and performance](https://docs.python.org/3/library/threading.html#gil-and-performance-considerations) · [Additional reading](https://docs.python.org/3/library/asyncio-dev.html#running-blocking-code)
+
+**Read for:** Compare conventional CPython with free-threaded builds; do not assume all threading workloads scale.
+
+### Learn with an example
+
+The first line is CPU work. The second reports whether this interpreter was built as free-threaded; False is expected on a conventional build. Choose concurrency based on the actual runtime and workload, not just the word async.
+
+**Worked example** - Browser-compatible Python
+
+```python
+import sysconfig
+print(sum(n * n for n in range(5)))
+print(bool(sysconfig.get_config_var("Py_GIL_DISABLED")))
+```
+
+**Expected output**
+
+```text
+30
+False
+```
+
+**Watch out for:** Threads do not automatically accelerate pure-Python CPU work on a conventional GIL build.
+
+**Change one thing:** Inspect the result on a free-threaded build and benchmark rather than assuming a speedup.
 
 ### Simple exercise 1
 
@@ -1806,7 +2302,34 @@ Processes provide isolated execution and communicate through serializable bounda
 
 **Difficulty:** Intermediate · **Code concepts:** ProcessPoolExecutor, pickle, __main__
 
-[Official documentation](https://docs.python.org/3/library/concurrent.futures.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[ProcessPoolExecutor](https://docs.python.org/3/library/concurrent.futures.html#processpoolexecutor) · [Additional reading](https://docs.python.org/3/library/threading.html#gil-and-performance-considerations)
+
+**Read for:** Read pickling and importability requirements before moving work to processes.
+
+### Learn with an example
+
+Save this as a local Python file. Child processes import the module and receive serialized inputs; the main guard prevents recursive process creation. A top-level function can be imported by spawned workers.
+
+**Worked example** - Run in local Python
+
+```python
+from concurrent.futures import ProcessPoolExecutor
+def square(number):
+    return number * number
+if __name__ == "__main__":
+    with ProcessPoolExecutor(max_workers=2) as pool:
+        print(list(pool.map(square, [2, 3])))
+```
+
+**Expected output**
+
+```text
+[4, 9]
+```
+
+**Watch out for:** A lambda or local nested function is not a portable process-pool task.
+
+**Change one thing:** Move square inside another function and investigate the serialization error.
 
 ### Simple exercise 1
 
@@ -1898,7 +2421,36 @@ A route connects an HTTP request to validation, dependency resolution, handler e
 
 **Difficulty:** Intermediate · **Code concepts:** FastAPI, route decorator, ASGI
 
-[Official documentation](https://fastapi.tiangolo.com/tutorial/first-steps/) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Path operations](https://fastapi.tiangolo.com/tutorial/first-steps/#step-3-create-a-path-operation) · [Additional reading](https://docs.python.org/3/reference/compound_stmts.html#function-definitions)
+
+**Read for:** Trace the HTTP method, path registration and the function that produces the response.
+
+### Learn with an example
+
+The decorator registers a GET path; FastAPI extracts the path value and calls hello. TestClient exercises request handling without opening a network port. Run this locally with fastapi and httpx installed.
+
+**Worked example** - Run in local Python - Requires fastapi, httpx
+
+```python
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
+app = FastAPI()
+@app.get("/hello/{name}")
+def hello(name: str):
+    return {"hello": name}
+with TestClient(app) as client:
+    print(client.get("/hello/Ada").json())
+```
+
+**Expected output**
+
+```text
+{'hello': 'Ada'}
+```
+
+**Watch out for:** Defining a function alone does not expose an HTTP route.
+
+**Change one thing:** Send a POST to the same path and inspect the status code.
 
 ### Simple exercise 1
 
@@ -1987,7 +2539,38 @@ Dependencies declare values or resources needed by handlers and can be overridde
 
 **Difficulty:** Intermediate · **Code concepts:** Depends, dependency override
 
-[Official documentation](https://fastapi.tiangolo.com/tutorial/dependencies/) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Declaring dependencies](https://fastapi.tiangolo.com/tutorial/dependencies/#declare-the-dependency-in-the-dependant) · [Additional reading](https://fastapi.tiangolo.com/tutorial/first-steps/#step-3-create-a-path-operation)
+
+**Read for:** Follow Depends and parameter injection, then inspect dependency reuse and overrides.
+
+### Learn with an example
+
+Depends asks FastAPI to resolve the collaborator before calling the endpoint. The endpoint receives a value, not the dependency function. Explicit injection creates a place to substitute test collaborators.
+
+**Worked example** - Run in local Python - Requires fastapi, httpx
+
+```python
+from fastapi import Depends, FastAPI
+from fastapi.testclient import TestClient
+app = FastAPI()
+def region():
+    return "eu"
+@app.get("/region")
+def read_region(value: str = Depends(region)):
+    return {"region": value}
+with TestClient(app) as client:
+    print(client.get("/region").json())
+```
+
+**Expected output**
+
+```text
+{'region': 'eu'}
+```
+
+**Watch out for:** Calling region in the default value would evaluate it at definition time instead.
+
+**Change one thing:** Override the region dependency with a function returning test.
 
 ### Simple exercise 1
 
@@ -2083,7 +2666,38 @@ Request annotations and models define input parsing and validation before domain
 
 **Difficulty:** Intermediate · **Code concepts:** request body, query parameter, validation error
 
-[Official documentation](https://fastapi.tiangolo.com/tutorial/query-params-str-validations/) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Additional validation](https://fastapi.tiangolo.com/tutorial/query-params-str-validations/#additional-validation) · [Additional reading](https://fastapi.tiangolo.com/tutorial/first-steps/#step-3-create-a-path-operation)
+
+**Read for:** Find Annotated and Query constraints; distinguish rejected requests from handler failures.
+
+### Learn with an example
+
+The request boundary converts and validates the query value before the endpoint runs. Zero violates ge=1 and produces a validation response. Valid input reaches the handler as an integer.
+
+**Worked example** - Run in local Python - Requires fastapi, httpx
+
+```python
+from fastapi import FastAPI, Query
+from fastapi.testclient import TestClient
+app = FastAPI()
+@app.get("/items")
+def items(limit: int = Query(5, ge=1)):
+    return {"limit": limit}
+with TestClient(app) as client:
+    print(client.get("/items?limit=0").status_code)
+    print(client.get("/items?limit=2").json())
+```
+
+**Expected output**
+
+```text
+422
+{'limit': 2}
+```
+
+**Watch out for:** Validation of shape and range does not check a caller's authorization.
+
+**Change one thing:** Try a nonnumeric limit and compare the error location with the zero case.
 
 ### Simple exercise 1
 
@@ -2179,7 +2793,37 @@ Middleware wraps request processing; exception handlers translate known failures
 
 **Difficulty:** Intermediate · **Code concepts:** middleware, HTTPException, exception_handler
 
-[Official documentation](https://fastapi.tiangolo.com/tutorial/handling-errors/) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Custom exception handlers](https://fastapi.tiangolo.com/tutorial/handling-errors/#install-custom-exception-handlers) · [Additional reading](https://fastapi.tiangolo.com/tutorial/first-steps/#step-3-create-a-path-operation)
+
+**Read for:** Find how an application exception becomes an HTTP response; compare middleware wrapping all requests.
+
+### Learn with an example
+
+A deliberate application failure becomes an HTTP response through exception handling. Middleware wraps the broader request/response path; it is a different extension point from a specific exception handler.
+
+**Worked example** - Run in local Python - Requires fastapi, httpx
+
+```python
+from fastapi import FastAPI, HTTPException
+from fastapi.testclient import TestClient
+app = FastAPI()
+@app.get("/missing")
+def missing():
+    raise HTTPException(status_code=404, detail="not found")
+with TestClient(app) as client:
+    response = client.get("/missing")
+    print(response.status_code, response.json()["detail"])
+```
+
+**Expected output**
+
+```text
+404 not found
+```
+
+**Watch out for:** Converting every exception to a 200 response hides failures from callers and monitoring.
+
+**Change one thing:** Add middleware that attaches a request ID to both successful and error responses.
 
 ### Simple exercise 1
 
@@ -2280,7 +2924,41 @@ Application lifespan manages resources shared across requests; request-scoped re
 
 **Difficulty:** Intermediate · **Code concepts:** lifespan, asynccontextmanager, client pool
 
-[Official documentation](https://fastapi.tiangolo.com/advanced/events/) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Lifespan](https://fastapi.tiangolo.com/advanced/events/#lifespan) · [Additional reading](https://fastapi.tiangolo.com/tutorial/dependencies/#declare-the-dependency-in-the-dependant)
+
+**Read for:** Trace resource acquisition before yield and cleanup afterward.
+
+### Learn with an example
+
+Entering TestClient as a context runs startup before requests are served and shutdown on exit. A real application would acquire its shared client or pool before yield and release it afterward.
+
+**Worked example** - Run in local Python - Requires fastapi, httpx
+
+```python
+from contextlib import asynccontextmanager
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
+@asynccontextmanager
+async def lifespan(app):
+    print("startup")
+    yield
+    print("shutdown")
+app = FastAPI(lifespan=lifespan)
+with TestClient(app):
+    print("serving")
+```
+
+**Expected output**
+
+```text
+startup
+serving
+shutdown
+```
+
+**Watch out for:** Creating a new connection pool on every request wastes resources and complicates cleanup.
+
+**Change one thing:** Store a fake client on app.state during startup and read it from a route.
 
 ### Simple exercise 1
 
@@ -2386,7 +3064,40 @@ In-process background work runs outside the immediate response but is not inhere
 
 **Difficulty:** Intermediate · **Code concepts:** BackgroundTasks, queue, job ID
 
-[Official documentation](https://fastapi.tiangolo.com/tutorial/background-tasks/) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Background-task caveat](https://fastapi.tiangolo.com/tutorial/background-tasks/#caveat) · [Additional reading](https://fastapi.tiangolo.com/advanced/events/#lifespan)
+
+**Read for:** Read when heavier or distributed work needs a job system beyond in-process background tasks.
+
+### Learn with an example
+
+FastAPI schedules this small task after preparing the response; TestClient waits for it to finish. The work still belongs to the same application process, so a process crash can lose it.
+
+**Worked example** - Run in local Python - Requires fastapi, httpx
+
+```python
+from fastapi import BackgroundTasks, FastAPI
+from fastapi.testclient import TestClient
+app = FastAPI()
+events = []
+@app.post("/notify")
+def notify(tasks: BackgroundTasks):
+    tasks.add_task(events.append, "sent")
+    return {"accepted": True}
+with TestClient(app) as client:
+    print(client.post("/notify").json())
+print(events)
+```
+
+**Expected output**
+
+```text
+{'accepted': True}
+['sent']
+```
+
+**Watch out for:** BackgroundTasks does not provide durable delivery or crash recovery.
+
+**Change one thing:** Describe what state a durable queue would need before returning accepted.
 
 ### Simple exercise 1
 

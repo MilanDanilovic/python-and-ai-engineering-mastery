@@ -14,7 +14,35 @@ A tool contract explains one operation and defines its allowed input and output 
 
 **Difficulty:** Advanced · **Code concepts:** JSON Schema, tool name, description
 
-[Official documentation](https://modelcontextprotocol.io/specification/latest/server/tools) · [Additional reading](https://modelcontextprotocol.io/docs/learn/architecture)
+[Tool definition](https://modelcontextprotocol.io/specification/latest/server/tools#tool) · [Additional reading](https://pydantic.dev/docs/validation/latest/concepts/json_schema/#generating-json-schema)
+
+**Read for:** Inspect name, description and inputSchema, then check the output schema contract.
+
+### Learn with an example
+
+The declaration describes one bounded capability and its inputs. The required array and additionalProperties policy make the boundary explicit. The protocol transports this description; the server must enforce it when called.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+schema = {"type": "object", "properties": {"order_id": {"type": "string"}}, "required": ["order_id"], "additionalProperties": False}
+tool = {"name": "lookup_order", "description": "Read an order's delivery state.", "inputSchema": schema}
+print(tool["name"])
+print(tool["inputSchema"]["required"])
+```
+
+**Expected output**
+
+```text
+lookup_order
+['order_id']
+```
+
+**Watch out for:** A vague tool description makes even a correct schema hard for a model to select.
+
+**Change one thing:** Add an optional include_items boolean and explain whether it changes authorization.
 
 ### Simple exercise 1
 
@@ -106,7 +134,35 @@ Validate inputs before execution and return errors with a stable structure.
 
 **Difficulty:** Advanced · **Code concepts:** validation error, error code, result envelope
 
-[Official documentation](https://modelcontextprotocol.io/specification/latest/server/tools) · [Additional reading](https://modelcontextprotocol.io/docs/learn/architecture)
+[Tool errors](https://modelcontextprotocol.io/specification/latest/server/tools#error-handling) · [Additional reading](https://modelcontextprotocol.io/specification/latest/server/tools#tool)
+
+**Read for:** Distinguish protocol errors from tool execution errors reported through isError.
+
+### Learn with an example
+
+Validate at the execution boundary even if the caller saw a schema. This small application result can be adapted to MCP tool content and isError when appropriate. Protocol failures and domain/tool failures need distinct handling.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+def validate(arguments):
+    if not isinstance(arguments.get("order_id"), str):
+        return {"ok": False, "error": "order_id must be text"}
+    return {"ok": True}
+print(validate({"order_id": 7}))
+```
+
+**Expected output**
+
+```text
+{'ok': False, 'error': 'order_id must be text'}
+```
+
+**Watch out for:** Do not send a raw stack trace or secret-bearing exception to a model as ordinary tool output.
+
+**Change one thing:** Add a length limit and an unknown-field policy.
 
 ### Simple exercise 1
 
@@ -199,7 +255,38 @@ A write tool needs explicit side-effect semantics and a stable request identity.
 
 **Difficulty:** Advanced · **Code concepts:** idempotency key, write boundary, deduplication
 
-[Official documentation](https://modelcontextprotocol.io/specification/latest/server/tools) · [Additional reading](https://modelcontextprotocol.io/docs/learn/architecture)
+[Tool safety boundaries](https://modelcontextprotocol.io/specification/latest/server/tools#security-considerations) · [Additional reading](https://modelcontextprotocol.io/specification/latest/server/tools#error-handling)
+
+**Read for:** Read input validation and access controls; idempotency must also be enforced by the application.
+
+### Learn with an example
+
+The in-memory model reuses a stored result when the same request is repeated. A real service needs atomic persistent storage, payload consistency checks and downstream idempotency to survive races and crashes.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+completed = {}
+def create_note(key, text):
+    if key not in completed:
+        completed[key] = {"id": len(completed) + 1, "text": text}
+    return completed[key]["id"]
+print(create_note("req-1", "hello"))
+print(create_note("req-1", "hello"))
+```
+
+**Expected output**
+
+```text
+1
+1
+```
+
+**Watch out for:** This dictionary demonstration is not concurrency-safe durable deduplication.
+
+**Change one thing:** Reuse req-1 with different text and define the rejection rule.
 
 ### Simple exercise 1
 
@@ -295,7 +382,37 @@ Authorization checks the authenticated caller's access at execution time.
 
 **Difficulty:** Advanced · **Code concepts:** principal, tenant ID, authorization
 
-[Official documentation](https://modelcontextprotocol.io/specification/latest/basic/authorization) · [Additional reading](https://modelcontextprotocol.io/docs/learn/architecture)
+[Scope selection](https://modelcontextprotocol.io/specification/latest/basic/authorization#scope-selection-strategy) · [Additional reading](https://modelcontextprotocol.io/specification/latest/server/tools#tool)
+
+**Read for:** Trace granted scopes and resource access; a schema-valid request can still be unauthorized.
+
+### Learn with an example
+
+Capability scope and resource ownership are separate conditions. Passing one does not satisfy the other. Trusted identity and grant information must come from authentication infrastructure, not a model's claim.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+def can_write(granted_scopes, record_tenant, caller_tenant):
+    return "notes:write" in granted_scopes and record_tenant == caller_tenant
+print(can_write({"notes:read"}, "a", "a"))
+print(can_write({"notes:write"}, "b", "a"))
+print(can_write({"notes:write"}, "a", "a"))
+```
+
+**Expected output**
+
+```text
+False
+False
+True
+```
+
+**Watch out for:** Hiding a write tool in the UI is not a substitute for checking authorization when it executes.
+
+**Change one thing:** Add an expired-grant condition and explain where its timestamp must come from.
 
 ### Simple exercise 1
 
@@ -384,7 +501,37 @@ The host coordinates clients, and clients communicate with servers exposing capa
 
 **Difficulty:** Advanced · **Code concepts:** MCP host, client, server
 
-[Official documentation](https://modelcontextprotocol.io/docs/learn/architecture) · [Additional reading](https://modelcontextprotocol.io/docs/learn/architecture)
+[MCP participants](https://modelcontextprotocol.io/docs/learn/architecture#participants) · [Additional reading](https://modelcontextprotocol.io/specification/latest/server/tools#tool)
+
+**Read for:** Identify the host, its clients and each server; distinguish process boundaries from protocol roles.
+
+### Learn with an example
+
+This diagram expressed as data separates the coordinating host from its protocol clients and the servers they call. One host can connect to several servers with different capabilities and trust boundaries.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+host = "learning assistant"
+clients = {"documents": "document-server", "issues": "issue-server"}
+print(host)
+for client, server in clients.items():
+    print(client, "->", server)
+```
+
+**Expected output**
+
+```text
+learning assistant
+documents -> document-server
+issues -> issue-server
+```
+
+**Watch out for:** A server exposing tools is not necessarily the agent that decides when to use them.
+
+**Change one thing:** Draw where authentication and user consent belong for each connection.
 
 ### Simple exercise 1
 
@@ -464,7 +611,7 @@ print(roles['server'] != roles['model'])  # Expected: True
 
 ## MCP capability and tool discovery
 
-Initialization and discovery expose supported capabilities and available tool contracts.
+Tool discovery exposes available contracts; capability exchange depends on the protocol revision, with initialization in older revisions and per-request metadata in newer ones.
 
 **Why it matters:** Clients should not assume every server offers the same features.
 
@@ -472,7 +619,35 @@ Initialization and discovery expose supported capabilities and available tool co
 
 **Difficulty:** Advanced · **Code concepts:** initialize, tools/list, capabilities
 
-[Official documentation](https://modelcontextprotocol.io/docs/learn/architecture) · [Additional reading](https://modelcontextprotocol.io/docs/learn/architecture)
+[Listing tools](https://modelcontextprotocol.io/specification/latest/server/tools#listing-tools) · [Additional reading](https://modelcontextprotocol.io/docs/learn/architecture#participants)
+
+**Read for:** Follow tools/list and pagination before issuing tools/call.
+
+### Learn with an example
+
+A tools/list response tells a client what a server currently exposes. The client can then construct a tools/call request for a selected capability. Current and older MCP revisions differ in initialization and capability negotiation; read the versioned reference.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+catalog = [{"name": "lookup_order"}, {"name": "search_docs"}]
+discovered = {tool["name"] for tool in catalog}
+print("search_docs" in discovered)
+print("delete_all" in discovered)
+```
+
+**Expected output**
+
+```text
+True
+False
+```
+
+**Watch out for:** A cached tool list can become stale, and discovery is not permission to execute every listed tool.
+
+**Change one thing:** Handle pagination and a later tool-list change without silently retaining removed tools.
 
 ### Simple exercise 1
 
@@ -551,7 +726,7 @@ async def lookup(session, customer_id):
 
 **Interview question:** How do capability negotiation and tool discovery differ?
 
-**Explain in your own words:** Explain mcp capability and tool discovery in your own words. Use a concrete example to show why this is true: Initialization and discovery expose supported capabilities and available tool contracts.
+**Explain in your own words:** Explain mcp capability and tool discovery in your own words. Use a concrete example to show why this is true: Tool discovery exposes available contracts; capability exchange depends on the protocol revision, with initialization in older revisions and per-request metadata in newer ones.
 
 <a id="mcp-primitives"></a>
 
@@ -565,7 +740,35 @@ Tools expose operations, resources expose contextual content, and prompts expose
 
 **Difficulty:** Advanced · **Code concepts:** tools/call, resources/read, prompts/get
 
-[Official documentation](https://modelcontextprotocol.io/docs/learn/architecture) · [Additional reading](https://modelcontextprotocol.io/docs/learn/architecture)
+[MCP primitives](https://modelcontextprotocol.io/docs/learn/architecture#primitives) · [Additional reading](https://modelcontextprotocol.io/specification/latest/server/tools#listing-tools)
+
+**Read for:** Compare tools, resources and prompts by purpose and who selects them.
+
+### Learn with an example
+
+Tools perform operations, resources expose addressable content, and prompts provide reusable interaction templates. These are different protocol primitives even when all contribute context to the same agent.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+capabilities = {"tool": "search_orders", "resource": "policy://returns", "prompt": "summarize_order"}
+for kind, name in capabilities.items():
+    print(kind, name)
+```
+
+**Expected output**
+
+```text
+tool search_orders
+resource policy://returns
+prompt summarize_order
+```
+
+**Watch out for:** Treating every content read as a mutating tool blurs the capability model.
+
+**Change one thing:** Classify a refund action, a product manual and a reusable support template.
 
 ### Simple exercise 1
 
@@ -640,7 +843,7 @@ def returns_policy() -> str: return "Returns require a valid receipt."
 
 ## MCP transport, sessions, and authorization
 
-Transport carries protocol messages; session state and authorization require their own explicit handling.
+Transport carries protocol messages; version-specific session or request metadata and authorization require separate handling.
 
 **Why it matters:** Connection success does not imply access to every capability.
 
@@ -648,7 +851,35 @@ Transport carries protocol messages; session state and authorization require the
 
 **Difficulty:** Advanced · **Code concepts:** stdio, Streamable HTTP, session, authorization
 
-[Official documentation](https://modelcontextprotocol.io/specification/latest/basic/authorization) · [Additional reading](https://modelcontextprotocol.io/docs/learn/architecture)
+[Streamable HTTP](https://modelcontextprotocol.io/specification/latest/basic/transports/streamable-http#request-metadata) · [Additional reading](https://modelcontextprotocol.io/specification/latest/server/tools#listing-tools)
+
+**Read for:** Read per-request metadata and cancellation rules; compare older session-based revisions separately from authorization.
+
+### Learn with an example
+
+This models message encoding only. A real transport also frames delivery, carries required protocol metadata and defines cancellation. The linked transport binding gives those version-specific rules; authorization remains a separate boundary.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+import json
+message = {"jsonrpc": "2.0", "id": 7, "method": "tools/list"}
+wire = json.dumps(message).encode("utf-8")
+received = json.loads(wire)
+print(received["id"], received["method"])
+```
+
+**Expected output**
+
+```text
+7 tools/list
+```
+
+**Watch out for:** This minimal JSON object is not a complete current-version MCP request.
+
+**Change one thing:** Compare how stdio framing and Streamable HTTP carry the same protocol method.
 
 ### Simple exercise 1
 
@@ -704,7 +935,7 @@ print(policy['retry_writes_without_key'] is False)  # Expected: True
 
 ### Debugging exercise
 
-A reconnect reuses stale session assumptions and calls fail. Reinitialize and restore only valid state.
+A reconnect reuses stale protocol assumptions and calls fail. Check the negotiated revision and restore only state supported by that revision.
 
 <details>
 <summary>Reveal reference solution</summary>
@@ -722,7 +953,7 @@ async def reconnect(open_session):
 
 **Interview question:** What changes when an MCP server moves from local to remote transport?
 
-**Explain in your own words:** Explain mcp transport, sessions, and authorization in your own words. Use a concrete example to show why this is true: Transport carries protocol messages; session state and authorization require their own explicit handling.
+**Explain in your own words:** Explain mcp transport, sessions, and authorization in your own words. Use a concrete example to show why this is true: Transport carries protocol messages; version-specific session or request metadata and authorization require separate handling.
 
 <a id="harness-runtime"></a>
 
@@ -736,7 +967,35 @@ A harness supplies the filesystem, network, tool runtime, and execution boundari
 
 **Difficulty:** Advanced · **Code concepts:** sandbox, filesystem scope, network policy
 
-[Official documentation](https://modelcontextprotocol.io/docs/learn/architecture) · [Additional reading](https://modelcontextprotocol.io/docs/learn/architecture)
+[Runtime control of an agent graph](https://pydantic.dev/docs/ai/core-concepts/agent/#iterating-over-an-agents-graph) · [Additional reading](https://modelcontextprotocol.io/specification/latest/basic/authorization#scope-selection-strategy)
+
+**Read for:** Locate the loop owned by application code; attach budgets, tool policy and stopping rules there.
+
+### Learn with an example
+
+The harness is application code around the model: it chooses capabilities, runs or rejects requests, records results and enforces stop conditions. A persuasive model message cannot expand the allowlist by itself.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+allowed = {"read"}
+requests = ["read", "delete"]
+for request in requests:
+    print(request, "allowed" if request in allowed else "denied")
+```
+
+**Expected output**
+
+```text
+read allowed
+delete denied
+```
+
+**Watch out for:** Instructions to the model are not an execution sandbox.
+
+**Change one thing:** Add a two-call budget and a timeout policy to this dispatcher design.
 
 ### Simple exercise 1
 
@@ -820,7 +1079,33 @@ Context construction selects instructions, task state, and retrieved information
 
 **Difficulty:** Advanced · **Code concepts:** system instructions, memory, context budget
 
-[Official documentation](https://ai.pydantic.dev/agents/) · [Additional reading](https://modelcontextprotocol.io/docs/learn/architecture)
+[Conversation state](https://pydantic.dev/docs/ai/core-concepts/agent/#runs-vs-conversations) · [Additional reading](https://pydantic.dev/docs/ai/core-concepts/agent/#iterating-over-an-agents-graph)
+
+**Read for:** Follow explicit history reuse and decide which state belongs in durable application storage.
+
+### Learn with an example
+
+Constructing context is a data-selection step. Provenance lets the application distinguish its instructions from untrusted retrieved content. A real implementation must preserve message roles, access filtering and token budgets too.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+items = [{"text": "system rule", "trusted": True}, {"text": "retrieved page", "trusted": False}]
+context = [{"text": item["text"], "origin": "application" if item["trusted"] else "retrieval"} for item in items]
+print([item["origin"] for item in context])
+```
+
+**Expected output**
+
+```text
+['application', 'retrieval']
+```
+
+**Watch out for:** Concatenating all text into one unlabeled prompt erases useful trust boundaries.
+
+**Change one thing:** Add a tenant ID and remove unauthorized content before constructing the context.
 
 ### Simple exercise 1
 
@@ -910,7 +1195,32 @@ The runtime should record decisions, calls, outcomes, and interruption points.
 
 **Difficulty:** Advanced · **Code concepts:** trace ID, tool span, error event
 
-[Official documentation](https://ai.pydantic.dev/logfire/) · [Additional reading](https://modelcontextprotocol.io/docs/learn/architecture)
+[Agent observability](https://pydantic.dev/docs/ai/integrations/logfire/#debugging) · [Additional reading](https://pydantic.dev/docs/ai/core-concepts/agent/#iterating-over-an-agents-graph)
+
+**Read for:** Trace model and tool spans while keeping sensitive input out of routine logs.
+
+### Learn with an example
+
+A shared run identifier connects the decisions and effects of one attempt. Separate events preserve where a failure occurred. Real traces add parent/child spans, durations and controlled attributes.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+events = [{"run": "r1", "step": "model", "status": "ok"}, {"run": "r1", "step": "tool", "status": "timeout"}]
+print([(event["step"], event["status"]) for event in events])
+```
+
+**Expected output**
+
+```text
+[('model', 'ok'), ('tool', 'timeout')]
+```
+
+**Watch out for:** Logging complete prompts and tool payloads by default can expose sensitive data.
+
+**Change one thing:** Record attempt number and duration without storing the secret input.
 
 ### Simple exercise 1
 
@@ -993,7 +1303,34 @@ A domain ontology defines the kinds of things a system refers to and how each is
 
 **Difficulty:** Advanced · **Code concepts:** Customer, Organization, Order, entity ID
 
-[Official documentation](https://www.w3.org/TR/rdf11-primer/) · [Additional reading](https://modelcontextprotocol.io/docs/learn/architecture)
+[IRIs and identity](https://www.w3.org/TR/rdf11-primer/#section-IRI) · [Additional reading](https://docs.python.org/3/library/stdtypes.html#dict.setdefault)
+
+**Read for:** Read how identifiers name resources independently of their human-readable labels.
+
+### Learn with an example
+
+Stable identifiers distinguish entities even when display names collide. Labels can change without changing identity. The same identifier should be carried through storage, tools and retrieved evidence.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+entities = {"customer:17": {"name": "Alex"}, "customer:28": {"name": "Alex"}}
+print(len(entities))
+print(entities["customer:17"]["name"])
+```
+
+**Expected output**
+
+```text
+2
+Alex
+```
+
+**Watch out for:** A human-readable name is rarely a safe unique key.
+
+**Change one thing:** Rename one customer and show which links should remain unchanged.
 
 ### Simple exercise 1
 
@@ -1077,7 +1414,33 @@ Relationships describe permitted connections and their multiplicity between enti
 
 **Difficulty:** Advanced · **Code concepts:** owns, belongs_to, cardinality, foreign key
 
-[Official documentation](https://www.w3.org/TR/rdf11-primer/) · [Additional reading](https://modelcontextprotocol.io/docs/learn/architecture)
+[RDF triples](https://www.w3.org/TR/rdf11-primer/#section-triple) · [Additional reading](https://www.w3.org/TR/rdf11-primer/#section-IRI)
+
+**Read for:** Identify subject, predicate and object; cardinality constraints require an additional schema or application rule.
+
+### Learn with an example
+
+A relation has a source, a named meaning and a target. The graph representation alone does not enforce that an order has exactly one customer; that is a separate domain constraint.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+relations = [("order:9", "placed_by", "customer:17"), ("order:9", "contains", "product:4")]
+owner = [obj for subject, predicate, obj in relations if subject == "order:9" and predicate == "placed_by"]
+print(owner)
+```
+
+**Expected output**
+
+```text
+['customer:17']
+```
+
+**Watch out for:** Storing triples does not automatically enforce cardinality or referential integrity.
+
+**Change one thing:** Add a second placed_by relation and decide whether it is invalid or represents a different domain model.
 
 ### Simple exercise 1
 
@@ -1160,7 +1523,34 @@ Tool schemas, metadata, and outputs should refer to shared domain entities and r
 
 **Difficulty:** Advanced · **Code concepts:** entity reference, metadata, domain contract
 
-[Official documentation](https://www.w3.org/TR/rdf11-primer/) · [Additional reading](https://modelcontextprotocol.io/docs/learn/architecture)
+[RDF vocabularies](https://www.w3.org/TR/rdf11-primer/#section-vocabulary) · [Additional reading](https://www.w3.org/TR/rdf11-primer/#section-triple)
+
+**Read for:** Trace shared terms for classes and properties into consistent API and retrieval contracts.
+
+### Learn with an example
+
+The same domain identifier connects the action contract and its supporting evidence. A shared vocabulary prevents one subsystem from interpreting customer as a name while another expects a stable ID.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+record = {"customer_id": "customer:17", "evidence_id": "document:3"}
+tool_input = {"customer_id": record["customer_id"]}
+citation = {"source": record["evidence_id"], "about": record["customer_id"]}
+print(tool_input["customer_id"] == citation["about"])
+```
+
+**Expected output**
+
+```text
+True
+```
+
+**Watch out for:** A common field spelling is not enough if systems assign different meaning or units to it.
+
+**Change one thing:** Write a contract distinguishing customer_id, account_id and document_id.
 
 ### Simple exercise 1
 

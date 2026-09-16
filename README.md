@@ -12,9 +12,11 @@ An eight-week curriculum with **152 granular milestones**, **608 exercises with 
 
 Code appears in a **Monaco editor with the existing dark green theme**, Python syntax highlighting, line numbers, folding, and copy controls. Your attempts autosave; references are read-only and stay hidden until requested. Python executes in a Pyodide Web Worker with a five-second timeout, stdout/stderr, and automated checks for 24 curated exercises. Roadmap reveal history is recorded separately from daily-session assistance metrics.
 
+Every milestone now includes a **guided learning section**: a direct link to the relevant documentation heading, a reading objective, a separate teaching example, expected output, a walkthrough, a common trap, and a small variation to try. These 152 examples are distinct from exercise solutions and appear in daily concept review too. See [how the learning guides work](docs/LEARNING_GUIDES.md) and the [documentation link audit](docs/documentation-link-audit.json).
+
 ## How to use it
 
-1. Open the roadmap and start with a concept whose prerequisites you understand.
+1. Open a roadmap milestone, follow its **Read this section** link, and study **Learn with an example** before attempting the questions.
 2. Click **Start Today's Session** for an approximately 80-minute session combining review, coding from memory, exercises, debugging, documentation, design, and reflection.
 3. Write code locally, record your verification evidence, and reveal hints or references only when needed.
 4. Rate confidence honestly, note mistakes, and return for scheduled revision and weekly reviews.

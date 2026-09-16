@@ -14,7 +14,33 @@ A BaseModel declares a runtime-validated data boundary with structured errors.
 
 **Difficulty:** Advanced · **Code concepts:** BaseModel, model_validate
 
-[Official documentation](https://docs.pydantic.dev/latest/concepts/models/) · [Additional reading](https://ai.pydantic.dev/agents/)
+[Basic model usage](https://pydantic.dev/docs/validation/latest/concepts/models/#basic-model-usage) · [Additional reading](https://docs.python.org/3/tutorial/controlflow.html#function-annotations)
+
+**Read for:** Trace a dictionary through model_validate and inspect the resulting field types.
+
+### Learn with an example
+
+Pydantic builds a model from external data and converts a compatible string to int under its default validation rules. The resulting field type is guaranteed by validation, unlike a plain annotation.
+
+**Worked example** - Browser-compatible Python - Requires pydantic
+
+```python
+from pydantic import BaseModel
+class Item(BaseModel):
+    quantity: int
+item = Item.model_validate({"quantity": "3"})
+print(item.quantity, type(item.quantity).__name__)
+```
+
+**Expected output**
+
+```text
+3 int
+```
+
+**Watch out for:** Coercion is a policy choice; strict mode rejects some values accepted by default.
+
+**Change one thing:** Enable strict validation and try the same string input.
 
 ### Simple exercise 1
 
@@ -105,7 +131,37 @@ Fields describe constraints and defaults that become part of the input contract.
 
 **Difficulty:** Advanced · **Code concepts:** Field, gt, min_length, default_factory
 
-[Official documentation](https://docs.pydantic.dev/latest/concepts/fields/) · [Additional reading](https://ai.pydantic.dev/agents/)
+[Numeric constraints](https://pydantic.dev/docs/validation/latest/concepts/fields/#numeric-constraints) · [Additional reading](https://pydantic.dev/docs/validation/latest/concepts/models/#basic-model-usage)
+
+**Read for:** Read gt/ge and lt/le, then find string constraints and default validation.
+
+### Learn with an example
+
+The field declares an inclusive range. Valid values enter the model; a violation produces structured error information rather than silently fixing the value. Defaults have their own validation configuration.
+
+**Worked example** - Browser-compatible Python - Requires pydantic
+
+```python
+from pydantic import BaseModel, Field, ValidationError
+class Page(BaseModel):
+    limit: int = Field(ge=1, le=20)
+print(Page(limit=5).limit)
+try:
+    Page(limit=0)
+except ValidationError as error:
+    print(error.errors()[0]["type"])
+```
+
+**Expected output**
+
+```text
+5
+greater_than_equal
+```
+
+**Watch out for:** A default is not automatically validated in every Pydantic configuration.
+
+**Change one thing:** Try the two endpoints and one value above the maximum.
 
 ### Simple exercise 1
 
@@ -193,7 +249,36 @@ Field validators add targeted normalization or validation at a chosen stage.
 
 **Difficulty:** Advanced · **Code concepts:** field_validator, before, after
 
-[Official documentation](https://docs.pydantic.dev/latest/concepts/validators/) · [Additional reading](https://ai.pydantic.dev/agents/)
+[After field validators](https://pydantic.dev/docs/validation/latest/concepts/validators/#field-after-validator) · [Additional reading](https://pydantic.dev/docs/validation/latest/concepts/fields/#numeric-constraints)
+
+**Read for:** Check the value's type when the validator runs and remember to return the accepted value.
+
+### Learn with an example
+
+This after-validator receives a value that has already passed the field's ordinary type validation. It returns the normalized value that will be stored in the model. Returning nothing would replace it with None.
+
+**Worked example** - Browser-compatible Python - Requires pydantic
+
+```python
+from pydantic import BaseModel, field_validator
+class Person(BaseModel):
+    name: str
+    @field_validator("name")
+    @classmethod
+    def normalize(cls, value):
+        return value.strip().title()
+print(Person(name=" ada ").name)
+```
+
+**Expected output**
+
+```text
+Ada
+```
+
+**Watch out for:** A validator must return the accepted or transformed value.
+
+**Change one thing:** Reject a name that becomes empty after stripping.
 
 ### Simple exercise 1
 
@@ -301,7 +386,41 @@ Model validators enforce relationships that cannot be expressed on one field alo
 
 **Difficulty:** Advanced · **Code concepts:** model_validator, cross-field invariant
 
-[Official documentation](https://docs.pydantic.dev/latest/concepts/validators/) · [Additional reading](https://ai.pydantic.dev/agents/)
+[After model validators](https://pydantic.dev/docs/validation/latest/concepts/validators/#model-after-validator) · [Additional reading](https://pydantic.dev/docs/validation/latest/concepts/validators/#field-after-validator)
+
+**Read for:** Find how to compare already-validated fields and why the validator returns self.
+
+### Learn with an example
+
+Each field can be a valid integer while their relationship is invalid. An after model validator sees the assembled model and enforces that relationship before returning self.
+
+**Worked example** - Browser-compatible Python - Requires pydantic
+
+```python
+from pydantic import BaseModel, model_validator, ValidationError
+class Window(BaseModel):
+    start: int
+    end: int
+    @model_validator(mode="after")
+    def ordered(self):
+        if self.end < self.start:
+            raise ValueError("end precedes start")
+        return self
+try:
+    Window(start=5, end=2)
+except ValidationError:
+    print("invalid window")
+```
+
+**Expected output**
+
+```text
+invalid window
+```
+
+**Watch out for:** Independent field constraints cannot express every cross-field rule.
+
+**Change one thing:** Allow equal endpoints, then explain whether that represents an empty or valid window in your domain.
 
 ### Simple exercise 1
 
@@ -411,7 +530,37 @@ Nested models validate structured subdocuments and locate errors within their pa
 
 **Difficulty:** Advanced · **Code concepts:** nested BaseModel, list[Model], errors
 
-[Official documentation](https://docs.pydantic.dev/latest/concepts/models/) · [Additional reading](https://ai.pydantic.dev/agents/)
+[Nested models](https://pydantic.dev/docs/validation/latest/concepts/models/#nested-models) · [Additional reading](https://pydantic.dev/docs/validation/latest/concepts/models/#basic-model-usage)
+
+**Read for:** Trace recursive construction and inspect the nested path in a validation error.
+
+### Learn with an example
+
+The nested dictionary is validated against Address during construction of Person. Callers receive a typed nested object instead of repeatedly checking dictionary keys. Validation errors retain the path to a failing nested field.
+
+**Worked example** - Browser-compatible Python - Requires pydantic
+
+```python
+from pydantic import BaseModel
+class Address(BaseModel):
+    city: str
+class Person(BaseModel):
+    address: Address
+person = Person.model_validate({"address": {"city": "Nis"}})
+print(type(person.address).__name__)
+print(person.address.city)
+```
+
+**Expected output**
+
+```text
+Address
+Nis
+```
+
+**Watch out for:** Using dict everywhere discards the nested contract you intended to enforce.
+
+**Change one thing:** Remove city and inspect the error location tuple.
 
 ### Simple exercise 1
 
@@ -500,7 +649,39 @@ A discriminator selects a specific model variant using a declared tag.
 
 **Difficulty:** Advanced · **Code concepts:** Annotated, Union, Literal, discriminator
 
-[Official documentation](https://docs.pydantic.dev/latest/concepts/unions/) · [Additional reading](https://ai.pydantic.dev/agents/)
+[String discriminators](https://pydantic.dev/docs/validation/latest/concepts/unions/#discriminated-unions-with-string-discriminators) · [Additional reading](https://pydantic.dev/docs/validation/latest/concepts/models/#nested-models)
+
+**Read for:** Follow how a Literal field chooses one union branch before validation.
+
+### Learn with an example
+
+The kind tag selects the Count branch before its remaining fields are validated. This is more explicit than asking a validator to guess which similar shape was intended.
+
+**Worked example** - Browser-compatible Python - Requires pydantic
+
+```python
+from typing import Annotated, Literal, Union
+from pydantic import BaseModel, Field, TypeAdapter
+class Text(BaseModel):
+    kind: Literal["text"]
+    value: str
+class Count(BaseModel):
+    kind: Literal["count"]
+    value: int
+Message = Annotated[Union[Text, Count], Field(discriminator="kind")]
+item = TypeAdapter(Message).validate_python({"kind": "count", "value": 3})
+print(type(item).__name__)
+```
+
+**Expected output**
+
+```text
+Count
+```
+
+**Watch out for:** A discriminator must reliably identify the intended branch.
+
+**Change one thing:** Use an unknown kind and compare its error with a wrong value type in the count branch.
 
 ### Simple exercise 1
 
@@ -603,7 +784,34 @@ Serialization converts validated objects into output forms with deliberate field
 
 **Difficulty:** Advanced · **Code concepts:** model_dump, model_dump_json, alias
 
-[Official documentation](https://docs.pydantic.dev/latest/concepts/serialization/) · [Additional reading](https://ai.pydantic.dev/agents/)
+[Python-mode serialization](https://pydantic.dev/docs/validation/latest/concepts/serialization/#python-mode) · [Additional reading](https://pydantic.dev/docs/validation/latest/concepts/models/#nested-models)
+
+**Read for:** Compare model_dump with JSON output and inspect by_alias and field exclusion.
+
+### Learn with an example
+
+Validation accepts the external alias, while the model uses request_id internally. Serialization can emit aliases and exclude internal fields. Choose the outgoing contract explicitly rather than exposing every model attribute.
+
+**Worked example** - Browser-compatible Python - Requires pydantic
+
+```python
+from pydantic import BaseModel, Field
+class Result(BaseModel):
+    request_id: str = Field(alias="requestId")
+    internal: str = Field(exclude=True)
+item = Result(requestId="r2", internal="debug")
+print(item.model_dump(by_alias=True))
+```
+
+**Expected output**
+
+```text
+{'requestId': 'r2'}
+```
+
+**Watch out for:** Successful validation does not make every field safe to return to clients.
+
+**Change one thing:** Compare model_dump() with model_dump(by_alias=True).
 
 ### Simple exercise 1
 
@@ -688,7 +896,35 @@ JSON Schema describes structural constraints for validation and interface discov
 
 **Difficulty:** Advanced · **Code concepts:** model_json_schema, properties, required
 
-[Official documentation](https://docs.pydantic.dev/latest/concepts/json_schema/) · [Additional reading](https://ai.pydantic.dev/agents/)
+[Generating JSON Schema](https://pydantic.dev/docs/validation/latest/concepts/json_schema/#generating-json-schema) · [Additional reading](https://pydantic.dev/docs/validation/latest/concepts/fields/#numeric-constraints)
+
+**Read for:** Find properties, required and constraints; a schema describes data but does not authorize actions.
+
+### Learn with an example
+
+The generated schema describes required fields and constraints for another component. It is a representation of a contract, not an execution engine or an authorization decision. Consumers must still validate requests and enforce policy.
+
+**Worked example** - Browser-compatible Python - Requires pydantic
+
+```python
+from pydantic import BaseModel, Field
+class Search(BaseModel):
+    limit: int = Field(ge=1)
+schema = Search.model_json_schema()
+print(schema["required"])
+print(schema["properties"]["limit"]["minimum"])
+```
+
+**Expected output**
+
+```text
+['limit']
+1
+```
+
+**Watch out for:** A model-visible schema cannot enforce server-side permissions by itself.
+
+**Change one thing:** Add an optional field and inspect how required changes.
 
 ### Simple exercise 1
 
@@ -777,7 +1013,38 @@ An agent loop exchanges messages with a model, executes authorized tool requests
 
 **Difficulty:** Advanced · **Code concepts:** message history, tool call, loop, stop condition
 
-[Official documentation](https://ai.pydantic.dev/agents/) · [Additional reading](https://ai.pydantic.dev/agents/)
+[Iterating over the agent graph](https://pydantic.dev/docs/ai/core-concepts/agent/#iterating-over-an-agents-graph) · [Additional reading](https://pydantic.dev/docs/validation/latest/concepts/json_schema/#generating-json-schema)
+
+**Read for:** Trace model requests, tool execution and the end node as separate runtime decisions.
+
+### Learn with an example
+
+This deterministic model shows the control loop without a paid API: inspect a model message, dispatch an allowed tool, and stop on a final answer. A real runtime also feeds results back to the model and enforces budgets and validation.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+tools = {"double": lambda value: value * 2}
+model_messages = iter([{"tool": "double", "value": 4}, {"answer": "done"}])
+for message in model_messages:
+    if "answer" in message:
+        print(message["answer"])
+        break
+    print(tools[message["tool"]](message["value"]))
+```
+
+**Expected output**
+
+```text
+8
+done
+```
+
+**Watch out for:** A model proposes tool use; application code decides what may actually execute.
+
+**Change one thing:** Introduce an unknown tool name and return a structured failure instead of dispatching it.
 
 ### Simple exercise 1
 
@@ -870,7 +1137,36 @@ An Agent coordinates typed dependencies, tools, and output around a model backen
 
 **Difficulty:** Advanced · **Code concepts:** Agent, model, run
 
-[Official documentation](https://ai.pydantic.dev/agents/) · [Additional reading](https://ai.pydantic.dev/agents/)
+[Running agents](https://pydantic.dev/docs/ai/core-concepts/agent/#running-agents) · [Additional reading](https://pydantic.dev/docs/ai/core-concepts/agent/#iterating-over-an-agents-graph)
+
+**Read for:** Compare run, run_sync and streaming; find where dependencies and results enter the run.
+
+### Learn with an example
+
+FunctionModel supplies a controlled model response so this real Agent example makes no external API request. Agent owns the run and exposes the final output. Use await agent.run inside an already-running async environment.
+
+**Worked example** - Run in local Python - Requires pydantic-ai
+
+```python
+from pydantic_ai import Agent
+from pydantic_ai.models.function import FunctionModel
+from pydantic_ai.messages import ModelResponse, TextPart
+def reply(messages, info):
+    return ModelResponse(parts=[TextPart(content="ready")])
+agent = Agent(FunctionModel(reply))
+result = agent.run_sync("status?")
+print(result.output)
+```
+
+**Expected output**
+
+```text
+ready
+```
+
+**Watch out for:** run_sync cannot start its own loop inside an active event loop.
+
+**Change one thing:** Change the controlled response and inspect the recorded message history.
 
 ### Simple exercise 1
 
@@ -963,7 +1259,39 @@ RunContext exposes run-specific dependencies to tools without global state.
 
 **Difficulty:** Advanced · **Code concepts:** RunContext, deps_type, deps
 
-[Official documentation](https://ai.pydantic.dev/dependencies/) · [Additional reading](https://ai.pydantic.dev/agents/)
+[Accessing dependencies](https://pydantic.dev/docs/ai/core-concepts/dependencies/#accessing-dependencies) · [Additional reading](https://pydantic.dev/docs/ai/core-concepts/agent/#running-agents)
+
+**Read for:** Follow RunContext.deps and distinguish per-run services from generated model arguments.
+
+### Learn with an example
+
+This plain-Python model separates trusted per-run dependencies from model-supplied lookup arguments. In Pydantic AI, RunContext.deps carries that dependency object into tools. The model should not choose its own tenant authority.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+from dataclasses import dataclass
+@dataclass
+class Dependencies:
+    tenant: str
+    records: dict
+def lookup(deps, key):
+    return deps.records.get((deps.tenant, key), "missing")
+deps = Dependencies("t1", {("t1", "a"): "allowed"})
+print(lookup(deps, "a"))
+```
+
+**Expected output**
+
+```text
+allowed
+```
+
+**Watch out for:** Putting tenant authority in freely generated tool arguments can cross access boundaries.
+
+**Change one thing:** Add a second tenant with the same record key and verify isolation.
 
 ### Simple exercise 1
 
@@ -1061,7 +1389,36 @@ Tools give an agent callable operations with explicit inputs and observable outc
 
 **Difficulty:** Advanced · **Code concepts:** tool, tool_plain, RunContext
 
-[Official documentation](https://ai.pydantic.dev/tools/) · [Additional reading](https://ai.pydantic.dev/agents/)
+[Registering function tools](https://pydantic.dev/docs/ai/tools-toolsets/tools/#registering-function-tools-via-decorator) · [Additional reading](https://pydantic.dev/docs/ai/core-concepts/dependencies/#accessing-dependencies)
+
+**Read for:** Compare tool with tool_plain; trace validated inputs into a Python function and its result back to the model.
+
+### Learn with an example
+
+The Python function is the behavior behind a tool. A framework exposes its name, documentation and argument schema, then calls it after validation. Keep its result bounded and useful for the next reasoning step.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+def lookup_order(order_id: str) -> str:
+    """Return the state of one known order."""
+    return {"o7": "shipped"}.get(order_id, "missing")
+print(lookup_order("o7"))
+print(lookup_order("other"))
+```
+
+**Expected output**
+
+```text
+shipped
+missing
+```
+
+**Watch out for:** A function exposed to a model still needs authorization and error handling at its boundary.
+
+**Change one thing:** Register this function with Agent.tool_plain and inspect the generated schema in the linked documentation.
 
 ### Simple exercise 1
 
@@ -1155,7 +1512,40 @@ Typed output makes result shape checkable; retries can ask for a corrected resul
 
 **Difficulty:** Advanced · **Code concepts:** output_type, validation, retry budget
 
-[Official documentation](https://ai.pydantic.dev/output/) · [Additional reading](https://ai.pydantic.dev/agents/)
+[Structured output](https://pydantic.dev/docs/ai/core-concepts/output/#structured-output) · [Additional reading](https://pydantic.dev/docs/ai/core-concepts/agent/#running-agents)
+
+**Read for:** Read output validation and retry behavior; valid shape does not guarantee truthful content.
+
+### Learn with an example
+
+This isolates the validation boundary used for structured agent output. A missing required field is rejected; a plausible but factually wrong reason can still validate. Retrying shape errors and evaluating truthfulness solve different problems.
+
+**Concept model** - Browser-compatible Python - Requires pydantic
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+from pydantic import BaseModel, ValidationError
+class Decision(BaseModel):
+    approved: bool
+    reason: str
+print(Decision.model_validate({"approved": False, "reason": "missing evidence"}).reason)
+try:
+    Decision.model_validate({"approved": True})
+except ValidationError:
+    print("missing reason")
+```
+
+**Expected output**
+
+```text
+missing evidence
+missing reason
+```
+
+**Watch out for:** Schema-valid output can still be incorrect or unauthorized.
+
+**Change one thing:** Supply a false factual reason and explain what an evaluation would need to catch it.
 
 ### Simple exercise 1
 
@@ -1255,7 +1645,38 @@ Streaming exposes incremental results while history carries prior conversation s
 
 **Difficulty:** Advanced · **Code concepts:** stream, message history, final result
 
-[Official documentation](https://ai.pydantic.dev/agents/) · [Additional reading](https://ai.pydantic.dev/agents/)
+[Runs versus conversations](https://pydantic.dev/docs/ai/core-concepts/agent/#runs-vs-conversations) · [Additional reading](https://pydantic.dev/docs/ai/core-concepts/output/#structured-output)
+
+**Read for:** Follow message history between runs and compare complete output with partial streamed output.
+
+### Learn with an example
+
+This model distinguishes incremental transport from committed conversation state. The partial text grows during streaming; the completed turn is then recorded. Real tool histories need their call/result structure preserved as well.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+chunks = ["The ", "order ", "shipped."]
+partial = ""
+for chunk in chunks:
+    partial += chunk
+print(partial)
+history = [{"role": "user", "text": "status?"}, {"role": "assistant", "text": partial}]
+print(len(history))
+```
+
+**Expected output**
+
+```text
+The order shipped.
+2
+```
+
+**Watch out for:** A partial structured value should not trigger an irreversible action before final validation.
+
+**Change one thing:** Stop after the first chunk and decide what should be saved as cancelled versus complete.
 
 ### Simple exercise 1
 
@@ -1354,7 +1775,39 @@ Request and token budgets bound a run's resource use and prevent uncontrolled lo
 
 **Difficulty:** Advanced · **Code concepts:** UsageLimits, request budget, token budget
 
-[Official documentation](https://ai.pydantic.dev/agents/#usage-limits) · [Additional reading](https://ai.pydantic.dev/agents/)
+[Usage limits](https://pydantic.dev/docs/ai/core-concepts/agent/#usage-limits) · [Additional reading](https://pydantic.dev/docs/ai/core-concepts/agent/#iterating-over-an-agents-graph)
+
+**Read for:** Distinguish model requests, tokens, tool calls and wall-clock time as different budgets.
+
+### Learn with an example
+
+The budget check happens before admitting another operation. Tokens, model requests, tool calls, time and cost require distinct accounting. This local model demonstrates the policy without consuming an API budget.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+remaining_calls = 2
+for request in ["first", "second", "third"]:
+    if remaining_calls == 0:
+        print("budget exhausted")
+        break
+    remaining_calls -= 1
+    print(request)
+```
+
+**Expected output**
+
+```text
+first
+second
+budget exhausted
+```
+
+**Watch out for:** A retry is still work and must consume the same end-to-end budget.
+
+**Change one thing:** Give each request a different cost and enforce both a call count and a cost limit.
 
 ### Simple exercise 1
 
@@ -1450,7 +1903,36 @@ Test models and fake dependencies verify orchestration without relying on live m
 
 **Difficulty:** Advanced · **Code concepts:** TestModel, FunctionModel, fake tools
 
-[Official documentation](https://ai.pydantic.dev/testing/) · [Additional reading](https://ai.pydantic.dev/agents/)
+[FunctionModel tests](https://pydantic.dev/docs/ai/guides/testing/#unit-testing-with-functionmodel) · [Additional reading](https://pydantic.dev/docs/ai/tools-toolsets/tools/#registering-function-tools-via-decorator)
+
+**Read for:** Read how controlled model responses isolate application behavior from model quality.
+
+### Learn with an example
+
+A deterministic model substitute makes the application path repeatable. In Pydantic AI, FunctionModel serves this role with real message objects. This proves transformation and wiring, not the quality of a live model's reasoning.
+
+**Concept model** - Browser-compatible Python
+
+This example isolates the concept; it is not a production framework implementation.
+
+```python
+def run_agent(model):
+    request = model("status")
+    return request["answer"].upper()
+def fake_model(prompt):
+    return {"answer": "ready"}
+print(run_agent(fake_model))
+```
+
+**Expected output**
+
+```text
+READY
+```
+
+**Watch out for:** A passing fake-model test is not evidence that a real model chooses good tools.
+
+**Change one thing:** Make the substitute return malformed output and verify the failure path separately.
 
 ### Simple exercise 1
 

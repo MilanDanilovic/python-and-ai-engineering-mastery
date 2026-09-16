@@ -14,7 +14,35 @@ Assignment binds a name to an object; rebinding a name does not modify other nam
 
 **Difficulty:** Foundational · **Code concepts:** assignment, id, type
 
-[Official documentation](https://docs.python.org/3/reference/datamodel.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Binding of names](https://docs.python.org/3/reference/executionmodel.html#binding-of-names) · [Additional reading](https://docs.python.org/3/reference/datamodel.html#objects-values-and-types)
+
+**Read for:** Read how assignment binds names; distinguish a name from the object it refers to.
+
+### Learn with an example
+
+The first assignment creates one list. Both names then refer to it, so append is visible through bag. Reassigning second_name creates a new binding without touching the original list.
+
+**Worked example** - Browser-compatible Python
+
+```python
+bag = ["apple"]
+second_name = bag
+second_name.append("pear")
+print(bag)
+second_name = ["plum"]
+print(bag)
+```
+
+**Expected output**
+
+```text
+['apple', 'pear']
+['apple', 'pear']
+```
+
+**Watch out for:** An assignment does not copy a mutable object.
+
+**Change one thing:** Replace the reassignment with second_name.clear(). Predict what bag contains.
 
 ### Simple exercise 1
 
@@ -105,7 +133,33 @@ A mutable object can change in place while retaining its identity; immutable obj
 
 **Difficulty:** Foundational · **Code concepts:** list.append, tuple, id
 
-[Official documentation](https://docs.python.org/3/reference/datamodel.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Objects, values and types](https://docs.python.org/3/reference/datamodel.html#objects-values-and-types) · [Additional reading](https://docs.python.org/3/reference/executionmodel.html#binding-of-names)
+
+**Read for:** Find the distinction between identity, type and value, including mutable contents inside tuples.
+
+### Learn with an example
+
+The tuple keeps the same reference in its only slot. The list reached through that slot can still change. Immutability describes the tuple's own structure, not everything reachable from it.
+
+**Worked example** - Browser-compatible Python
+
+```python
+box = (["draft"],)
+box[0].append("reviewed")
+print(box)
+print(type(box).__name__)
+```
+
+**Expected output**
+
+```text
+(['draft', 'reviewed'],)
+tuple
+```
+
+**Watch out for:** Immutable does not mean recursively frozen.
+
+**Change one thing:** Try replacing box[0] instead of appending to the nested list. Explain the TypeError.
 
 ### Simple exercise 1
 
@@ -197,7 +251,36 @@ Equality compares values according to a type's protocol; identity tests whether 
 
 **Difficulty:** Foundational · **Code concepts:** ==, is, None
 
-[Official documentation](https://docs.python.org/3/reference/datamodel.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Identity comparisons](https://docs.python.org/3/reference/expressions.html#is-not) · [Additional reading](https://docs.python.org/3/reference/executionmodel.html#binding-of-names)
+
+**Read for:** Compare is with ==; identify when object identity is the intended question.
+
+### Learn with an example
+
+The two list displays allocate separate objects with equal contents. alias adds another name for left's object. Equality asks about values; identity asks whether there is just one object.
+
+**Worked example** - Browser-compatible Python
+
+```python
+left = [7]
+right = [7]
+alias = left
+print(left == right)
+print(left is right)
+print(left is alias)
+```
+
+**Expected output**
+
+```text
+True
+False
+True
+```
+
+**Watch out for:** Do not use is to compare strings or numbers by value.
+
+**Change one thing:** Change right[0] and predict which other names observe the change.
 
 ### Simple exercise 1
 
@@ -279,7 +362,35 @@ None represents absence; empty containers and numeric zero are also false in boo
 
 **Difficulty:** Foundational · **Code concepts:** None, bool, if, or
 
-[Official documentation](https://docs.python.org/3/library/stdtypes.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Truth value testing](https://docs.python.org/3/library/stdtypes.html#truth-value-testing) · [Additional reading](https://docs.python.org/3/reference/expressions.html#is-not)
+
+**Read for:** Find the false values and explain why zero is different from missing.
+
+### Learn with an example
+
+The explicit None check preserves a deliberately supplied zero. The or expression chooses its second operand whenever the first is false, including valid zero values.
+
+**Worked example** - Browser-compatible Python
+
+```python
+def timeout(value):
+    return 10 if value is None else value
+print(timeout(None))
+print(timeout(0))
+print(0 or 10)
+```
+
+**Expected output**
+
+```text
+10
+0
+10
+```
+
+**Watch out for:** Missing and false are different conditions.
+
+**Change one thing:** Try an empty string and False, then decide which values your API should accept.
 
 ### Simple exercise 1
 
@@ -356,7 +467,33 @@ Integers are arbitrary precision; binary floating point approximates many decima
 
 **Difficulty:** Foundational · **Code concepts:** int, float, Decimal
 
-[Official documentation](https://docs.python.org/3/library/decimal.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Decimal quick-start](https://docs.python.org/3/library/decimal.html#quick-start-tutorial) · [Additional reading](https://docs.python.org/3/reference/executionmodel.html#binding-of-names)
+
+**Read for:** Compare construction from strings and floats, then inspect rounding with quantize.
+
+### Learn with an example
+
+Binary floating point cannot exactly represent every decimal fraction. Constructing Decimal from text preserves the decimal quantity before arithmetic begins.
+
+**Worked example** - Browser-compatible Python
+
+```python
+from decimal import Decimal
+print(0.1 + 0.2 == 0.3)
+price = Decimal("0.10")
+print(price * 3)
+```
+
+**Expected output**
+
+```text
+False
+0.30
+```
+
+**Watch out for:** Decimal(0.1) starts with the already-approximated float.
+
+**Change one thing:** Print Decimal(0.1) and compare it with Decimal("0.1").
 
 ### Simple exercise 1
 
@@ -438,7 +575,35 @@ Strings are immutable Unicode sequences; slicing selects a subsequence with an e
 
 **Difficulty:** Foundational · **Code concepts:** str, encode, decode, slicing
 
-[Official documentation](https://docs.python.org/3/library/stdtypes.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Text sequence type str](https://docs.python.org/3/library/stdtypes.html#text-sequence-type-str) · [Additional reading](https://docs.python.org/3/reference/executionmodel.html#binding-of-names)
+
+**Read for:** Read about Unicode strings and encoding before applying sequence slicing.
+
+### Learn with an example
+
+The string has four Unicode code points, while UTF-8 uses five bytes here. The slice includes indexes 1 and 2, but excludes 3. Decoding reconstructs the text before character-level work.
+
+**Worked example** - Browser-compatible Python
+
+```python
+word = "caf\u00e9"
+encoded = word.encode("utf-8")
+print(len(word), len(encoded))
+print(word[1:3])
+print(encoded.decode("utf-8") == word)
+```
+
+**Expected output**
+
+```text
+4 5
+af
+True
+```
+
+**Watch out for:** Byte offsets and string indexes are not interchangeable.
+
+**Change one thing:** Slice the encoded bytes inside the final character and observe the decoding failure.
 
 ### Simple exercise 1
 
@@ -521,7 +686,35 @@ Lists preserve order and support in-place updates; slicing creates a new outer l
 
 **Difficulty:** Foundational · **Code concepts:** list, append, extend, enumerate
 
-[Official documentation](https://docs.python.org/3/tutorial/datastructures.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[More on lists](https://docs.python.org/3/tutorial/datastructures.html#more-on-lists) · [Additional reading](https://docs.python.org/3/reference/datamodel.html#objects-values-and-types)
+
+**Read for:** Compare append and extend and note which operations mutate the list.
+
+### Learn with an example
+
+append adds its argument as one element. extend iterates over its argument and adds each element. Both methods mutate the existing list.
+
+**Worked example** - Browser-compatible Python
+
+```python
+first = [1]
+second = [1]
+first.append([2, 3])
+second.extend([2, 3])
+print(first)
+print(second)
+```
+
+**Expected output**
+
+```text
+[1, [2, 3]]
+[1, 2, 3]
+```
+
+**Watch out for:** Assigning the result of append replaces your variable with None.
+
+**Change one thing:** Store the return value of append and print it next to the list.
 
 ### Simple exercise 1
 
@@ -605,7 +798,34 @@ Dictionaries associate hashable keys with values and preserve insertion order.
 
 **Difficulty:** Foundational · **Code concepts:** dict, get, items, setdefault
 
-[Official documentation](https://docs.python.org/3/tutorial/datastructures.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[dict.setdefault](https://docs.python.org/3/library/stdtypes.html#dict.setdefault) · [Additional reading](https://docs.python.org/3/tutorial/datastructures.html#more-on-lists)
+
+**Read for:** Trace the returned value for an existing key and a missing key.
+
+### Learn with an example
+
+setdefault returns the stored list when a key exists and installs a new list otherwise. Appending changes that bucket. get returns a fallback without adding an absent key.
+
+**Worked example** - Browser-compatible Python
+
+```python
+buckets = {}
+for kind in ["warning", "info", "warning"]:
+    buckets.setdefault(kind, []).append(kind)
+print(buckets["warning"])
+print(buckets.get("error", []))
+```
+
+**Expected output**
+
+```text
+['warning', 'warning']
+[]
+```
+
+**Watch out for:** Reusing one mutable list as every bucket joins unrelated groups.
+
+**Change one thing:** Check whether error is in buckets after the get call.
 
 ### Simple exercise 1
 
@@ -693,7 +913,33 @@ Sets eliminate duplicate hashable values; equality and hashing must remain consi
 
 **Difficulty:** Foundational · **Code concepts:** set, frozenset, hash
 
-[Official documentation](https://docs.python.org/3/tutorial/datastructures.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Sets](https://docs.python.org/3/tutorial/datastructures.html#sets) · [Additional reading](https://docs.python.org/3/reference/expressions.html#is-not)
+
+**Read for:** Try union and intersection, then explain why set elements must be hashable.
+
+### Learn with an example
+
+Intersection selects shared members; subtraction selects members present only on the left. Sorting is used only to make the displayed result deterministic.
+
+**Worked example** - Browser-compatible Python
+
+```python
+registered = {"a", "b", "c"}
+active = {"b", "c", "d"}
+print(sorted(registered & active))
+print(sorted(registered - active))
+```
+
+**Expected output**
+
+```text
+['b', 'c']
+['a']
+```
+
+**Watch out for:** Set iteration order is not an ordering contract.
+
+**Change one thing:** Try adding a list to a set, then represent the same values with a tuple.
 
 ### Simple exercise 1
 
@@ -772,7 +1018,33 @@ Unpacking assigns sequence elements to names, with an optional starred remainder
 
 **Difficulty:** Foundational · **Code concepts:** tuple, starred assignment
 
-[Official documentation](https://docs.python.org/3/tutorial/datastructures.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Tuples and sequences](https://docs.python.org/3/tutorial/datastructures.html#tuples-and-sequences) · [Additional reading](https://docs.python.org/3/tutorial/datastructures.html#more-on-lists)
+
+**Read for:** Find sequence unpacking and contrast creating a tuple with assigning its elements.
+
+### Learn with an example
+
+The first two names receive individual elements. The starred target collects all remaining elements into a list, even though the source is a tuple.
+
+**Worked example** - Browser-compatible Python
+
+```python
+record = (201, "created", "job-8", 4)
+status, message, *details = record
+print(status, message)
+print(details)
+```
+
+**Expected output**
+
+```text
+201 created
+['job-8', 4]
+```
+
+**Watch out for:** A starred target is a list, not necessarily the source's container type.
+
+**Change one thing:** Remove the last two source elements and inspect details.
 
 ### Simple exercise 1
 
@@ -854,7 +1126,35 @@ A for loop consumes an iterable; range uses an exclusive endpoint and conditiona
 
 **Difficulty:** Foundational · **Code concepts:** for, while, range, break, continue
 
-[Official documentation](https://docs.python.org/3/tutorial/controlflow.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[The range function](https://docs.python.org/3/tutorial/controlflow.html#the-range-function) · [Additional reading](https://docs.python.org/3/library/stdtypes.html#truth-value-testing)
+
+**Read for:** Check the exclusive stop and connect range to zero-based sequence indexes.
+
+### Learn with an example
+
+range starts at 2 and stops before 5. The loop else runs because iteration finishes without a break. It is attached to the loop, not to an if inside it.
+
+**Worked example** - Browser-compatible Python
+
+```python
+for number in range(2, 5):
+    print(number)
+else:
+    print("finished")
+```
+
+**Expected output**
+
+```text
+2
+3
+4
+finished
+```
+
+**Watch out for:** An exclusive stop is not the last emitted value.
+
+**Change one thing:** Break when number is 3 and predict whether finished is printed.
 
 ### Simple exercise 1
 
@@ -940,7 +1240,33 @@ A comprehension expresses a transformation and optional predicate while creating
 
 **Difficulty:** Foundational · **Code concepts:** list comprehension, dict comprehension
 
-[Official documentation](https://docs.python.org/3/tutorial/datastructures.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[List comprehensions](https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions) · [Additional reading](https://docs.python.org/3/tutorial/controlflow.html#the-range-function)
+
+**Read for:** Identify the output expression, iteration clause and filter in that order.
+
+### Learn with an example
+
+The filter decides which input values survive; the expression computes an output for each survivor. A new list is created and the input is untouched.
+
+**Worked example** - Browser-compatible Python
+
+```python
+readings = [-2, 0, 3, 5]
+positive_squares = [n * n for n in readings if n > 0]
+print(positive_squares)
+print(readings)
+```
+
+**Expected output**
+
+```text
+[9, 25]
+[-2, 0, 3, 5]
+```
+
+**Watch out for:** A comprehension with side effects can hide execution order.
+
+**Change one thing:** Move the filtering into a normal loop and compare both versions.
 
 ### Simple exercise 1
 
@@ -1019,7 +1345,35 @@ Exceptions transfer control to a matching handler; finally supports cleanup acro
 
 **Difficulty:** Foundational · **Code concepts:** raise, try, except, finally
 
-[Official documentation](https://docs.python.org/3/tutorial/errors.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Handling exceptions](https://docs.python.org/3/tutorial/errors.html#handling-exceptions) · [Additional reading](https://docs.python.org/3/library/stdtypes.html#truth-value-testing)
+
+**Read for:** Follow where execution resumes after a matching handler; avoid catching unrelated errors.
+
+### Learn with an example
+
+int raises before count is assigned. The matching handler runs, and finally runs afterward whether parsing succeeded or failed. Narrow handling keeps unrelated failures visible.
+
+**Worked example** - Browser-compatible Python
+
+```python
+try:
+    count = int("many")
+except ValueError:
+    print("not a number")
+finally:
+    print("cleanup")
+```
+
+**Expected output**
+
+```text
+not a number
+cleanup
+```
+
+**Watch out for:** Catching every Exception can disguise programming errors as invalid input.
+
+**Change one thing:** Replace many with 12 and predict which messages remain.
 
 ### Simple exercise 1
 
@@ -1109,7 +1463,37 @@ Path objects describe paths; context managers close opened files when a block ex
 
 **Difficulty:** Foundational · **Code concepts:** Path, open, with, encoding
 
-[Official documentation](https://docs.python.org/3/library/pathlib.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Path.open](https://docs.python.org/3/library/pathlib.html#pathlib.Path.open) · [Additional reading](https://docs.python.org/3/tutorial/errors.html#handling-exceptions)
+
+**Read for:** Read the encoding parameter and the with-block example for reliable cleanup.
+
+### Learn with an example
+
+Path describes the location; open creates the resource. Exiting the inner with closes the file even if its body fails. The temporary directory isolates this example's filesystem changes.
+
+**Worked example** - Browser-compatible Python
+
+```python
+from pathlib import Path
+from tempfile import TemporaryDirectory
+with TemporaryDirectory() as folder:
+    path = Path(folder) / "note.txt"
+    path.write_text("ready", encoding="utf-8")
+    with path.open(encoding="utf-8") as handle:
+        print(handle.read())
+    print(handle.closed)
+```
+
+**Expected output**
+
+```text
+ready
+True
+```
+
+**Watch out for:** A path object is not an open file handle.
+
+**Change one thing:** Raise an exception inside the file block and inspect closed in a handler outside it.
 
 ### Simple exercise 1
 
@@ -1199,7 +1583,33 @@ JSON decoding produces basic Python values; it does not validate application-spe
 
 **Difficulty:** Foundational · **Code concepts:** json.loads, json.dumps, JSONDecodeError
 
-[Official documentation](https://docs.python.org/3/library/json.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[json.loads](https://docs.python.org/3/library/json.html#json.loads) · [Additional reading](https://docs.python.org/3/library/stdtypes.html#dict.setdefault)
+
+**Read for:** Check the conversion table and JSONDecodeError; decoding is not domain validation.
+
+### Learn with an example
+
+JSON booleans and numbers become Python values. A JSON array is valid syntax but becomes a list, so a caller expecting an object must still check its contract.
+
+**Worked example** - Browser-compatible Python
+
+```python
+import json
+payload = json.loads('{"active": true, "count": 2}')
+print(payload["active"], type(payload["count"]).__name__)
+print(isinstance(json.loads("[]"), dict))
+```
+
+**Expected output**
+
+```text
+True int
+False
+```
+
+**Watch out for:** Successful decoding does not prove required fields exist.
+
+**Change one thing:** Decode null and decide what your boundary should do with the result.
 
 ### Simple exercise 1
 
@@ -1285,7 +1695,34 @@ def creates a callable and binds it to a name; its body runs on invocation.
 
 **Difficulty:** Foundational · **Code concepts:** def, call, docstring
 
-[Official documentation](https://docs.python.org/3/tutorial/controlflow.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Defining functions](https://docs.python.org/3/tutorial/controlflow.html#defining-functions) · [Additional reading](https://docs.python.org/3/reference/executionmodel.html#binding-of-names)
+
+**Read for:** Follow when def executes and when the function body runs.
+
+### Learn with an example
+
+def binds a callable object. Its body runs only when greet is invoked. The caller chooses to print the returned string, keeping computation separate from display.
+
+**Worked example** - Browser-compatible Python
+
+```python
+def greet(name):
+    """Return a greeting without printing it."""
+    return f"Hello, {name}"
+print(greet("Mina"))
+print(callable(greet))
+```
+
+**Expected output**
+
+```text
+Hello, Mina
+True
+```
+
+**Watch out for:** Writing greet without parentheses refers to the function; it does not run it.
+
+**Change one thing:** Assign greet to another variable and call the function through that name.
 
 ### Simple exercise 1
 
@@ -1369,7 +1806,37 @@ return ends a function invocation and provides a value; falling through returns 
 
 **Difficulty:** Foundational · **Code concepts:** return, None, tuple
 
-[Official documentation](https://docs.python.org/3/tutorial/controlflow.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[The return statement](https://docs.python.org/3/reference/simple_stmts.html#the-return-statement) · [Additional reading](https://docs.python.org/3/tutorial/controlflow.html#defining-functions)
+
+**Read for:** Distinguish sending a value to the caller from displaying text.
+
+### Learn with an example
+
+show sends text to the console but returns None because it reaches the end. double sends a number to its caller, which can use that result in another expression.
+
+**Worked example** - Browser-compatible Python
+
+```python
+def show(value):
+    print(value)
+def double(value):
+    return value * 2
+result = show(4)
+print(result)
+print(double(4) + 1)
+```
+
+**Expected output**
+
+```text
+4
+None
+9
+```
+
+**Watch out for:** Console output is not a return value.
+
+**Change one thing:** Add an explicit return to show and compare the stored result.
 
 ### Simple exercise 1
 
@@ -1453,7 +1920,33 @@ Positional arguments bind to parameters in order; positional-only parameters can
 
 **Difficulty:** Foundational · **Code concepts:** parameters, positional arguments, /
 
-[Official documentation](https://docs.python.org/3/tutorial/controlflow.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Positional-or-keyword arguments](https://docs.python.org/3/tutorial/controlflow.html#positional-or-keyword-arguments) · [Additional reading](https://docs.python.org/3/tutorial/controlflow.html#defining-functions)
+
+**Read for:** Match arguments to parameter positions and compare the same call using names.
+
+### Learn with an example
+
+The first positional argument binds left and the second binds right. Changing order changes meaning even though both inputs have the same type.
+
+**Worked example** - Browser-compatible Python
+
+```python
+def subtract(left, right):
+    return left - right
+print(subtract(9, 2))
+print(subtract(2, 9))
+```
+
+**Expected output**
+
+```text
+7
+-7
+```
+
+**Watch out for:** Types alone cannot detect every accidentally swapped argument.
+
+**Change one thing:** Call subtract using keyword arguments in reverse written order.
 
 ### Simple exercise 1
 
@@ -1532,7 +2025,31 @@ Keyword arguments bind by parameter name; keyword-only parameters require explic
 
 **Difficulty:** Foundational · **Code concepts:** keyword arguments, * separator
 
-[Official documentation](https://docs.python.org/3/tutorial/controlflow.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Keyword arguments](https://docs.python.org/3/tutorial/controlflow.html#keyword-arguments) · [Additional reading](https://docs.python.org/3/tutorial/controlflow.html#positional-or-keyword-arguments)
+
+**Read for:** Read the invalid-call examples, especially duplicate values for one parameter.
+
+### Learn with an example
+
+The bare star makes prefix keyword-only. Naming it at the call site documents its role and prevents it from being accidentally supplied as a second positional value.
+
+**Worked example** - Browser-compatible Python
+
+```python
+def label(name, *, prefix):
+    return f"{prefix}: {name}"
+print(label("queue", prefix="service"))
+```
+
+**Expected output**
+
+```text
+service: queue
+```
+
+**Watch out for:** A keyword-only parameter still needs a value unless it has a default.
+
+**Change one thing:** Try label("queue", "service") and explain the error.
 
 ### Simple exercise 1
 
@@ -1611,7 +2128,35 @@ Default expressions are evaluated when the function definition executes, not on 
 
 **Difficulty:** Foundational · **Code concepts:** default expression, def
 
-[Official documentation](https://docs.python.org/3/tutorial/controlflow.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Default argument values](https://docs.python.org/3/tutorial/controlflow.html#default-argument-values) · [Additional reading](https://docs.python.org/3/tutorial/controlflow.html#keyword-arguments)
+
+**Read for:** Find when a default expression is evaluated, not just how to omit an argument.
+
+### Learn with an example
+
+The default expression is evaluated while def executes, so changing initial later does not change that saved default. Supplying a value explicitly replaces the default for that call.
+
+**Worked example** - Browser-compatible Python
+
+```python
+initial = 3
+def attempts(limit=initial):
+    return limit
+initial = 8
+print(attempts())
+print(attempts(5))
+```
+
+**Expected output**
+
+```text
+3
+5
+```
+
+**Watch out for:** Defaults are not recomputed each time a function is called.
+
+**Change one thing:** Move def below the reassignment and predict the new default.
 
 ### Simple exercise 1
 
@@ -1695,7 +2240,36 @@ A mutable default can be shared by successive calls; an explicit sentinel allows
 
 **Difficulty:** Foundational · **Code concepts:** None sentinel, list default
 
-[Official documentation](https://docs.python.org/3/tutorial/controlflow.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Mutable default example](https://docs.python.org/3/tutorial/controlflow.html#default-argument-values) · [Additional reading](https://docs.python.org/3/reference/datamodel.html#objects-values-and-types)
+
+**Read for:** Trace the accumulating list example and the None-sentinel repair.
+
+### Learn with an example
+
+Each omitted bucket reaches the None branch and gets a fresh list. An explicitly supplied list is deliberately reused. This expresses ownership instead of sharing a hidden default list.
+
+**Worked example** - Browser-compatible Python
+
+```python
+def collect(value, bucket=None):
+    if bucket is None:
+        bucket = []
+    bucket.append(value)
+    return bucket
+print(collect("red"))
+print(collect("blue"))
+```
+
+**Expected output**
+
+```text
+['red']
+['blue']
+```
+
+**Watch out for:** Using bucket or [] incorrectly replaces an explicitly supplied empty list.
+
+**Change one thing:** Pass the same list into two calls and compare that behavior with omitted arguments.
 
 ### Simple exercise 1
 
@@ -1784,7 +2358,36 @@ A starred parameter collects additional positional arguments into a tuple.
 
 **Difficulty:** Foundational · **Code concepts:** *args, tuple
 
-[Official documentation](https://docs.python.org/3/tutorial/controlflow.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Arbitrary argument lists](https://docs.python.org/3/tutorial/controlflow.html#arbitrary-argument-lists) · [Additional reading](https://docs.python.org/3/tutorial/controlflow.html#positional-or-keyword-arguments)
+
+**Read for:** Identify the tuple collected by *args and why later parameters are keyword-only.
+
+### Learn with an example
+
+The star in the definition collects extra positional arguments into one tuple. With no arguments the tuple is empty; sum has a defined result for that case.
+
+**Worked example** - Browser-compatible Python
+
+```python
+def describe(*values):
+    print(type(values).__name__, len(values))
+    return sum(values)
+print(describe(2, 5))
+print(describe())
+```
+
+**Expected output**
+
+```text
+tuple 2
+7
+tuple 0
+0
+```
+
+**Watch out for:** The name args is conventional; the star creates the behavior.
+
+**Change one thing:** Rename values to numbers and confirm that the behavior is unchanged.
 
 ### Simple exercise 1
 
@@ -1862,7 +2465,33 @@ A double-starred parameter collects otherwise unbound named arguments into a dic
 
 **Difficulty:** Foundational · **Code concepts:** **kwargs, dict
 
-[Official documentation](https://docs.python.org/3/tutorial/controlflow.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Collecting keyword arguments](https://docs.python.org/3/tutorial/controlflow.html#keyword-arguments) · [Additional reading](https://docs.python.org/3/library/stdtypes.html#dict.setdefault)
+
+**Read for:** Find the **name example and distinguish that dictionary from explicitly declared parameters.
+
+### Learn with an example
+
+The double star gathers otherwise-unbound named arguments into a dictionary. Looking up an optional field does not require inventing a positional convention.
+
+**Worked example** - Browser-compatible Python
+
+```python
+def describe(**fields):
+    print(sorted(fields))
+    return fields.get("region", "local")
+print(describe(service="worker", region="eu"))
+```
+
+**Expected output**
+
+```text
+['region', 'service']
+eu
+```
+
+**Watch out for:** Collecting keywords does not validate which keys are allowed.
+
+**Change one thing:** Reject an unknown key and decide what exception to raise.
 
 ### Simple exercise 1
 
@@ -1943,7 +2572,34 @@ Star and double-star expressions expand values into positional and named argumen
 
 **Difficulty:** Foundational · **Code concepts:** f(*values), f(**options)
 
-[Official documentation](https://docs.python.org/3/tutorial/controlflow.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Unpacking argument lists](https://docs.python.org/3/tutorial/controlflow.html#unpacking-argument-lists) · [Additional reading](https://docs.python.org/3/tutorial/controlflow.html#arbitrary-argument-lists)
+
+**Read for:** Compare * at a call site with * in a parameter list.
+
+### Learn with an example
+
+At a call site, a star expands a sequence into positional arguments; a double star expands a mapping into keyword arguments. The function's signature remains unchanged.
+
+**Worked example** - Browser-compatible Python
+
+```python
+def volume(width, height, depth):
+    return width * height * depth
+size = (2, 3, 4)
+print(volume(*size))
+print(volume(**{"width": 2, "height": 3, "depth": 4}))
+```
+
+**Expected output**
+
+```text
+24
+24
+```
+
+**Watch out for:** A mapping key that does not match a parameter causes a call error.
+
+**Change one thing:** Add an extra mapping key and explain why the call is rejected.
 
 ### Simple exercise 1
 
@@ -2024,7 +2680,33 @@ Annotations describe intended input and output types; ordinary calls do not auto
 
 **Difficulty:** Foundational · **Code concepts:** parameter annotations, return annotation
 
-[Official documentation](https://docs.python.org/3/library/typing.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Function annotations](https://docs.python.org/3/tutorial/controlflow.html#function-annotations) · [Additional reading](https://docs.python.org/3/reference/simple_stmts.html#the-return-statement)
+
+**Read for:** Read where annotations are stored and why they do not by themselves validate inputs.
+
+### Learn with an example
+
+Annotations describe the intended contract to readers and tooling. Python still performs string repetition on the second call because no runtime validation was installed.
+
+**Worked example** - Browser-compatible Python
+
+```python
+def twice(value: int) -> int:
+    return value * 2
+print(twice(3))
+print(twice("ha"))
+```
+
+**Expected output**
+
+```text
+6
+haha
+```
+
+**Watch out for:** An annotated function is not automatically a validating boundary.
+
+**Change one thing:** Run a static checker on the second call and compare its report with runtime behavior.
 
 ### Simple exercise 1
 
@@ -2106,7 +2788,34 @@ Functions can be stored, passed, and returned like other objects.
 
 **Difficulty:** Foundational · **Code concepts:** callable, function reference, dispatch table
 
-[Official documentation](https://docs.python.org/3/reference/datamodel.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[User-defined functions](https://docs.python.org/3/reference/datamodel.html#user-defined-functions) · [Additional reading](https://docs.python.org/3/tutorial/controlflow.html#defining-functions)
+
+**Read for:** Inspect function attributes and distinguish a function object from its return value.
+
+### Learn with an example
+
+The dictionary stores the function object. Looking it up and adding parentheses invokes it. greet() instead produces a string, which cannot be called.
+
+**Worked example** - Browser-compatible Python
+
+```python
+def greet():
+    return "hello"
+operations = {"welcome": greet}
+print(operations["welcome"]())
+print(callable(greet), callable(greet()))
+```
+
+**Expected output**
+
+```text
+hello
+True False
+```
+
+**Watch out for:** Storing greet() executes immediately and stores its result.
+
+**Change one thing:** Replace the dictionary value with greet() and predict the failure at dispatch time.
 
 ### Simple exercise 1
 
@@ -2187,7 +2896,31 @@ A higher order function accepts or returns a callable, separating policy from me
 
 **Difficulty:** Foundational · **Code concepts:** Callable, callback, sorted key
 
-[Official documentation](https://docs.python.org/3/library/functions.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[sorted and its key function](https://docs.python.org/3/library/functions.html#sorted) · [Additional reading](https://docs.python.org/3/reference/datamodel.html#user-defined-functions)
+
+**Read for:** Follow how a callable is passed as key without being called at the call site.
+
+### Learn with an example
+
+The caller supplies behavior as a value. The first application changes 1 to 4; the second changes 4 to 7. The higher-order function does not need to know the operation's implementation.
+
+**Worked example** - Browser-compatible Python
+
+```python
+def apply_twice(operation, value):
+    return operation(operation(value))
+print(apply_twice(lambda n: n + 3, 1))
+```
+
+**Expected output**
+
+```text
+7
+```
+
+**Watch out for:** Passing operation(value) supplies a result instead of a callable.
+
+**Change one thing:** Pass a doubling function and predict the result before running.
 
 ### Simple exercise 1
 
@@ -2263,7 +2996,35 @@ Assignment in a function normally makes a name local unless declared otherwise.
 
 **Difficulty:** Foundational · **Code concepts:** local binding, global, UnboundLocalError
 
-[Official documentation](https://docs.python.org/3/reference/executionmodel.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Resolution of names](https://docs.python.org/3/reference/executionmodel.html#resolution-of-names) · [Additional reading](https://docs.python.org/3/tutorial/controlflow.html#defining-functions)
+
+**Read for:** Read why assigning a name makes it local throughout a function block.
+
+### Learn with an example
+
+Assignment inside read_local creates a local binding. Returning it does not alter the module binding with the same spelling. Each name is resolved in its scope.
+
+**Worked example** - Browser-compatible Python
+
+```python
+level = "global"
+def read_local():
+    level = "local"
+    return level
+print(read_local())
+print(level)
+```
+
+**Expected output**
+
+```text
+local
+global
+```
+
+**Watch out for:** Mutating a shared object and rebinding a name are different operations.
+
+**Change one thing:** Replace the string with a list and mutate it without assigning the name locally.
 
 ### Simple exercise 1
 
@@ -2354,7 +3115,35 @@ Names are resolved through local, enclosing, global, and built-in scopes.
 
 **Difficulty:** Foundational · **Code concepts:** locals, enclosing scope, builtins
 
-[Official documentation](https://docs.python.org/3/reference/executionmodel.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Python scopes and namespaces](https://docs.python.org/3/tutorial/classes.html#python-scopes-and-namespaces) · [Additional reading](https://docs.python.org/3/reference/executionmodel.html#resolution-of-names)
+
+**Read for:** Trace local, enclosing, module and built-in namespaces for ordinary function code.
+
+### Learn with an example
+
+inner has no local label, so ordinary function lookup reaches the enclosing function's binding before the module's. Built-ins are considered after those ordinary scopes.
+
+**Worked example** - Browser-compatible Python
+
+```python
+label = "global"
+def outer():
+    label = "enclosing"
+    def inner():
+        return label
+    return inner()
+print(outer())
+```
+
+**Expected output**
+
+```text
+enclosing
+```
+
+**Watch out for:** LEGB is a useful rule for function code, not a complete account of every class or annotation scope.
+
+**Change one thing:** Add a local label inside inner and predict the result.
 
 ### Simple exercise 1
 
@@ -2446,7 +3235,34 @@ A closure retains access to enclosing bindings; captured names are resolved when
 
 **Difficulty:** Foundational · **Code concepts:** nested function, nonlocal, closure
 
-[Official documentation](https://docs.python.org/3/reference/executionmodel.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Free-variable lookup](https://docs.python.org/3/reference/executionmodel.html#interaction-with-dynamic-features) · [Additional reading](https://docs.python.org/3/library/functions.html#sorted)
+
+**Read for:** Find when free variables are resolved; compare capturing a binding with saving a value.
+
+### Learn with an example
+
+The returned function retains access to the enclosing factor binding after multiplier returns. Each call to multiplier creates a separate enclosing environment.
+
+**Worked example** - Browser-compatible Python
+
+```python
+def multiplier(factor):
+    def apply(value):
+        return value * factor
+    return apply
+triple = multiplier(3)
+print(triple(5))
+```
+
+**Expected output**
+
+```text
+15
+```
+
+**Watch out for:** A closure captures access to bindings, not a frozen copy of every referenced object.
+
+**Change one thing:** Create a second multiplier with factor 4 and show that the two functions behave independently.
 
 ### Simple exercise 1
 

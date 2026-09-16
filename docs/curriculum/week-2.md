@@ -14,7 +14,35 @@ A shallow copy creates a new outer container while sharing nested objects.
 
 **Difficulty:** Intermediate · **Code concepts:** copy.copy, list.copy, dict.copy
 
-[Official documentation](https://docs.python.org/3/library/copy.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Shallow copy](https://docs.python.org/3/library/copy.html#copy.copy) · [Additional reading](https://docs.python.org/3/reference/datamodel.html#objects-values-and-types)
+
+**Read for:** Read the shallow/deep distinction above the API and trace nested references.
+
+### Learn with an example
+
+copy creates a new outer list, so appending a new row does not lengthen original. Both outer lists still point to the same first inner list, whose mutation is visible through either route.
+
+**Worked example** - Browser-compatible Python
+
+```python
+original = [["open"]]
+copy = original.copy()
+copy.append(["new"] )
+copy[0].append("closed")
+print(original)
+print(len(copy))
+```
+
+**Expected output**
+
+```text
+[['open', 'closed']]
+2
+```
+
+**Watch out for:** A shallow copy separates only the outer container.
+
+**Change one thing:** Print original[0] is copy[0], then copy is original.
 
 ### Simple exercise 1
 
@@ -98,7 +126,35 @@ Deep copying recursively copies supported objects and tracks visited objects to 
 
 **Difficulty:** Intermediate · **Code concepts:** copy.deepcopy, memo
 
-[Official documentation](https://docs.python.org/3/library/copy.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Deep copy](https://docs.python.org/3/library/copy.html#copy.deepcopy) · [Additional reading](https://docs.python.org/3/library/copy.html#copy.copy)
+
+**Read for:** Read about recursive copying and the memo dictionary before copying arbitrary objects.
+
+### Learn with an example
+
+deepcopy recursively creates an independent nested list here. The change reaches only the new graph. Real resources such as sockets need explicit ownership rather than blind recursive copying.
+
+**Worked example** - Browser-compatible Python
+
+```python
+from copy import deepcopy
+original = {"flags": ["safe"]}
+copy = deepcopy(original)
+copy["flags"].append("fast")
+print(original["flags"])
+print(copy["flags"])
+```
+
+**Expected output**
+
+```text
+['safe']
+['safe', 'fast']
+```
+
+**Watch out for:** Deep copying an entire application object graph is not a resource-management strategy.
+
+**Change one thing:** Repeat with dict.copy and explain the changed result.
 
 ### Simple exercise 1
 
@@ -184,7 +240,36 @@ Calling a class creates an instance; initialization sets up its state.
 
 **Difficulty:** Intermediate · **Code concepts:** class, self, __init__
 
-[Official documentation](https://docs.python.org/3/tutorial/classes.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Class objects](https://docs.python.org/3/tutorial/classes.html#class-objects) · [Additional reading](https://docs.python.org/3/tutorial/controlflow.html#defining-functions)
+
+**Read for:** Follow instantiation and __init__; distinguish creating an instance from initializing it.
+
+### Learn with an example
+
+Calling Counter creates an instance and initializes its value. Accessing increment through that instance binds self, so the method changes that particular object's state.
+
+**Worked example** - Browser-compatible Python
+
+```python
+class Counter:
+    def __init__(self, start):
+        self.value = start
+    def increment(self):
+        self.value += 1
+counter = Counter(4)
+counter.increment()
+print(counter.value)
+```
+
+**Expected output**
+
+```text
+5
+```
+
+**Watch out for:** self is supplied by a bound method call, not a magic global variable.
+
+**Change one thing:** Create a second counter and show that incrementing the first leaves it unchanged.
 
 ### Simple exercise 1
 
@@ -270,7 +355,37 @@ Instance state belongs to one object; class attributes are shared unless shadowe
 
 **Difficulty:** Intermediate · **Code concepts:** self.attr, Class.attr, attribute lookup
 
-[Official documentation](https://docs.python.org/3/tutorial/classes.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Class and instance variables](https://docs.python.org/3/tutorial/classes.html#class-and-instance-variables) · [Additional reading](https://docs.python.org/3/tutorial/classes.html#class-objects)
+
+**Read for:** Trace the shared mutable class-variable example and its instance-owned repair.
+
+### Learn with an example
+
+category is shared on the class. __init__ allocates a pages list for each instance, so mutable state is separate. Attribute lookup can find a class value when the instance has no override.
+
+**Worked example** - Browser-compatible Python
+
+```python
+class Notebook:
+    category = "notes"
+    def __init__(self):
+        self.pages = []
+a, b = Notebook(), Notebook()
+a.pages.append("idea")
+print(a.category, b.category)
+print(a.pages, b.pages)
+```
+
+**Expected output**
+
+```text
+notes notes
+['idea'] []
+```
+
+**Watch out for:** A mutable class attribute is shared by every instance using it.
+
+**Change one thing:** Move pages to the class body and predict the new output.
 
 ### Simple exercise 1
 
@@ -359,7 +474,37 @@ Composition delegates to collaborators; inheritance specializes an existing type
 
 **Difficulty:** Intermediate · **Code concepts:** inheritance, delegation, super
 
-[Official documentation](https://docs.python.org/3/tutorial/classes.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Inheritance](https://docs.python.org/3/tutorial/classes.html#inheritance) · [Additional reading](https://docs.python.org/3/tutorial/classes.html#class-objects)
+
+**Read for:** Find method lookup in base classes, then compare delegation to a contained collaborator.
+
+### Learn with an example
+
+Reporter owns a reference to a collaborator and delegates sending. It does not inherit Console's identity or implementation. Replacing the collaborator changes delivery without changing report orchestration.
+
+**Worked example** - Browser-compatible Python
+
+```python
+class Console:
+    def send(self, text):
+        print(text)
+class Reporter:
+    def __init__(self, output):
+        self.output = output
+    def report(self):
+        self.output.send("ready")
+Reporter(Console()).report()
+```
+
+**Expected output**
+
+```text
+ready
+```
+
+**Watch out for:** Inheritance is not required merely to reuse another object's behavior.
+
+**Change one thing:** Inject an object that records messages in a list instead of printing.
 
 ### Simple exercise 1
 
@@ -448,7 +593,38 @@ Dataclasses generate common methods from declared fields while leaving domain be
 
 **Difficulty:** Intermediate · **Code concepts:** dataclass, field, default_factory
 
-[Official documentation](https://docs.python.org/3/library/dataclasses.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[The dataclass decorator](https://docs.python.org/3/library/dataclasses.html#dataclasses.dataclass) · [Additional reading](https://docs.python.org/3/tutorial/controlflow.html#function-annotations)
+
+**Read for:** Check generated methods and defaults; then inspect field(default_factory=...).
+
+### Learn with an example
+
+dataclass generates initialization and representation from declared fields. default_factory calls list separately for each instance, avoiding a shared collection. Annotations still do not validate element types at runtime.
+
+**Worked example** - Browser-compatible Python
+
+```python
+from dataclasses import dataclass, field
+@dataclass
+class Batch:
+    name: str
+    items: list = field(default_factory=list)
+a, b = Batch("a"), Batch("b")
+a.items.append(1)
+print(a)
+print(b.items)
+```
+
+**Expected output**
+
+```text
+Batch(name='a', items=[1])
+[]
+```
+
+**Watch out for:** A dataclass is not a Pydantic validation boundary.
+
+**Change one thing:** Construct a Batch with an unexpected name type and compare runtime behavior with a static checker.
 
 ### Simple exercise 1
 
@@ -538,7 +714,39 @@ A property mediates attribute access through descriptor methods rather than a di
 
 **Difficulty:** Intermediate · **Code concepts:** property, getter, setter, __get__
 
-[Official documentation](https://docs.python.org/3/library/functions.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[property](https://docs.python.org/3/library/functions.html#property) · [Additional reading](https://docs.python.org/3/tutorial/classes.html#class-and-instance-variables)
+
+**Read for:** Read the getter/setter example and separate attribute syntax from stored data.
+
+### Learn with an example
+
+Accessing fahrenheit invokes its getter through attribute syntax. The value is computed from current state instead of stored separately, avoiding stale duplicated data.
+
+**Worked example** - Browser-compatible Python
+
+```python
+class Temperature:
+    def __init__(self, celsius):
+        self.celsius = celsius
+    @property
+    def fahrenheit(self):
+        return self.celsius * 9 / 5 + 32
+t = Temperature(20)
+print(t.fahrenheit)
+t.celsius = 0
+print(t.fahrenheit)
+```
+
+**Expected output**
+
+```text
+68.0
+32.0
+```
+
+**Watch out for:** A property without a setter cannot be assigned like a normal stored field.
+
+**Change one thing:** Try assigning fahrenheit and explain why Python rejects it.
 
 ### Simple exercise 1
 
@@ -629,7 +837,39 @@ Instance methods receive the instance; class methods receive the class; static m
 
 **Difficulty:** Intermediate · **Code concepts:** classmethod, staticmethod, cls
 
-[Official documentation](https://docs.python.org/3/library/functions.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[classmethod](https://docs.python.org/3/library/functions.html#classmethod) · [Additional reading](https://docs.python.org/3/tutorial/classes.html#class-objects)
+
+**Read for:** Compare the implicit class argument with an instance method and staticmethod.
+
+### Learn with an example
+
+The class method receives the class as cls and can respect subclass configuration. The static method receives neither an instance nor a class; it is a namespaced helper.
+
+**Worked example** - Browser-compatible Python
+
+```python
+class Label:
+    prefix = "item"
+    @classmethod
+    def named(cls, value):
+        return f"{cls.prefix}:{value}"
+    @staticmethod
+    def clean(value):
+        return value.strip()
+print(Label.named("7"))
+print(Label.clean(" x "))
+```
+
+**Expected output**
+
+```text
+item:7
+x
+```
+
+**Watch out for:** classmethod is not just an instance method that you happen to call on the class.
+
+**Change one thing:** Subclass Label with a new prefix and call named on the subclass.
 
 ### Simple exercise 1
 
@@ -718,7 +958,34 @@ Special methods connect user-defined objects to built-in syntax and functions.
 
 **Difficulty:** Intermediate · **Code concepts:** __repr__, __len__, __eq__
 
-[Official documentation](https://docs.python.org/3/reference/datamodel.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Special method names](https://docs.python.org/3/reference/datamodel.html#special-method-names) · [Additional reading](https://docs.python.org/3/tutorial/classes.html#class-objects)
+
+**Read for:** Choose one syntax operation and find the method Python calls for it.
+
+### Learn with an example
+
+len delegates to the type's length protocol. Implementing __len__ makes the object participate in ordinary syntax without exposing its internal list to callers.
+
+**Worked example** - Browser-compatible Python
+
+```python
+class Playlist:
+    def __init__(self, songs):
+        self.songs = songs
+    def __len__(self):
+        return len(self.songs)
+print(len(Playlist(["intro", "outro"])))
+```
+
+**Expected output**
+
+```text
+2
+```
+
+**Watch out for:** Special methods must honor the protocol's expected result and error behavior.
+
+**Change one thing:** Return a negative length and observe Python's validation of the protocol.
 
 ### Simple exercise 1
 
@@ -808,7 +1075,34 @@ An iterable can supply an iterator, often a fresh one for each traversal.
 
 **Difficulty:** Intermediate · **Code concepts:** iter, __iter__, for
 
-[Official documentation](https://docs.python.org/3/library/stdtypes.html#iterator-types) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Iterator types](https://docs.python.org/3/library/stdtypes.html#typeiter) · [Additional reading](https://docs.python.org/3/tutorial/controlflow.html#the-range-function)
+
+**Read for:** Distinguish obtaining an iterator with iter from advancing it with next.
+
+### Learn with an example
+
+A list can produce independent iterators. Each iterator owns its position, so advancing first does not advance second. An iterable is the source of iteration, not necessarily the cursor itself.
+
+**Worked example** - Browser-compatible Python
+
+```python
+values = [3, 4]
+first = iter(values)
+second = iter(values)
+print(next(first), next(first))
+print(next(second))
+```
+
+**Expected output**
+
+```text
+3 4
+3
+```
+
+**Watch out for:** An iterable and an iterator are different roles even when one object implements both.
+
+**Change one thing:** Compare iter(first) is first with iter(values) is values.
 
 ### Simple exercise 1
 
@@ -887,7 +1181,34 @@ An iterator returns itself from iter and supplies values through next until exha
 
 **Difficulty:** Intermediate · **Code concepts:** __iter__, __next__, StopIteration
 
-[Official documentation](https://docs.python.org/3/library/stdtypes.html#iterator-types) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[iterator.__next__](https://docs.python.org/3/library/stdtypes.html#iterator.__next__) · [Additional reading](https://docs.python.org/3/library/stdtypes.html#typeiter)
+
+**Read for:** Check StopIteration and the requirement that exhausted iterators remain exhausted.
+
+### Learn with an example
+
+The iterator yields its single element and then stays exhausted. The two-argument next supplies a fallback instead of exposing StopIteration. No rewind occurs automatically.
+
+**Worked example** - Browser-compatible Python
+
+```python
+cursor = iter([9])
+print(next(cursor))
+print(next(cursor, "done"))
+print(next(cursor, "done"))
+```
+
+**Expected output**
+
+```text
+9
+done
+done
+```
+
+**Watch out for:** Calling iter on an exhausted iterator does not reset it.
+
+**Change one thing:** Remove the fallback and catch StopIteration explicitly.
 
 ### Simple exercise 1
 
@@ -984,7 +1305,41 @@ A generator function returns an iterator that suspends execution at each yield.
 
 **Difficulty:** Intermediate · **Code concepts:** yield, generator function, next
 
-[Official documentation](https://docs.python.org/3/tutorial/classes.html#generators) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Generators](https://docs.python.org/3/tutorial/classes.html#generators) · [Additional reading](https://docs.python.org/3/library/stdtypes.html#iterator.__next__)
+
+**Read for:** Trace suspension at yield and resumption at the next request.
+
+### Learn with an example
+
+Creating the generator does not execute its body. Each next advances to a yield and returns that yielded value; locals and the instruction position survive between calls.
+
+**Worked example** - Browser-compatible Python
+
+```python
+def sequence():
+    print("start")
+    yield 8
+    print("resume")
+    yield 9
+stream = sequence()
+print("created")
+print(next(stream))
+print(next(stream))
+```
+
+**Expected output**
+
+```text
+created
+start
+8
+resume
+9
+```
+
+**Watch out for:** yield pauses a function; return finishes it.
+
+**Change one thing:** Request one more value and explain the resulting StopIteration.
 
 ### Simple exercise 1
 
@@ -1072,7 +1427,36 @@ Generator stages can transform and filter data one item at a time.
 
 **Difficulty:** Intermediate · **Code concepts:** generator expression, yield from
 
-[Official documentation](https://docs.python.org/3/tutorial/classes.html#generators) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Generator expressions](https://docs.python.org/3/tutorial/classes.html#generator-expressions) · [Additional reading](https://docs.python.org/3/tutorial/classes.html#generators)
+
+**Read for:** Compare lazy consumption with building a list and note single-pass behavior.
+
+### Learn with an example
+
+Requesting an output pulls only enough input through the pipeline to produce it. Consuming the rest drains the shared source, including values rejected by the filter.
+
+**Worked example** - Browser-compatible Python
+
+```python
+source = (n for n in range(6))
+filtered = (n for n in source if n % 2 == 0)
+squared = (n * n for n in filtered)
+print(next(squared))
+print(list(squared))
+print(list(source))
+```
+
+**Expected output**
+
+```text
+0
+[4, 16]
+[]
+```
+
+**Watch out for:** Laziness avoids eager storage but does not make a stream reusable.
+
+**Change one thing:** Replace the source generator with a list and create two independent pipelines.
 
 ### Simple exercise 1
 
@@ -1155,7 +1539,38 @@ A suspended generator may hold resources; explicit ownership and cleanup are nee
 
 **Difficulty:** Intermediate · **Code concepts:** close, try/finally, GeneratorExit
 
-[Official documentation](https://docs.python.org/3/reference/expressions.html#generator-iterator-methods) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[generator.close](https://docs.python.org/3/reference/expressions.html#generator.close) · [Additional reading](https://docs.python.org/3/tutorial/classes.html#generators)
+
+**Read for:** Read GeneratorExit and cleanup semantics; do not depend on garbage collection timing.
+
+### Learn with an example
+
+The first next enters the try block and suspends at yield. Explicit close causes the generator to unwind through finally. Cleanup ownership should be deliberate when consumers may stop early.
+
+**Worked example** - Browser-compatible Python
+
+```python
+def stream():
+    try:
+        yield "row"
+        yield "later"
+    finally:
+        print("closed")
+cursor = stream()
+print(next(cursor))
+cursor.close()
+```
+
+**Expected output**
+
+```text
+row
+closed
+```
+
+**Watch out for:** Do not assume a loop break immediately closes every referenced generator.
+
+**Change one thing:** Keep a reference after breaking from a loop, then close it explicitly.
 
 ### Simple exercise 1
 
@@ -1249,7 +1664,36 @@ A decorator receives the defined callable and its return value becomes the decor
 
 **Difficulty:** Intermediate · **Code concepts:** @decorator, wrapper, callable
 
-[Official documentation](https://docs.python.org/3/reference/compound_stmts.html#function-definitions) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Function definitions and decorators](https://docs.python.org/3/reference/compound_stmts.html#function-definitions) · [Additional reading](https://docs.python.org/3/reference/datamodel.html#user-defined-functions)
+
+**Read for:** Find the transformation from decorator syntax to nested function calls.
+
+### Learn with an example
+
+Python creates greeting, passes it to loud and binds the returned wrapper to greeting. The later call enters the wrapper, which calls the original function and transforms its result.
+
+**Worked example** - Browser-compatible Python
+
+```python
+def loud(function):
+    def wrapper():
+        return function().upper()
+    return wrapper
+@loud
+def greeting():
+    return "hello"
+print(greeting())
+```
+
+**Expected output**
+
+```text
+HELLO
+```
+
+**Watch out for:** Decoration happens when the definition executes, not on every invocation.
+
+**Change one thing:** Replace @loud with greeting = loud(greeting) after a plain definition.
 
 ### Simple exercise 1
 
@@ -1344,7 +1788,40 @@ A transparent wrapper forwards arguments and preserves useful metadata with func
 
 **Difficulty:** Intermediate · **Code concepts:** *args, **kwargs, functools.wraps
 
-[Official documentation](https://docs.python.org/3/library/functools.html#functools.wraps) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[functools.wraps](https://docs.python.org/3/library/functools.html#functools.wraps) · [Additional reading](https://docs.python.org/3/reference/compound_stmts.html#function-definitions)
+
+**Read for:** Read which metadata is copied and why forwarding arguments is a separate responsibility.
+
+### Learn with an example
+
+The wrapper collects both argument kinds and expands them back into the original call. wraps preserves descriptive metadata; it does not do the forwarding for you.
+
+**Worked example** - Browser-compatible Python
+
+```python
+from functools import wraps
+def traced(function):
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        return function(*args, **kwargs)
+    return wrapper
+@traced
+def total(a, *, b):
+    return a + b
+print(total(2, b=6))
+print(total.__name__)
+```
+
+**Expected output**
+
+```text
+8
+total
+```
+
+**Watch out for:** A wrapper accepting only positional arguments breaks keyword-only calls.
+
+**Change one thing:** Remove wraps and compare __name__; then remove **kwargs and observe the failed call.
 
 ### Simple exercise 1
 
@@ -1446,7 +1923,38 @@ A configurable decorator adds an outer function that returns the actual decorato
 
 **Difficulty:** Intermediate · **Code concepts:** closure, decorator factory
 
-[Official documentation](https://docs.python.org/3/reference/compound_stmts.html#function-definitions) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Decorator expressions](https://docs.python.org/3/reference/compound_stmts.html#function-definitions) · [Additional reading](https://docs.python.org/3/reference/executionmodel.html#interaction-with-dynamic-features)
+
+**Read for:** Separate evaluating the decorator factory, wrapping the function and calling the wrapper.
+
+### Learn with an example
+
+suffix first saves configuration and returns a decorator. The decorator receives the function and returns a wrapper. Only the wrapper executes when greeting is called.
+
+**Worked example** - Browser-compatible Python
+
+```python
+def suffix(mark):
+    def decorate(function):
+        def wrapper():
+            return function() + mark
+        return wrapper
+    return decorate
+@suffix("!")
+def greeting():
+    return "hello"
+print(greeting())
+```
+
+**Expected output**
+
+```text
+hello!
+```
+
+**Watch out for:** There are three different calls: configure, decorate and invoke.
+
+**Change one thing:** Create another decorated function with a question-mark suffix.
 
 ### Simple exercise 1
 
@@ -1553,7 +2061,37 @@ Stacked decorators are applied from the innermost one outward, affecting call be
 
 **Difficulty:** Intermediate · **Code concepts:** decorator composition, wrapper ordering
 
-[Official documentation](https://docs.python.org/3/reference/compound_stmts.html#function-definitions) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[Nested decorators](https://docs.python.org/3/reference/compound_stmts.html#function-definitions) · [Additional reading](https://docs.python.org/3/library/functools.html#functools.wraps)
+
+**Read for:** Expand two decorators into outer(inner(function)) and trace call order.
+
+### Learn with an example
+
+The inner decorator is applied first, giving wrap(A)(wrap(B)(value)). At invocation, the outer wrapper surrounds the inner result. Changing order can change authentication, caching and logging behavior too.
+
+**Worked example** - Browser-compatible Python
+
+```python
+def wrap(mark):
+    def decorate(function):
+        return lambda: mark + function() + mark
+    return decorate
+@wrap("A")
+@wrap("B")
+def value():
+    return "x"
+print(value())
+```
+
+**Expected output**
+
+```text
+ABxBA
+```
+
+**Watch out for:** The top decorator is the outermost wrapper, not the first one applied.
+
+**Change one thing:** Swap A and B and predict the complete result.
 
 ### Simple exercise 1
 
@@ -1660,7 +2198,39 @@ A context manager enters and exits a resource scope and can explicitly choose wh
 
 **Difficulty:** Intermediate · **Code concepts:** __enter__, __exit__, with
 
-[Official documentation](https://docs.python.org/3/reference/compound_stmts.html#the-with-statement) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[The with statement](https://docs.python.org/3/reference/compound_stmts.html#the-with-statement) · [Additional reading](https://docs.python.org/3/tutorial/classes.html#class-objects)
+
+**Read for:** Follow __enter__, the body and __exit__; inspect the meaning of a truthy exit result.
+
+### Learn with an example
+
+with calls __enter__ and binds its return value to value. After the body, __exit__ runs. False means any body exception should propagate rather than be suppressed.
+
+**Worked example** - Browser-compatible Python
+
+```python
+class Notice:
+    def __enter__(self):
+        print("enter")
+        return "resource"
+    def __exit__(self, kind, error, traceback):
+        print("exit")
+        return False
+with Notice() as value:
+    print(value)
+```
+
+**Expected output**
+
+```text
+enter
+resource
+exit
+```
+
+**Watch out for:** The value after as is the result of __enter__, not necessarily the manager object.
+
+**Change one thing:** Raise ValueError in the body and catch it outside the with statement.
 
 ### Simple exercise 1
 
@@ -1755,7 +2325,40 @@ contextlib.contextmanager splits setup and cleanup around a single yield.
 
 **Difficulty:** Intermediate · **Code concepts:** contextmanager, yield, finally
 
-[Official documentation](https://docs.python.org/3/library/contextlib.html) · [Additional reading](https://docs.python.org/3/reference/datamodel.html)
+[contextmanager](https://docs.python.org/3/library/contextlib.html#contextlib.contextmanager) · [Additional reading](https://docs.python.org/3/reference/compound_stmts.html#the-with-statement)
+
+**Read for:** Locate the single yield and the try/finally pattern around it.
+
+### Learn with an example
+
+The decorator adapts a one-yield generator to the context-manager protocol. Code before yield acquires; the yielded value enters the body; finally releases on normal and exceptional exit.
+
+**Worked example** - Browser-compatible Python
+
+```python
+from contextlib import contextmanager
+@contextmanager
+def notice():
+    print("acquire")
+    try:
+        yield "resource"
+    finally:
+        print("release")
+with notice() as value:
+    print(value)
+```
+
+**Expected output**
+
+```text
+acquire
+resource
+release
+```
+
+**Watch out for:** A contextmanager generator must yield exactly once for each entered context.
+
+**Change one thing:** Raise an exception inside the with block and check that release still prints.
 
 ### Simple exercise 1
 

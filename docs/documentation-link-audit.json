@@ -1,0 +1,1069 @@
+{
+  "checkedAt": "2026-09-16T10:13:29.917Z",
+  "links": [
+    {
+      "id": "bindings",
+      "url": "https://docs.python.org/3/reference/executionmodel.html#binding-of-names",
+      "resolvedUrl": "https://docs.python.org/3/reference/executionmodel.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "mutability",
+      "url": "https://docs.python.org/3/reference/datamodel.html#objects-values-and-types",
+      "resolvedUrl": "https://docs.python.org/3/reference/datamodel.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "identity",
+      "url": "https://docs.python.org/3/reference/expressions.html#is-not",
+      "resolvedUrl": "https://docs.python.org/3/reference/expressions.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "truth",
+      "url": "https://docs.python.org/3/library/stdtypes.html#truth-value-testing",
+      "resolvedUrl": "https://docs.python.org/3/builtins/stdtypes.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "numbers",
+      "url": "https://docs.python.org/3/library/decimal.html#quick-start-tutorial",
+      "resolvedUrl": "https://docs.python.org/3/library/decimal.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "strings",
+      "url": "https://docs.python.org/3/library/stdtypes.html#text-sequence-type-str",
+      "resolvedUrl": "https://docs.python.org/3/builtins/stdtypes.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "lists",
+      "url": "https://docs.python.org/3/tutorial/datastructures.html#more-on-lists",
+      "resolvedUrl": "https://docs.python.org/3/tutorial/datastructures.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "dicts",
+      "url": "https://docs.python.org/3/library/stdtypes.html#dict.setdefault",
+      "resolvedUrl": "https://docs.python.org/3/builtins/stdtypes.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "sets",
+      "url": "https://docs.python.org/3/tutorial/datastructures.html#sets",
+      "resolvedUrl": "https://docs.python.org/3/tutorial/datastructures.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "unpack",
+      "url": "https://docs.python.org/3/tutorial/datastructures.html#tuples-and-sequences",
+      "resolvedUrl": "https://docs.python.org/3/tutorial/datastructures.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "loops",
+      "url": "https://docs.python.org/3/tutorial/controlflow.html#the-range-function",
+      "resolvedUrl": "https://docs.python.org/3/tutorial/controlflow.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "comprehensions",
+      "url": "https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions",
+      "resolvedUrl": "https://docs.python.org/3/tutorial/datastructures.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "exceptions",
+      "url": "https://docs.python.org/3/tutorial/errors.html#handling-exceptions",
+      "resolvedUrl": "https://docs.python.org/3/tutorial/errors.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "files",
+      "url": "https://docs.python.org/3/library/pathlib.html#pathlib.Path.open",
+      "resolvedUrl": "https://docs.python.org/3/library/pathlib.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "json",
+      "url": "https://docs.python.org/3/library/json.html#json.loads",
+      "resolvedUrl": "https://docs.python.org/3/library/json.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "define",
+      "url": "https://docs.python.org/3/tutorial/controlflow.html#defining-functions",
+      "resolvedUrl": "https://docs.python.org/3/tutorial/controlflow.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "returns",
+      "url": "https://docs.python.org/3/reference/simple_stmts.html#the-return-statement",
+      "resolvedUrl": "https://docs.python.org/3/reference/simple_stmts.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "positional",
+      "url": "https://docs.python.org/3/tutorial/controlflow.html#positional-or-keyword-arguments",
+      "resolvedUrl": "https://docs.python.org/3/tutorial/controlflow.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "keywords",
+      "url": "https://docs.python.org/3/tutorial/controlflow.html#keyword-arguments",
+      "resolvedUrl": "https://docs.python.org/3/tutorial/controlflow.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "defaults",
+      "url": "https://docs.python.org/3/tutorial/controlflow.html#default-argument-values",
+      "resolvedUrl": "https://docs.python.org/3/tutorial/controlflow.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "mutable-defaults",
+      "url": "https://docs.python.org/3/tutorial/controlflow.html#default-argument-values",
+      "resolvedUrl": "https://docs.python.org/3/tutorial/controlflow.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "args",
+      "url": "https://docs.python.org/3/tutorial/controlflow.html#arbitrary-argument-lists",
+      "resolvedUrl": "https://docs.python.org/3/tutorial/controlflow.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "kwargs",
+      "url": "https://docs.python.org/3/tutorial/controlflow.html#keyword-arguments",
+      "resolvedUrl": "https://docs.python.org/3/tutorial/controlflow.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "argument-unpack",
+      "url": "https://docs.python.org/3/tutorial/controlflow.html#unpacking-argument-lists",
+      "resolvedUrl": "https://docs.python.org/3/tutorial/controlflow.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "annotations",
+      "url": "https://docs.python.org/3/tutorial/controlflow.html#function-annotations",
+      "resolvedUrl": "https://docs.python.org/3/tutorial/controlflow.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "function-objects",
+      "url": "https://docs.python.org/3/reference/datamodel.html#user-defined-functions",
+      "resolvedUrl": "https://docs.python.org/3/reference/datamodel.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "higher-order",
+      "url": "https://docs.python.org/3/library/functions.html#sorted",
+      "resolvedUrl": "https://docs.python.org/3/builtins/functions.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "scope",
+      "url": "https://docs.python.org/3/reference/executionmodel.html#resolution-of-names",
+      "resolvedUrl": "https://docs.python.org/3/reference/executionmodel.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "legb",
+      "url": "https://docs.python.org/3/tutorial/classes.html#python-scopes-and-namespaces",
+      "resolvedUrl": "https://docs.python.org/3/tutorial/classes.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "closures",
+      "url": "https://docs.python.org/3/reference/executionmodel.html#interaction-with-dynamic-features",
+      "resolvedUrl": "https://docs.python.org/3/reference/executionmodel.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "shallow-copy",
+      "url": "https://docs.python.org/3/library/copy.html#copy.copy",
+      "resolvedUrl": "https://docs.python.org/3/library/copy.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "deep-copy",
+      "url": "https://docs.python.org/3/library/copy.html#copy.deepcopy",
+      "resolvedUrl": "https://docs.python.org/3/library/copy.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "classes",
+      "url": "https://docs.python.org/3/tutorial/classes.html#class-objects",
+      "resolvedUrl": "https://docs.python.org/3/tutorial/classes.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "attributes",
+      "url": "https://docs.python.org/3/tutorial/classes.html#class-and-instance-variables",
+      "resolvedUrl": "https://docs.python.org/3/tutorial/classes.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "composition",
+      "url": "https://docs.python.org/3/tutorial/classes.html#inheritance",
+      "resolvedUrl": "https://docs.python.org/3/tutorial/classes.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "dataclasses",
+      "url": "https://docs.python.org/3/library/dataclasses.html#dataclasses.dataclass",
+      "resolvedUrl": "https://docs.python.org/3/library/dataclasses.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "properties",
+      "url": "https://docs.python.org/3/library/functions.html#property",
+      "resolvedUrl": "https://docs.python.org/3/builtins/functions.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "method-kinds",
+      "url": "https://docs.python.org/3/library/functions.html#classmethod",
+      "resolvedUrl": "https://docs.python.org/3/builtins/functions.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "dunders",
+      "url": "https://docs.python.org/3/reference/datamodel.html#special-method-names",
+      "resolvedUrl": "https://docs.python.org/3/reference/datamodel.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "iterables",
+      "url": "https://docs.python.org/3/library/stdtypes.html#typeiter",
+      "resolvedUrl": "https://docs.python.org/3/builtins/stdtypes.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "iterators",
+      "url": "https://docs.python.org/3/library/stdtypes.html#iterator.__next__",
+      "resolvedUrl": "https://docs.python.org/3/builtins/stdtypes.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "generators",
+      "url": "https://docs.python.org/3/tutorial/classes.html#generators",
+      "resolvedUrl": "https://docs.python.org/3/tutorial/classes.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "generator-pipelines",
+      "url": "https://docs.python.org/3/tutorial/classes.html#generator-expressions",
+      "resolvedUrl": "https://docs.python.org/3/tutorial/classes.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "generator-cleanup",
+      "url": "https://docs.python.org/3/reference/expressions.html#generator.close",
+      "resolvedUrl": "https://docs.python.org/3/reference/expressions.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "decorators",
+      "url": "https://docs.python.org/3/reference/compound_stmts.html#function-definitions",
+      "resolvedUrl": "https://docs.python.org/3/reference/compound_stmts.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "decorator-forwarding",
+      "url": "https://docs.python.org/3/library/functools.html#functools.wraps",
+      "resolvedUrl": "https://docs.python.org/3/library/functools.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "decorator-factories",
+      "url": "https://docs.python.org/3/reference/compound_stmts.html#function-definitions",
+      "resolvedUrl": "https://docs.python.org/3/reference/compound_stmts.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "decorator-order",
+      "url": "https://docs.python.org/3/reference/compound_stmts.html#function-definitions",
+      "resolvedUrl": "https://docs.python.org/3/reference/compound_stmts.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "context-managers",
+      "url": "https://docs.python.org/3/reference/compound_stmts.html#the-with-statement",
+      "resolvedUrl": "https://docs.python.org/3/reference/compound_stmts.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "contextlib",
+      "url": "https://docs.python.org/3/library/contextlib.html#contextlib.contextmanager",
+      "resolvedUrl": "https://docs.python.org/3/library/contextlib.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "packages",
+      "url": "https://docs.python.org/3/tutorial/modules.html#packages",
+      "resolvedUrl": "https://docs.python.org/3/tutorial/modules.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "environment",
+      "url": "https://packaging.python.org/en/latest/tutorials/packaging-projects/#configuring-metadata",
+      "resolvedUrl": "https://packaging.python.org/en/latest/tutorials/packaging-projects/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "configuration",
+      "url": "https://docs.python.org/3/library/logging.html#logging.LoggerAdapter",
+      "resolvedUrl": "https://docs.python.org/3/library/logging.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "unions",
+      "url": "https://docs.python.org/3/library/typing.html#typing.Optional",
+      "resolvedUrl": "https://docs.python.org/3/library/typing.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "callable-types",
+      "url": "https://docs.python.org/3/library/typing.html#annotating-callable-objects",
+      "resolvedUrl": "https://docs.python.org/3/library/typing.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "generics",
+      "url": "https://docs.python.org/3/library/typing.html#generics",
+      "resolvedUrl": "https://docs.python.org/3/library/typing.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "protocol",
+      "url": "https://docs.python.org/3/library/typing.html#typing.Protocol",
+      "resolvedUrl": "https://docs.python.org/3/library/typing.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "typeddict",
+      "url": "https://docs.python.org/3/library/typing.html#typing.TypedDict",
+      "resolvedUrl": "https://docs.python.org/3/library/typing.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "type-narrowing",
+      "url": "https://docs.python.org/3/library/typing.html#typing.TypeGuard",
+      "resolvedUrl": "https://docs.python.org/3/library/typing.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "pytest",
+      "url": "https://docs.pytest.org/en/stable/how-to/assert.html#asserting-with-the-assert-statement",
+      "resolvedUrl": "https://docs.pytest.org/en/stable/how-to/assert.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "fixtures",
+      "url": "https://docs.pytest.org/en/stable/how-to/fixtures.html#fixture-scopes",
+      "resolvedUrl": "https://docs.pytest.org/en/stable/how-to/fixtures.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "parametrize",
+      "url": "https://docs.pytest.org/en/stable/how-to/parametrize.html#pytest-mark-parametrize-parametrizing-test-functions",
+      "resolvedUrl": "https://docs.pytest.org/en/stable/how-to/parametrize.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "exception-tests",
+      "url": "https://docs.pytest.org/en/stable/how-to/assert.html#assertions-about-expected-exceptions",
+      "resolvedUrl": "https://docs.pytest.org/en/stable/how-to/assert.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "mocking",
+      "url": "https://docs.python.org/3/library/unittest.mock.html#where-to-patch",
+      "resolvedUrl": "https://docs.python.org/3/library/unittest.mock.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "monkeypatch",
+      "url": "https://docs.pytest.org/en/stable/how-to/monkeypatch.html#monkeypatching-environment-variables",
+      "resolvedUrl": "https://docs.pytest.org/en/stable/how-to/monkeypatch.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "fakes",
+      "url": "https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock.side_effect",
+      "resolvedUrl": "https://docs.python.org/3/library/unittest.mock.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "debugging",
+      "url": "https://docs.python.org/3/library/pdb.html#debugger-commands",
+      "resolvedUrl": "https://docs.python.org/3/library/pdb.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "test-boundaries",
+      "url": "https://docs.pytest.org/en/stable/how-to/fixtures.html#safe-fixture-structure",
+      "resolvedUrl": "https://docs.pytest.org/en/stable/how-to/fixtures.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "coroutines",
+      "url": "https://docs.python.org/3/library/asyncio-task.html#coroutines",
+      "resolvedUrl": "https://docs.python.org/3/library/asyncio-task.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "coroutine-call",
+      "url": "https://docs.python.org/3/library/asyncio-task.html#awaitables",
+      "resolvedUrl": "https://docs.python.org/3/library/asyncio-task.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "await",
+      "url": "https://docs.python.org/3/reference/expressions.html#await-expression",
+      "resolvedUrl": "https://docs.python.org/3/reference/expressions.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "event-loop",
+      "url": "https://docs.python.org/3/library/asyncio-eventloop.html#running-and-stopping-the-loop",
+      "resolvedUrl": "https://docs.python.org/3/library/asyncio-eventloop.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "tasks",
+      "url": "https://docs.python.org/3/library/asyncio-task.html#creating-tasks",
+      "resolvedUrl": "https://docs.python.org/3/library/asyncio-task.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "gather",
+      "url": "https://docs.python.org/3/library/asyncio-task.html#asyncio.gather",
+      "resolvedUrl": "https://docs.python.org/3/library/asyncio-task.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "cancellation",
+      "url": "https://docs.python.org/3/library/asyncio-task.html#task-cancellation",
+      "resolvedUrl": "https://docs.python.org/3/library/asyncio-task.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "timeouts",
+      "url": "https://docs.python.org/3/library/asyncio-task.html#timeouts",
+      "resolvedUrl": "https://docs.python.org/3/library/asyncio-task.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "async-errors",
+      "url": "https://docs.python.org/3/library/asyncio-task.html#task-groups",
+      "resolvedUrl": "https://docs.python.org/3/library/asyncio-task.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "queues",
+      "url": "https://docs.python.org/3/library/asyncio-queue.html#asyncio.Queue",
+      "resolvedUrl": "https://docs.python.org/3/library/asyncio-queue.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "locks",
+      "url": "https://docs.python.org/3/library/asyncio-sync.html#asyncio.Lock",
+      "resolvedUrl": "https://docs.python.org/3/library/asyncio-sync.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "semaphores",
+      "url": "https://docs.python.org/3/library/asyncio-sync.html#asyncio.Semaphore",
+      "resolvedUrl": "https://docs.python.org/3/library/asyncio-sync.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "async-context",
+      "url": "https://docs.python.org/3/reference/datamodel.html#asynchronous-context-managers",
+      "resolvedUrl": "https://docs.python.org/3/reference/datamodel.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "async-iterators",
+      "url": "https://docs.python.org/3/reference/datamodel.html#asynchronous-iterators",
+      "resolvedUrl": "https://docs.python.org/3/reference/datamodel.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "blocking",
+      "url": "https://docs.python.org/3/library/asyncio-dev.html#running-blocking-code",
+      "resolvedUrl": "https://docs.python.org/3/library/asyncio-dev.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "async-threads",
+      "url": "https://docs.python.org/3/library/asyncio-task.html#asyncio.to_thread",
+      "resolvedUrl": "https://docs.python.org/3/library/asyncio-task.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "cpu-work",
+      "url": "https://docs.python.org/3/library/threading.html#gil-and-performance-considerations",
+      "resolvedUrl": "https://docs.python.org/3/library/threading.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "processes",
+      "url": "https://docs.python.org/3/library/concurrent.futures.html#processpoolexecutor",
+      "resolvedUrl": "https://docs.python.org/3/library/concurrent.futures.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "fastapi-routing",
+      "url": "https://fastapi.tiangolo.com/tutorial/first-steps/#step-3-create-a-path-operation",
+      "resolvedUrl": "https://fastapi.tiangolo.com/tutorial/first-steps/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "fastapi-deps",
+      "url": "https://fastapi.tiangolo.com/tutorial/dependencies/#declare-the-dependency-in-the-dependant",
+      "resolvedUrl": "https://fastapi.tiangolo.com/tutorial/dependencies/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "fastapi-validation",
+      "url": "https://fastapi.tiangolo.com/tutorial/query-params-str-validations/#additional-validation",
+      "resolvedUrl": "https://fastapi.tiangolo.com/tutorial/query-params-str-validations/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "fastapi-middleware",
+      "url": "https://fastapi.tiangolo.com/tutorial/handling-errors/#install-custom-exception-handlers",
+      "resolvedUrl": "https://fastapi.tiangolo.com/tutorial/handling-errors/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "fastapi-resources",
+      "url": "https://fastapi.tiangolo.com/advanced/events/#lifespan",
+      "resolvedUrl": "https://fastapi.tiangolo.com/advanced/events/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "fastapi-background",
+      "url": "https://fastapi.tiangolo.com/tutorial/background-tasks/#caveat",
+      "resolvedUrl": "https://fastapi.tiangolo.com/tutorial/background-tasks/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "base-model",
+      "url": "https://pydantic.dev/docs/validation/latest/concepts/models/#basic-model-usage",
+      "resolvedUrl": "https://pydantic.dev/docs/validation/latest/concepts/models/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "pydantic-fields",
+      "url": "https://pydantic.dev/docs/validation/latest/concepts/fields/#numeric-constraints",
+      "resolvedUrl": "https://pydantic.dev/docs/validation/latest/concepts/fields/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "field-validators",
+      "url": "https://pydantic.dev/docs/validation/latest/concepts/validators/#field-after-validator",
+      "resolvedUrl": "https://pydantic.dev/docs/validation/latest/concepts/validators/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "model-validators",
+      "url": "https://pydantic.dev/docs/validation/latest/concepts/validators/#model-after-validator",
+      "resolvedUrl": "https://pydantic.dev/docs/validation/latest/concepts/validators/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "nested-models",
+      "url": "https://pydantic.dev/docs/validation/latest/concepts/models/#nested-models",
+      "resolvedUrl": "https://pydantic.dev/docs/validation/latest/concepts/models/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "discriminators",
+      "url": "https://pydantic.dev/docs/validation/latest/concepts/unions/#discriminated-unions-with-string-discriminators",
+      "resolvedUrl": "https://pydantic.dev/docs/validation/latest/concepts/unions/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "serialization",
+      "url": "https://pydantic.dev/docs/validation/latest/concepts/serialization/#python-mode",
+      "resolvedUrl": "https://pydantic.dev/docs/validation/latest/concepts/serialization/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "json-schema",
+      "url": "https://pydantic.dev/docs/validation/latest/concepts/json_schema/#generating-json-schema",
+      "resolvedUrl": "https://pydantic.dev/docs/validation/latest/concepts/json_schema/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "agent-loop",
+      "url": "https://pydantic.dev/docs/ai/core-concepts/agent/#iterating-over-an-agents-graph",
+      "resolvedUrl": "https://pydantic.dev/docs/ai/core-concepts/agent/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "pydantic-agent",
+      "url": "https://pydantic.dev/docs/ai/core-concepts/agent/#running-agents",
+      "resolvedUrl": "https://pydantic.dev/docs/ai/core-concepts/agent/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "run-context",
+      "url": "https://pydantic.dev/docs/ai/core-concepts/dependencies/#accessing-dependencies",
+      "resolvedUrl": "https://pydantic.dev/docs/ai/core-concepts/dependencies/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "agent-tools",
+      "url": "https://pydantic.dev/docs/ai/tools-toolsets/tools/#registering-function-tools-via-decorator",
+      "resolvedUrl": "https://pydantic.dev/docs/ai/tools-toolsets/tools/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "structured-output",
+      "url": "https://pydantic.dev/docs/ai/core-concepts/output/#structured-output",
+      "resolvedUrl": "https://pydantic.dev/docs/ai/core-concepts/output/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "streaming-history",
+      "url": "https://pydantic.dev/docs/ai/core-concepts/agent/#runs-vs-conversations",
+      "resolvedUrl": "https://pydantic.dev/docs/ai/core-concepts/agent/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "usage-limits",
+      "url": "https://pydantic.dev/docs/ai/core-concepts/agent/#usage-limits",
+      "resolvedUrl": "https://pydantic.dev/docs/ai/core-concepts/agent/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "agent-tests",
+      "url": "https://pydantic.dev/docs/ai/guides/testing/#unit-testing-with-functionmodel",
+      "resolvedUrl": "https://pydantic.dev/docs/ai/guides/testing/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "tool-schemas",
+      "url": "https://modelcontextprotocol.io/specification/latest/server/tools#tool",
+      "resolvedUrl": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "tool-validation",
+      "url": "https://modelcontextprotocol.io/specification/latest/server/tools#error-handling",
+      "resolvedUrl": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "tool-effects",
+      "url": "https://modelcontextprotocol.io/specification/latest/server/tools#security-considerations",
+      "resolvedUrl": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "tool-permissions",
+      "url": "https://modelcontextprotocol.io/specification/latest/basic/authorization#scope-selection-strategy",
+      "resolvedUrl": "https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "mcp-roles",
+      "url": "https://modelcontextprotocol.io/docs/learn/architecture#participants",
+      "resolvedUrl": "https://modelcontextprotocol.io/docs/2026-07-28/learn/architecture",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "mcp-discovery",
+      "url": "https://modelcontextprotocol.io/specification/latest/server/tools#listing-tools",
+      "resolvedUrl": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "mcp-primitives",
+      "url": "https://modelcontextprotocol.io/docs/learn/architecture#primitives",
+      "resolvedUrl": "https://modelcontextprotocol.io/docs/2026-07-28/learn/architecture",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "mcp-transport",
+      "url": "https://modelcontextprotocol.io/specification/latest/basic/transports/streamable-http#request-metadata",
+      "resolvedUrl": "https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/streamable-http",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "harness-runtime",
+      "url": "https://pydantic.dev/docs/ai/core-concepts/agent/#iterating-over-an-agents-graph",
+      "resolvedUrl": "https://pydantic.dev/docs/ai/core-concepts/agent/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "harness-context",
+      "url": "https://pydantic.dev/docs/ai/core-concepts/agent/#runs-vs-conversations",
+      "resolvedUrl": "https://pydantic.dev/docs/ai/core-concepts/agent/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "harness-observation",
+      "url": "https://pydantic.dev/docs/ai/integrations/logfire/#debugging",
+      "resolvedUrl": "https://pydantic.dev/docs/ai/integrations/logfire/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "ontology-entities",
+      "url": "https://www.w3.org/TR/rdf11-primer/#section-IRI",
+      "resolvedUrl": "https://www.w3.org/TR/rdf11-primer/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "ontology-relations",
+      "url": "https://www.w3.org/TR/rdf11-primer/#section-triple",
+      "resolvedUrl": "https://www.w3.org/TR/rdf11-primer/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "ontology-contracts",
+      "url": "https://www.w3.org/TR/rdf11-primer/#section-vocabulary",
+      "resolvedUrl": "https://www.w3.org/TR/rdf11-primer/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "ingestion",
+      "url": "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-solution-design-and-evaluation-guide#rag-data-pipeline-flow",
+      "resolvedUrl": "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-solution-design-and-evaluation-guide",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "chunking",
+      "url": "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-chunking-phase#fixed-size-parsing-with-overlap",
+      "resolvedUrl": "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-chunking-phase",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "metadata",
+      "url": "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-information-retrieval#filter-queries",
+      "resolvedUrl": "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-information-retrieval",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "embeddings",
+      "url": "https://www.sbert.net/examples/sentence_transformer/applications/semantic-search/README.html#semantic-search",
+      "resolvedUrl": "https://www.sbert.net/examples/sentence_transformer/applications/semantic-search/README.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "cosine",
+      "url": "https://github.com/pgvector/pgvector#distances",
+      "resolvedUrl": "https://github.com/pgvector/pgvector",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "vector-search",
+      "url": "https://github.com/pgvector/pgvector#querying",
+      "resolvedUrl": "https://github.com/pgvector/pgvector",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "vector-indexes",
+      "url": "https://github.com/pgvector/pgvector#indexing",
+      "resolvedUrl": "https://github.com/pgvector/pgvector",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "full-text",
+      "url": "https://www.postgresql.org/docs/current/textsearch-controls.html#TEXTSEARCH-PARSING-DOCUMENTS",
+      "resolvedUrl": "https://www.postgresql.org/docs/current/textsearch-controls.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "hybrid",
+      "url": "https://www.elastic.co/docs/reference/elasticsearch/rest-apis/reciprocal-rank-fusion#rrf-api",
+      "resolvedUrl": "https://www.elastic.co/docs/reference/elasticsearch/rest-apis/reciprocal-rank-fusion",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "basic-rag",
+      "url": "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-solution-design-and-evaluation-guide#rag-application-flow",
+      "resolvedUrl": "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-solution-design-and-evaluation-guide",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "reranking",
+      "url": "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-information-retrieval#cross-encoder-reranking",
+      "resolvedUrl": "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-information-retrieval",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "query-rewriting",
+      "url": "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-information-retrieval#rewriting",
+      "resolvedUrl": "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-information-retrieval",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "citations",
+      "url": "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-prompt-engineering#design-grounding-instructions",
+      "resolvedUrl": "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-prompt-engineering",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "retrieval-eval",
+      "url": "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-information-retrieval#evaluate-your-search-results",
+      "resolvedUrl": "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-information-retrieval",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "workflow-concepts",
+      "url": "https://docs.dbos.dev/python/tutorials/workflow-tutorial#workflow-guarantees",
+      "resolvedUrl": "https://docs.dbos.dev/python/tutorials/workflow-tutorial",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "dbos-workflows",
+      "url": "https://docs.dbos.dev/python/tutorials/workflow-tutorial#starting-workflows-in-the-background",
+      "resolvedUrl": "https://docs.dbos.dev/python/tutorials/workflow-tutorial",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "dbos-steps",
+      "url": "https://docs.dbos.dev/python/tutorials/step-tutorial#configurable-retries",
+      "resolvedUrl": "https://docs.dbos.dev/python/tutorials/step-tutorial",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "recovery",
+      "url": "https://docs.dbos.dev/python/tutorials/workflow-tutorial#determinism",
+      "resolvedUrl": "https://docs.dbos.dev/python/tutorials/workflow-tutorial",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "durable-queues",
+      "url": "https://docs.dbos.dev/python/tutorials/queue-tutorial#managing-concurrency",
+      "resolvedUrl": "https://docs.dbos.dev/python/tutorials/queue-tutorial",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "retries",
+      "url": "https://docs.dbos.dev/python/tutorials/step-tutorial#configurable-retries",
+      "resolvedUrl": "https://docs.dbos.dev/python/tutorials/step-tutorial",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "idempotency",
+      "url": "https://www.postgresql.org/docs/current/sql-insert.html#SQL-ON-CONFLICT",
+      "resolvedUrl": "https://www.postgresql.org/docs/current/sql-insert.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "observability",
+      "url": "https://opentelemetry-python.readthedocs.io/en/latest/api/trace.html#opentelemetry.trace.Span",
+      "resolvedUrl": "https://opentelemetry-python.readthedocs.io/en/latest/api/trace.html",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "agent-evaluation",
+      "url": "https://pydantic.dev/docs/ai/evals/evals/#evaluators",
+      "resolvedUrl": "https://pydantic.dev/docs/ai/evals/evals/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "tool-evaluation",
+      "url": "https://pydantic.dev/docs/ai/evals/evals/#datasets-and-cases",
+      "resolvedUrl": "https://pydantic.dev/docs/ai/evals/evals/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "regression-eval",
+      "url": "https://pydantic.dev/docs/ai/evals/evals/#running-experiments",
+      "resolvedUrl": "https://pydantic.dev/docs/ai/evals/evals/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "cost-fallbacks",
+      "url": "https://pydantic.dev/docs/ai/core-concepts/agent/#usage-limits",
+      "resolvedUrl": "https://pydantic.dev/docs/ai/core-concepts/agent/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "secrets",
+      "url": "https://fastapi.tiangolo.com/advanced/security/oauth2-scopes/#oauth2-scopes-and-openapi",
+      "resolvedUrl": "https://fastapi.tiangolo.com/advanced/security/oauth2-scopes/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "prompt-injection",
+      "url": "https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/security_best_practices#confused-deputy-problem",
+      "resolvedUrl": "https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/security_best_practices",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "human-approval",
+      "url": "https://docs.dbos.dev/python/tutorials/workflow-communication#workflow-messaging-and-notifications",
+      "resolvedUrl": "https://docs.dbos.dev/python/tutorials/workflow-communication",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "id": "failure-compensation",
+      "url": "https://learn.microsoft.com/en-us/azure/architecture/patterns/compensating-transaction#solution",
+      "resolvedUrl": "https://learn.microsoft.com/en-us/azure/architecture/patterns/compensating-transaction",
+      "status": 200,
+      "ok": true
+    }
+  ]
+}
